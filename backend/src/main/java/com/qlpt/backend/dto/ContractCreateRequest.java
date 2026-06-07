@@ -1,6 +1,5 @@
 package com.qlpt.backend.dto;
 
-import com.qlpt.backend.entity.BillingMode;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -28,11 +27,6 @@ public class ContractCreateRequest {
 
     @Min(value = 0, message = "Giá thuê phòng không được âm")
     private double contractedRoomPrice;
-
-    @NotNull(message = "Chế độ tính tiền không được trống")
-    private BillingMode billingMode; // BY_RENTAL_DAYS, FIXED_DATE_OF_MONTH
-
-    private Integer fixedBillingDay; // Bắt buộc nếu chọn FIXED_DATE_OF_MONTH
 
     @Min(value = 1, message = "Số người ở phải lớn hơn hoặc bằng 1")
     private int numberOfTenants;
