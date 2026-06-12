@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useChatStore } from '../../stores/chat.js';
 import { useAuthStore } from '../../stores/auth.js';
 import { formatDateTime, formatDate } from '../../utils/date.js';
@@ -90,6 +90,11 @@ export default {
       }
     );
 
+    // Watch selectedRoom to keep chatStore.currentRoomId in sync
+    watch(selectedRoom, (newRoom) => {
+      chatStore.currentRoomId = newRoom ? newRoom.id : null;
+    });
+
     const formatTimeOnly = (dateTimeStr) => {
       if (!dateTimeStr) return '';
       const date = new Date(dateTimeStr);
@@ -115,16 +120,16 @@ export default {
       });
     };
 
-    const getChatRoomLabel = (room) => {
-      if (!room) return '';
-      return `Phòng ${room.room.roomNumber} - ${room.room.boardingHouse.name}`;
-    };
-
     onMounted(async () => {
       // Connect WebSocket if authenticated
       if (authStore.isAuthenticated) {
         chatStore.connectWebSocket();
       }
+    });
+
+    onUnmounted(() => {
+      // Clear currentRoomId when leaving Chat page
+      chatStore.currentRoomId = null;
     });
 
     return {
@@ -144,7 +149,6 @@ export default {
       handleSendMessage,
       formatTimeOnly,
       formatMessageTime,
-      getChatRoomLabel,
       formatDateTime,
       formatDate
     };
