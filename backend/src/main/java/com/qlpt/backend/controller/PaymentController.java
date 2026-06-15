@@ -92,8 +92,9 @@ public class PaymentController {
                     bh.getPayosApiKey().trim(),
                     bh.getPayosChecksumKey().trim());
 
-            String finalReturnUrl = validateRedirectUrl(returnUrl, "http://localhost:5173/tenant/invoices");
-            String finalCancelUrl = validateRedirectUrl(cancelUrl, "http://localhost:5173/tenant/invoices");
+            String defaultUrl = "http://localhost:5173/tenant/invoices/" + invoiceId;
+            String finalReturnUrl = validateRedirectUrl(returnUrl, defaultUrl);
+            String finalCancelUrl = validateRedirectUrl(cancelUrl, defaultUrl);
 
             // Description tối đa 25 ký tự
             String roomNum = invoice.getContract().getRoom().getRoomNumber();
@@ -282,6 +283,7 @@ public class PaymentController {
             java.net.URI uri = new java.net.URI(trimmed);
             String host = uri.getHost();
             if (host == null || host.equals("localhost") || host.equals("127.0.0.1") || 
+                host.startsWith("192.168.") || host.startsWith("10.") || host.startsWith("172.") ||
                 host.endsWith("vercel.app") || host.contains("quanlyphongtro")) {
                 return trimmed;
             }

@@ -68,6 +68,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new RuntimeException("Gói dịch vụ này hiện tại không hoạt động");
         }
 
+        // Xóa các yêu cầu PENDING cũ của landlord này để tránh lưu rác
+        List<UpgradeRequest> oldRequests = upgradeRequestRepository.findByUserIdOrderByCreatedAtDesc(landlord.getId());
+        for (UpgradeRequest oldReq : oldRequests) {
+            if ("PENDING".equals(oldReq.getStatus())) {
+                upgradeRequestRepository.delete(oldReq);
+            }
+        }
+
         int months = pack.getMonths();
         double amount = pack.getPrice();
         String paymentContent = generateUniquePaymentContent(landlord.getUsername());
