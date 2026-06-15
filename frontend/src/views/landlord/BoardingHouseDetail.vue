@@ -91,10 +91,9 @@
                 </div>
               </div>
 
-              <!-- VietQR Settings -->
+              <!-- Bank Account Settings -->
               <div class="pt-4 border-t border-border-main">
-                <h4 class="text-xs font-bold text-text-main uppercase tracking-wider mb-3">💳 Tài Khoản Nhận Thanh Toán
-                  (VietQR)</h4>
+                <h4 class="text-xs font-bold text-text-main uppercase tracking-wider mb-3">💳 Tài Khoản Ngân Hàng Nhận Tiền</h4>
                 <div class="mb-4">
                   <FormSelect label="Ngân hàng nhận" v-model="form.bankName">
                     <option value="">-- Chọn ngân hàng --</option>
@@ -421,12 +420,12 @@
           <div class="bg-[rgba(0,102,204,0.04)] border border-primary/20 rounded-2xl p-5">
             <h4 class="text-xs font-bold text-primary mb-2 flex items-center gap-1.5">
               <AppIcon name="info-circle" class="!w-4 !h-4" />
-              <span>VietQR & Nội quy</span>
+              <span>Tài Khoản & Nội Quy</span>
             </h4>
             <p class="text-[11px] leading-relaxed text-text-sub">
               Việc thiết lập đầy đủ tài khoản ngân hàng và các quy định nội quy rõ ràng sẽ giúp tối ưu hóa trải nghiệm
               tự
-              động hóa dịch vụ cho khách thuê của bạn. Khách thuê sẽ nhìn thấy mã QR VietQR khi nhận hóa đơn và xem được
+              động hóa dịch vụ cho khách thuê của bạn. Khách thuê sẽ nhìn thấy thông tin chuyển khoản khi nhận hóa đơn và xem được
               bảng nội quy dãy trọ này tại trang riêng của họ.
             </p>
           </div>

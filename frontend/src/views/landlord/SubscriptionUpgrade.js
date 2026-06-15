@@ -125,15 +125,6 @@ export default {
     };
 
     // Computed properties
-    const vietQrUrl = computed(() => {
-      if (!currentRequest.value) return '';
-      const amount = currentRequest.value.amount;
-      const content = currentRequest.value.paymentContent;
-      const bank = (adminBankInfo.value?.bankName || 'vietinbank').toLowerCase().replace(/\s+/g, '');
-      const account = adminBankInfo.value?.bankAccount || '102882915218';
-      const name = adminBankInfo.value?.accountName || 'TRAN VAN HUY';
-      return `https://img.vietqr.io/image/${bank}-${account}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(content)}&accountName=${encodeURIComponent(name)}`;
-    });
 
     const zaloUrl = computed(() => {
       const phone = adminBankInfo.value?.phone || '0365943254';
@@ -166,7 +157,6 @@ export default {
       loadingStatus,
       loadingRequests,
       submitting,
-      vietQrUrl,
       zaloUrl,
       submitUpgradeRequest,
       copyContent,

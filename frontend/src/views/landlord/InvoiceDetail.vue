@@ -330,17 +330,11 @@
               </div>
             </div>
 
-            <!-- Case 2: Fallback to static VietQR if PayOS is not configured -->
-            <div v-else-if="vietQrUrl"
+            <!-- Case 2: Fallback to manual bank transfer if PayOS is not configured -->
+            <div v-else-if="invoice.contract?.room?.boardingHouse?.bankAccountNumber"
               class="bg-card border border-border-main rounded-xl p-5 shadow-xs flex flex-col items-center sticky top-20">
-              <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán chuyển khoản nhanh</h3>
-              <p class="text-[11px] text-text-sub mb-4 text-center">Quét mã QR bằng ứng dụng ngân hàng để chuyển khoản.</p>
-
-              <!-- QR Code (Large) -->
-              <div
-                class="w-52 h-52 sm:w-56 sm:h-56 bg-white border border-border-main p-2 rounded-2xl flex items-center justify-center shrink-0 shadow-xs mb-4">
-                <img :src="vietQrUrl" class="w-full h-full object-contain" alt="Mã chuyển khoản VietQR" />
-              </div>
+              <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán chuyển khoản</h3>
+              <p class="text-[11px] text-text-sub mb-4 text-center">Vui lòng chuyển khoản ngân hàng theo thông tin chi tiết dưới đây.</p>
 
               <!-- Details -->
               <div class="space-y-2.5 text-xs w-full">

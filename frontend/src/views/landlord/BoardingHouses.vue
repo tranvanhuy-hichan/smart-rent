@@ -125,7 +125,7 @@
 
         <!-- Cấu hình nhận thanh toán bằng QR Code -->
         <div class="mt-6 pt-4 border-t border-border-main">
-          <h4 class="text-sm font-bold text-text-main mb-3">Tài Khoản Thanh Toán QR (VietQR)</h4>
+          <h4 class="text-sm font-bold text-text-main mb-3">Tài Khoản Ngân Hàng Nhận Tiền</h4>
           <div class="mb-4">
             <FormSelect label="Ngân hàng nhận" v-model="form.bankName">
               <option value="">-- Chọn ngân hàng --</option>

@@ -158,19 +158,7 @@
           <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-4">2. Hướng dẫn thanh toán
           </h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <!-- QR Code VietQR -->
-            <div
-              class="flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/40 border border-border-main/50 rounded-2xl p-4">
-              <span class="text-[10px] font-bold text-text-sub uppercase mb-2">Quét mã QR để chuyển khoản nhanh</span>
-              <div
-                class="w-48 h-48 bg-white border border-slate-200 rounded-xl p-2 flex items-center justify-center shrink-0 shadow-xs">
-                <img :src="vietQrUrl" class="w-full h-full object-contain" alt="VietQR code" />
-              </div>
-              <span class="text-[9px] text-text-sub mt-2 text-center">Hỗ trợ tất cả ứng dụng ngân hàng và Ví điện
-                tử</span>
-            </div>
-
+          <div class="max-w-md mx-auto w-full p-4 bg-slate-50 dark:bg-slate-900/40 border border-border-main/50 rounded-2xl">
             <!-- Account Transfer Info -->
             <div class="space-y-3.5 text-xs">
               <div class="flex justify-between border-b border-border-main/20 pb-2">

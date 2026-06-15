@@ -49,21 +49,7 @@ export default {
     const activeTab = ref('summary'); // 'summary' or 'receipt'
     const showPreviewModal = ref(false);
 
-    const vietQrUrl = computed(() => {
-      if (!invoice.value) return '';
-      const bh = invoice.value.contract?.room?.boardingHouse;
-      if (!bh || !bh.bankName || !bh.bankAccountNumber) return '';
-      
-      const amount = invoice.value.totalAmount - invoice.value.paidAmount;
-      if (amount <= 0) return '';
-      const roomNum = invoice.value.contract?.room?.roomNumber || '';
-      
-      const rawDesc = `PHONG ${roomNum} CK TIEN PHONG`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
-      const addInfo = encodeURIComponent(rawDesc);
-      const accountName = encodeURIComponent((bh.bankAccountName || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase());
-      
-      return `https://img.vietqr.io/image/${bh.bankName}-${bh.bankAccountNumber}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
-    });
+
 
     const fetchInvoiceDetail = async () => {
       try {
@@ -346,9 +332,6 @@ export default {
           msg += `- Chủ tài khoản: ${bh.bankAccountName}\n`;
         }
         msg += `- Nội dung chuyển khoản: PHONG ${roomNum} CK TIEN PHONG\n`;
-        if (vietQrUrl.value) {
-          msg += `- Quét mã VietQR thanh toán nhanh tại: ${vietQrUrl.value}\n`;
-        }
       }
 
       msg += `\nAnh/Chị vui lòng kiểm tra và thanh toán sớm. Xin cảm ơn!`;
@@ -424,7 +407,6 @@ export default {
       copyAndShareZalo,
       activeTab,
       showPreviewModal,
-      vietQrUrl,
       confirmModal,
       onConfirmModal,
       closeConfirmModal,
