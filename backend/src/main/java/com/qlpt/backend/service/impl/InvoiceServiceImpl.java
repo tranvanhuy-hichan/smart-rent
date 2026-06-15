@@ -20,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import vn.payos.PayOS;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -34,13 +35,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final NotificationService notificationService;
 
     public InvoiceServiceImpl(InvoiceRepository invoiceRepository,
-                          InvoiceItemRepository invoiceItemRepository,
-                          ContractRepository contractRepository,
-                          RoomRepository roomRepository,
-                          ContractAddendumRepository contractAddendumRepository,
-                          ContractAddendumExtraFeeRepository contractAddendumExtraFeeRepository,
-                          BoardingHouseRepository boardingHouseRepository,
-                          NotificationService notificationService) {
+            InvoiceItemRepository invoiceItemRepository,
+            ContractRepository contractRepository,
+            RoomRepository roomRepository,
+            ContractAddendumRepository contractAddendumRepository,
+            ContractAddendumExtraFeeRepository contractAddendumExtraFeeRepository,
+            BoardingHouseRepository boardingHouseRepository,
+            NotificationService notificationService) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceItemRepository = invoiceItemRepository;
         this.contractRepository = contractRepository;
@@ -82,7 +83,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         // ==========================================
         ContractAddendum latestAddendum = contractAddendumRepository
                 .findFirstByContractIdAndStartDateLessThanEqualOrderByStartDateDesc(contract.getId(), end)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phụ lục hợp đồng có hiệu lực. Vui lòng kiểm tra lại hợp đồng."));
+                .orElseThrow(() -> new RuntimeException(
+                        "Không tìm thấy phụ lục hợp đồng có hiệu lực. Vui lòng kiểm tra lại hợp đồng."));
 
         // Lấy giá trị snapshot từ phụ lục mới nhất
         double snapshotRoomPrice = latestAddendum.getRoomPrice();
@@ -104,7 +106,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         double oldElec = room.getCurrentElectricityIndex();
         double newElec = request.getNewElectricityIndex();
         if (newElec < oldElec) {
-            throw new RuntimeException("Chỉ số điện mới (" + newElec + ") không được nhỏ hơn chỉ số cũ (" + oldElec + ")");
+            throw new RuntimeException(
+                    "Chỉ số điện mới (" + newElec + ") không được nhỏ hơn chỉ số cũ (" + oldElec + ")");
         }
         double elecUsage = newElec - oldElec;
         double elecTotal = Math.round(elecUsage * snapshotElecRate);
@@ -120,7 +123,8 @@ public class InvoiceServiceImpl implements InvoiceService {
             oldWater = room.getCurrentWaterIndex();
             newWater = request.getNewWaterIndex();
             if (newWater < oldWater) {
-                throw new RuntimeException("Chỉ số nước mới (" + newWater + ") không được nhỏ hơn chỉ số cũ (" + oldWater + ")");
+                throw new RuntimeException(
+                        "Chỉ số nước mới (" + newWater + ") không được nhỏ hơn chỉ số cũ (" + oldWater + ")");
             }
             double waterUsage = newWater - oldWater;
             waterTotal = Math.round(waterUsage * snapshotWaterRate);
@@ -162,7 +166,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceItem> invoiceItems = new ArrayList<>();
         double extraFeesTotal = 0;
 
-        List<ContractAddendumExtraFee> addendumExtraFees = contractAddendumExtraFeeRepository.findByAddendumId(latestAddendum.getId());
+        List<ContractAddendumExtraFee> addendumExtraFees = contractAddendumExtraFeeRepository
+                .findByAddendumId(latestAddendum.getId());
         for (ContractAddendumExtraFee cef : addendumExtraFees) {
             ExtraFee ef = cef.getExtraFee();
             double quantity = 1;
@@ -207,12 +212,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Gửi thông báo đến người thuê
         try {
             String title = "Hóa đơn mới được tạo";
-            String content = String.format("Hóa đơn phòng %s kỳ từ %s đến %s với số tiền %s đã được tạo. Vui lòng thanh toán sớm.",
+            String content = String.format(
+                    "Hóa đơn phòng %s kỳ từ %s đến %s với số tiền %s đã được tạo. Vui lòng thanh toán sớm.",
                     room.getRoomNumber(),
                     start,
                     end,
                     String.format("%,.0f VNĐ", resultInvoice.getTotalAmount()));
-            notificationService.createNotification(contract.getTenant(), title, content, "INVOICE_NEW", resultInvoice.getId());
+            notificationService.createNotification(contract.getTenant(), title, content, "INVOICE_NEW",
+                    resultInvoice.getId());
         } catch (Exception e) {
             System.err.println("Lỗi khi gửi thông báo hóa đơn mới: " + e.getMessage());
         }
@@ -231,14 +238,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
 
         double newPaid = invoice.getPaidAmount() + paidAmount;
-        if (newPaid > invoice.getTotalAmount()) {
+        // Sử dụng delta epsilon để tránh lỗi so sánh số thực dấu phẩy động
+        if (newPaid - invoice.getTotalAmount() > 0.01) {
             throw new RuntimeException("Số tiền thanh toán vượt quá số tiền còn nợ của hóa đơn");
         }
 
         invoice.setPaidAmount(newPaid);
         invoice.setPaymentClaimed(false);
         boolean isFullyPaid = false;
-        if (newPaid >= invoice.getTotalAmount()) {
+        if (newPaid >= invoice.getTotalAmount() - 0.01) {
+            invoice.setPaidAmount(invoice.getTotalAmount()); // Chuẩn hóa về đúng tổng tiền
             invoice.setStatus(InvoiceStatus.PAID);
             invoice.setPaymentDate(LocalDate.now());
             isFullyPaid = true;
@@ -252,11 +261,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (isFullyPaid) {
             try {
                 String title = "Xác nhận thanh toán hóa đơn";
-                String content = String.format("Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
+                String content = String.format(
+                        "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
                         result.getContract().getRoom().getRoomNumber(),
                         result.getBillingPeriodStart(),
                         result.getBillingPeriodEnd());
-                notificationService.createNotification(result.getContract().getTenant(), title, content, "PAYMENT_CONFIRMED", result.getId());
+                notificationService.createNotification(result.getContract().getTenant(), title, content,
+                        "PAYMENT_CONFIRMED", result.getId());
             } catch (Exception e) {
                 System.err.println("Lỗi khi gửi thông báo xác nhận thanh toán: " + e.getMessage());
             }
@@ -272,14 +283,16 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
 
         double newPaid = invoice.getPaidAmount() + paidAmount;
-        if (newPaid > invoice.getTotalAmount()) {
+        // Sử dụng delta epsilon để tránh lỗi so sánh số thực dấu phẩy động
+        if (newPaid - invoice.getTotalAmount() > 0.01) {
             throw new RuntimeException("Số tiền thanh toán vượt quá số tiền còn nợ của hóa đơn");
         }
 
         invoice.setPaidAmount(newPaid);
         invoice.setPaymentClaimed(false);
         boolean isFullyPaid = false;
-        if (newPaid >= invoice.getTotalAmount()) {
+        if (newPaid >= invoice.getTotalAmount() - 0.01) {
+            invoice.setPaidAmount(invoice.getTotalAmount()); // Chuẩn hóa về đúng tổng tiền
             invoice.setStatus(InvoiceStatus.PAID);
             invoice.setPaymentDate(LocalDate.now());
             isFullyPaid = true;
@@ -293,11 +306,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (isFullyPaid) {
             try {
                 String title = "Xác nhận thanh toán hóa đơn";
-                String content = String.format("Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
+                String content = String.format(
+                        "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
                         result.getContract().getRoom().getRoomNumber(),
                         result.getBillingPeriodStart(),
                         result.getBillingPeriodEnd());
-                notificationService.createNotification(result.getContract().getTenant(), title, content, "PAYMENT_CONFIRMED", result.getId());
+                notificationService.createNotification(result.getContract().getTenant(), title, content,
+                        "PAYMENT_CONFIRMED", result.getId());
             } catch (Exception e) {
                 System.err.println("Lỗi khi gửi thông báo xác nhận thanh toán: " + e.getMessage());
             }
@@ -330,19 +345,71 @@ public class InvoiceServiceImpl implements InvoiceService {
         return page;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public Invoice getInvoiceById(UUID invoiceId, User user) {
         Invoice invoice = invoiceRepository.findWithDetailsById(invoiceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
 
-        boolean isLandlord = invoice.getContract().getRoom().getBoardingHouse().getLandlord().getId().equals(user.getId());
+        boolean isLandlord = invoice.getContract().getRoom().getBoardingHouse().getLandlord().getId()
+                .equals(user.getId());
         boolean isTenant = invoice.getContract().getTenant().getId().equals(user.getId());
 
         if (!isLandlord && !isTenant && user.getRole() != Role.ADMIN) {
             throw new RuntimeException("Bạn không có quyền xem hóa đơn này");
         }
 
+        // Tự động đồng bộ trạng thái từ PayOS nếu hóa đơn chưa thanh toán xong và có mã
+        // payosOrderCode
+        if (invoice.getStatus() != InvoiceStatus.PAID && invoice.getPayosOrderCode() != null) {
+            invoice = syncPayosStatus(invoice);
+        }
+
+        return invoice;
+    }
+
+    private Invoice syncPayosStatus(Invoice invoice) {
+        BoardingHouse bh = invoice.getContract().getRoom().getBoardingHouse();
+        if (bh.getPayosClientId() == null || bh.getPayosApiKey() == null || bh.getPayosChecksumKey() == null ||
+                bh.getPayosClientId().trim().isEmpty() || bh.getPayosApiKey().trim().isEmpty()
+                || bh.getPayosChecksumKey().trim().isEmpty()) {
+            return invoice;
+        }
+
+        try {
+            PayOS payOS = new PayOS(
+                    bh.getPayosClientId().trim(),
+                    bh.getPayosApiKey().trim(),
+                    bh.getPayosChecksumKey().trim());
+
+            var paymentLinkData = payOS.paymentRequests().get(invoice.getPayosOrderCode());
+            if (paymentLinkData != null && "PAID".equals(paymentLinkData.getStatus())) {
+                invoice.setPaidAmount(invoice.getTotalAmount());
+                invoice.setStatus(InvoiceStatus.PAID);
+                invoice.setPaymentDate(LocalDate.now());
+                invoice.setPaymentClaimed(false);
+
+                Invoice saved = invoiceRepository.save(invoice);
+
+                // Gửi thông báo đến người thuê
+                try {
+                    String title = "Xác nhận thanh toán hóa đơn";
+                    String content = String.format(
+                            "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công qua PayOS.",
+                            saved.getContract().getRoom().getRoomNumber(),
+                            saved.getBillingPeriodStart(),
+                            saved.getBillingPeriodEnd());
+                    notificationService.createNotification(saved.getContract().getTenant(), title, content,
+                            "PAYMENT_CONFIRMED", saved.getId());
+                } catch (Exception ne) {
+                    System.err.println("Lỗi khi gửi thông báo đồng bộ PayOS: " + ne.getMessage());
+                }
+
+                return invoiceRepository.findWithDetailsById(saved.getId()).orElse(saved);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi đồng bộ trạng thái PayOS cho hóa đơn " + invoice.getId() + ": " + e.getMessage());
+        }
         return invoice;
     }
 
@@ -368,8 +435,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<BulkBillingRoomStatus> result = new ArrayList<>();
 
         for (Room room : rooms) {
-            java.util.Optional<Contract> activeContractOpt = contractRepository.findByRoomIdAndStatus(room.getId(), ContractStatus.ACTIVE);
-            
+            java.util.Optional<Contract> activeContractOpt = contractRepository.findByRoomIdAndStatus(room.getId(),
+                    ContractStatus.ACTIVE);
+
             BulkBillingRoomStatus.BulkBillingRoomStatusBuilder builder = BulkBillingRoomStatus.builder()
                     .roomId(room.getId())
                     .roomNumber(room.getRoomNumber())
@@ -389,7 +457,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                         .fixedBillingDay(contract.getFixedBillingDay());
 
                 // Tìm hóa đơn cuối cùng để biết ngày bắt đầu
-                java.util.Optional<Invoice> lastInvoiceOpt = invoiceRepository.findFirstByContractIdOrderByBillingPeriodEndDesc(contract.getId());
+                java.util.Optional<Invoice> lastInvoiceOpt = invoiceRepository
+                        .findFirstByContractIdOrderByBillingPeriodEndDesc(contract.getId());
                 LocalDate nextStart;
                 if (lastInvoiceOpt.isPresent()) {
                     nextStart = lastInvoiceOpt.get().getInvoiceDate().plusDays(1);
@@ -406,10 +475,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                     LocalDate candidateEnd = nextStart;
                     int targetYear = nextStart.getYear();
                     int targetMonth = nextStart.getMonthValue();
-                    
+
                     try {
-                        candidateEnd = LocalDate.of(targetYear, targetMonth, Math.min(billingDay, LocalDate.of(targetYear, targetMonth, 1).lengthOfMonth()));
-                    } catch (Exception e) {}
+                        candidateEnd = LocalDate.of(targetYear, targetMonth,
+                                Math.min(billingDay, LocalDate.of(targetYear, targetMonth, 1).lengthOfMonth()));
+                    } catch (Exception e) {
+                    }
 
                     if (candidateEnd.isBefore(nextStart) || candidateEnd.isEqual(nextStart)) {
                         targetMonth++;
@@ -418,8 +489,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                             targetYear++;
                         }
                         try {
-                            candidateEnd = LocalDate.of(targetYear, targetMonth, Math.min(billingDay, LocalDate.of(targetYear, targetMonth, 1).lengthOfMonth()));
-                        } catch (Exception e) {}
+                            candidateEnd = LocalDate.of(targetYear, targetMonth,
+                                    Math.min(billingDay, LocalDate.of(targetYear, targetMonth, 1).lengthOfMonth()));
+                        } catch (Exception e) {
+                        }
                     }
                     nextEnd = candidateEnd;
                 } else {
@@ -480,17 +553,20 @@ public class InvoiceServiceImpl implements InvoiceService {
         User landlord = invoice.getContract().getRoom().getBoardingHouse().getLandlord();
         String roomNumber = invoice.getContract().getRoom().getRoomNumber();
         String bhName = invoice.getContract().getRoom().getBoardingHouse().getName();
-        String billingPeriod = String.format("%s đến %s", invoice.getBillingPeriodStart(), invoice.getBillingPeriodEnd());
+        String billingPeriod = String.format("%s đến %s", invoice.getBillingPeriodStart(),
+                invoice.getBillingPeriodEnd());
         double remainingAmount = invoice.getTotalAmount() - invoice.getPaidAmount();
 
         String title = "Khách báo đã chuyển khoản";
-        String content = String.format("Phòng %s (dãy %s) báo đã thanh toán hóa đơn kỳ %s. Số tiền cần đóng: %,.0f VNĐ. Vui lòng kiểm tra tài khoản.",
+        String content = String.format(
+                "Phòng %s (dãy %s) báo đã thanh toán hóa đơn kỳ %s. Số tiền cần đóng: %,.0f VNĐ. Vui lòng kiểm tra tài khoản.",
                 roomNumber, bhName, billingPeriod, remainingAmount);
 
         invoice.setPaymentClaimed(true);
         invoiceRepository.save(invoice);
 
-        // Tạo thông báo cho chủ trọ (createNotification tự động kích hoạt WebSocket đẩy đến chủ trọ)
+        // Tạo thông báo cho chủ trọ (createNotification tự động kích hoạt WebSocket đẩy
+        // đến chủ trọ)
         notificationService.createNotification(landlord, title, content, "PAYMENT_REPORTED", invoiceId);
     }
 }
