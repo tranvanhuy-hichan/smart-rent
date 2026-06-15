@@ -6,6 +6,7 @@ import com.qlpt.backend.dto.user.UserResponse;
 import com.qlpt.backend.entity.UpgradeRequest;
 import com.qlpt.backend.entity.User;
 import com.qlpt.backend.service.SubscriptionService;
+import com.qlpt.backend.enums.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -36,8 +37,22 @@ public class SubscriptionController {
     }
 
     @GetMapping("/admin-bank-info")
-    public ResponseEntity<SystemSetting> getAdminBankInfo() {
-        return ResponseEntity.ok(systemSettingService.getSetting());
+    public ResponseEntity<SystemSetting> getAdminBankInfo(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        SystemSetting setting = systemSettingService.getSetting();
+        boolean isAdmin = userDetails != null && userDetails.getUser() != null && userDetails.getUser().getRole() == Role.ADMIN;
+        
+        SystemSetting responseSetting = SystemSetting.builder()
+                .id(setting.getId())
+                .phone(setting.getPhone())
+                .email(setting.getEmail())
+                .fullName(setting.getFullName())
+                .payosClientId(isAdmin ? setting.getPayosClientId() : "")
+                .payosApiKey(isAdmin ? (setting.getPayosApiKey() != null && !setting.getPayosApiKey().trim().isEmpty() ? "******" : "") : "")
+                .payosChecksumKey(isAdmin ? (setting.getPayosChecksumKey() != null && !setting.getPayosChecksumKey().trim().isEmpty() ? "******" : "") : "")
+                .build();
+                
+        return ResponseEntity.ok(responseSetting);
     }
 
     @PutMapping("/admin-bank-info")

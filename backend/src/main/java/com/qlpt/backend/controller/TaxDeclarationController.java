@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +47,8 @@ public class TaxDeclarationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TaxDeclarationResponse>> getDeclarations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<List<TaxDeclarationResponse>> getDeclarations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         User landlord = userDetails.getUser();
         return ResponseEntity.ok(taxDeclarationService.getDeclarations(landlord));
     }
@@ -78,7 +78,7 @@ public class TaxDeclarationController {
         try {
             User landlord = userDetails.getUser();
             byte[] excelBytes = taxDeclarationService.exportExcel(landlord, boardingHouseId, startDate, endDate);
-            
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"bao_cao_doanh_thu.xlsx\"")
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -87,7 +87,8 @@ public class TaxDeclarationController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(java.util.Collections.singletonMap("message", e.getMessage() != null ? e.getMessage() : e.toString()));
+                    .body(java.util.Collections.singletonMap("message",
+                            e.getMessage() != null ? e.getMessage() : e.toString()));
         }
     }
 }

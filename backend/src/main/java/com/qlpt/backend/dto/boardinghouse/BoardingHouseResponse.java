@@ -19,9 +19,6 @@ public record BoardingHouseResponse(
     WaterBillingType waterBillingType,
     List<ExtraFeeResponse> extraFees,
     UserResponse landlord,
-    String bankName,
-    String bankAccountNumber,
-    String bankAccountName,
     String rules,
     Integer fixedBillingDay,
     String payosClientId,
@@ -63,9 +60,6 @@ public record BoardingHouseResponse(
             waterType,
             fees,
             UserResponse.fromEntity(bh.getLandlord()),
-            bh.getBankName(),
-            bh.getBankAccountNumber(),
-            bh.getBankAccountName(),
             bh.getRules(),
             bh.getFixedBillingDay(),
             bh.getPayosClientId(),
@@ -90,9 +84,6 @@ public record BoardingHouseResponse(
             bh.getWaterBillingType(),
             null, // extraFees
             UserResponse.fromEntityLight(bh.getLandlord()), // landlord
-            null, // bankName
-            null, // bankAccountNumber
-            null, // bankAccountName
             null, // rules
             bh.getFixedBillingDay(),
             bh.getPayosClientId(),

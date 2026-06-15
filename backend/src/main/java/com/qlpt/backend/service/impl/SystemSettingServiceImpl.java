@@ -30,9 +30,6 @@ public class SystemSettingServiceImpl implements SystemSettingService {
         return systemSettingRepository.findById(1L).orElseGet(() -> {
             SystemSetting defaultSetting = SystemSetting.builder()
                     .id(1L)
-                    .bankName("VietinBank")
-                    .bankAccount("102882915218")
-                    .accountName("TRAN VAN HUY")
                     .phone("0365943254")
                     .email("admin@gmail.com")
                     .fullName("Trần Văn Huy")
@@ -48,15 +45,16 @@ public class SystemSettingServiceImpl implements SystemSettingService {
     @Override
     public SystemSetting updateSetting(SystemSetting newSetting) {
         SystemSetting existing = getSetting();
-        existing.setBankName(newSetting.getBankName());
-        existing.setBankAccount(newSetting.getBankAccount());
-        existing.setAccountName(newSetting.getAccountName());
         existing.setPhone(newSetting.getPhone());
         existing.setEmail(newSetting.getEmail());
         existing.setFullName(newSetting.getFullName());
         existing.setPayosClientId(newSetting.getPayosClientId());
-        existing.setPayosApiKey(newSetting.getPayosApiKey());
-        existing.setPayosChecksumKey(newSetting.getPayosChecksumKey());
+        if (newSetting.getPayosApiKey() != null && !newSetting.getPayosApiKey().trim().isEmpty() && !newSetting.getPayosApiKey().equals("******")) {
+            existing.setPayosApiKey(newSetting.getPayosApiKey().trim());
+        }
+        if (newSetting.getPayosChecksumKey() != null && !newSetting.getPayosChecksumKey().trim().isEmpty() && !newSetting.getPayosChecksumKey().equals("******")) {
+            existing.setPayosChecksumKey(newSetting.getPayosChecksumKey().trim());
+        }
         return systemSettingRepository.save(existing);
     }
 }

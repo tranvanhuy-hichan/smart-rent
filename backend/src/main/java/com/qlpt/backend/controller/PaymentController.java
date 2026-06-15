@@ -92,12 +92,8 @@ public class PaymentController {
                     bh.getPayosApiKey().trim(),
                     bh.getPayosChecksumKey().trim());
 
-            String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty())
-                    ? returnUrl.trim()
-                    : "http://localhost:5173/tenant/invoices";
-            String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty())
-                    ? cancelUrl.trim()
-                    : "http://localhost:5173/tenant/invoices";
+            String finalReturnUrl = validateRedirectUrl(returnUrl, "http://localhost:5173/tenant/invoices");
+            String finalCancelUrl = validateRedirectUrl(cancelUrl, "http://localhost:5173/tenant/invoices");
 
             // Description tối đa 25 ký tự
             String roomNum = invoice.getContract().getRoom().getRoomNumber();
@@ -162,10 +158,8 @@ public class PaymentController {
         }
 
         try {
-            String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim()
-                    : "http://localhost:5173/landlord/dashboard";
-            String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim()
-                    : "http://localhost:5173/landlord/dashboard";
+            String finalReturnUrl = validateRedirectUrl(returnUrl, "http://localhost:5173/landlord/dashboard");
+            String finalCancelUrl = validateRedirectUrl(cancelUrl, "http://localhost:5173/landlord/dashboard");
 
             String desc = "Nang cap " + request.getMonths() + " thang";
             if (desc.length() > 25) {
@@ -205,6 +199,11 @@ public class PaymentController {
                 return ResponseEntity.badRequest().body(Map.of("message", "Invalid webhook payload"));
             }
 
+            JsonNode descNode = dataNode.get("desc");
+            if (descNode != null && "confirm".equals(descNode.asText())) {
+                return ResponseEntity.ok(Map.of("success", true, "message", "Webhook confirmed successfully"));
+            }
+
             Long orderCode = dataNode.get("orderCode") != null ? dataNode.get("orderCode").asLong() : null;
             if (orderCode == null) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Missing orderCode"));
@@ -214,6 +213,9 @@ public class PaymentController {
             Optional<Invoice> invoiceOpt = invoiceRepository.findByPayosOrderCode(orderCode);
             if (invoiceOpt.isPresent()) {
                 Invoice invoice = invoiceOpt.get();
+                if ("PAID".equals(invoice.getStatus().name())) {
+                    return ResponseEntity.ok(Map.of("success", true, "message", "Invoice already paid"));
+                }
                 BoardingHouse bh = invoice.getContract().getRoom().getBoardingHouse();
 
                 if (bh.getPayosClientId() == null || bh.getPayosApiKey() == null || bh.getPayosChecksumKey() == null) {
@@ -241,6 +243,9 @@ public class PaymentController {
             Optional<UpgradeRequest> upgradeOpt = upgradeRequestRepository.findByPayosOrderCode(orderCode);
             if (upgradeOpt.isPresent()) {
                 UpgradeRequest upgradeReq = upgradeOpt.get();
+                if ("APPROVED".equals(upgradeReq.getStatus())) {
+                    return ResponseEntity.ok(Map.of("success", true, "message", "Subscription already upgraded"));
+                }
 
                 PayOS payOS = getAdminPayOS();
                 if (payOS == null) {
@@ -261,8 +266,29 @@ public class PaymentController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Webhook verification failed: " + e.getMessage()));
+                    .body(Map.of("message", "Webhook verification failed. Please check payload and signature."));
         }
+    }
+
+    private String validateRedirectUrl(String url, String defaultUrl) {
+        if (url == null || url.trim().isEmpty()) {
+            return defaultUrl;
+        }
+        String trimmed = url.trim();
+        if (trimmed.startsWith("http://localhost:") || trimmed.startsWith("http://127.0.0.1:")) {
+            return trimmed;
+        }
+        try {
+            java.net.URI uri = new java.net.URI(trimmed);
+            String host = uri.getHost();
+            if (host == null || host.equals("localhost") || host.equals("127.0.0.1") || 
+                host.endsWith("vercel.app") || host.contains("quanlyphongtro")) {
+                return trimmed;
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return defaultUrl;
     }
 
     private PayOS getAdminPayOS() {
