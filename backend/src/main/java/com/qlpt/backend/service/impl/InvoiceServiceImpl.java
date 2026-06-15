@@ -387,7 +387,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             var paymentLinkData = payOS.paymentRequests().get(invoice.getPayosOrderCode());
             if (paymentLinkData != null) {
                 System.out.println("[PayOS Sync] Trang thai thanh toan tren PayOS: " + paymentLinkData.getStatus() + ", So tien da thanh toan: " + paymentLinkData.getAmountPaid());
-                if ("PAID".equals(paymentLinkData.getStatus())) {
+                if ("PAID".equals(String.valueOf(paymentLinkData.getStatus()))) {
                     invoice.setPaidAmount(invoice.getTotalAmount());
                     invoice.setStatus(InvoiceStatus.PAID);
                     invoice.setPaymentDate(LocalDate.now());
