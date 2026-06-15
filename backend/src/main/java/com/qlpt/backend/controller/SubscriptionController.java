@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.qlpt.backend.entity.SystemSetting;
 import com.qlpt.backend.service.SystemSettingService;
+import com.qlpt.backend.entity.SubscriptionPackage;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,18 +50,53 @@ public class SubscriptionController {
     public ResponseEntity<UpgradeRequestResponse> createRequest(
             @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        int months = 3;
-        if (payload.containsKey("months")) {
-            Object monthsObj = payload.get("months");
-            if (monthsObj instanceof Number) {
-                months = ((Number) monthsObj).intValue();
-            }
+        UUID packageId = null;
+        if (payload.containsKey("packageId")) {
+            packageId = UUID.fromString((String) payload.get("packageId"));
+        } else {
+            throw new RuntimeException("Vui lòng cung cấp mã gói cước.");
         }
         String returnUrl = (String) payload.get("returnUrl");
         String cancelUrl = (String) payload.get("cancelUrl");
         User landlord = userDetails.getUser();
-        UpgradeRequest request = subscriptionService.createUpgradeRequest(landlord, months, returnUrl, cancelUrl);
+        UpgradeRequest request = subscriptionService.createUpgradeRequest(landlord, packageId, returnUrl, cancelUrl);
         return ResponseEntity.ok(UpgradeRequestResponse.fromEntity(request));
+    }
+
+    // ==========================================
+    // SUBSCRIPTION PACKAGES ENDPOINTS
+    // ==========================================
+
+    @GetMapping("/packages")
+    public ResponseEntity<List<SubscriptionPackage>> getActivePackages() {
+        return ResponseEntity.ok(subscriptionService.getActivePackages());
+    }
+
+    @GetMapping("/packages/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SubscriptionPackage>> getAllPackages() {
+        return ResponseEntity.ok(subscriptionService.getAllPackages());
+    }
+
+    @PostMapping("/packages")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SubscriptionPackage> createPackage(@RequestBody SubscriptionPackage pack) {
+        return ResponseEntity.ok(subscriptionService.createPackage(pack));
+    }
+
+    @PutMapping("/packages/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<SubscriptionPackage> updatePackage(
+            @PathVariable UUID id,
+            @RequestBody SubscriptionPackage pack) {
+        return ResponseEntity.ok(subscriptionService.updatePackage(id, pack));
+    }
+
+    @DeleteMapping("/packages/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deletePackage(@PathVariable UUID id) {
+        subscriptionService.deletePackage(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/my-requests")

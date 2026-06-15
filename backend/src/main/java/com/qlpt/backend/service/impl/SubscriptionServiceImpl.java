@@ -5,9 +5,11 @@ import com.qlpt.backend.service.SubscriptionService;
 import com.qlpt.backend.enums.Role;
 import com.qlpt.backend.entity.UpgradeRequest;
 import com.qlpt.backend.entity.User;
+import com.qlpt.backend.entity.SubscriptionPackage;
 import com.qlpt.backend.exception.ResourceNotFoundException;
 import com.qlpt.backend.repository.UpgradeRequestRepository;
 import com.qlpt.backend.repository.UserRepository;
+import com.qlpt.backend.repository.SubscriptionPackageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserRepository userRepository;
     private final com.qlpt.backend.service.NotificationService notificationService;
     private final com.qlpt.backend.service.SystemSettingService systemSettingService;
+    private final SubscriptionPackageRepository subscriptionPackageRepository;
 
     @Value("${app.payos.client-id:}")
     private String adminPayosClientId;
@@ -42,25 +45,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public SubscriptionServiceImpl(UpgradeRequestRepository upgradeRequestRepository,
                                    UserRepository userRepository,
                                    com.qlpt.backend.service.NotificationService notificationService,
-                                   com.qlpt.backend.service.SystemSettingService systemSettingService) {
+                                   com.qlpt.backend.service.SystemSettingService systemSettingService,
+                                   SubscriptionPackageRepository subscriptionPackageRepository) {
         this.upgradeRequestRepository = upgradeRequestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.systemSettingService = systemSettingService;
+        this.subscriptionPackageRepository = subscriptionPackageRepository;
     }
 
     @Transactional
     @Override
-    public UpgradeRequest createUpgradeRequest(User landlord, int months, String returnUrl, String cancelUrl) {
+    public UpgradeRequest createUpgradeRequest(User landlord, UUID packageId, String returnUrl, String cancelUrl) {
         if (landlord.getRole() != Role.LANDLORD) {
             throw new RuntimeException("Chỉ tài khoản chủ trọ mới có thể mua gói nâng cấp");
         }
 
-        if (months != 3 && months != 6 && months != 12) {
-            throw new RuntimeException("Gói đăng ký không hợp lệ! Vui lòng chọn gói 3, 6, hoặc 12 tháng.");
+        SubscriptionPackage pack = subscriptionPackageRepository.findById(packageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
+
+        if (!pack.isActive()) {
+            throw new RuntimeException("Gói dịch vụ này hiện tại không hoạt động");
         }
 
-        double amount = calculateAmount(months);
+        int months = pack.getMonths();
+        double amount = pack.getPrice();
         String paymentContent = generateUniquePaymentContent(landlord.getUsername());
 
         long orderCode = System.currentTimeMillis();
@@ -111,8 +120,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         try {
             List<User> admins = userRepository.findByRole(Role.ADMIN);
             String title = "Yêu cầu nâng cấp gói mới";
-            String content = String.format("Chủ trọ %s đã gửi yêu cầu nâng cấp gói %d tháng. Vui lòng kiểm tra và phê duyệt.",
-                    landlord.getFullName(), months);
+            String content = String.format("Chủ trọ %s đã gửi yêu cầu nâng cấp gói %s (%d tháng). Vui lòng kiểm tra và phê duyệt.",
+                    landlord.getFullName(), pack.getName(), months);
             for (User admin : admins) {
                 notificationService.createNotification(admin, title, content, "SUBSCRIPTION_REQUEST");
             }
@@ -283,21 +292,66 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     // ==========================================
-    // PRIVATE HELPERS
+    // SUBSCRIPTION PACKAGE ACTIONS
     // ==========================================
 
-    private double calculateAmount(int months) {
-        switch (months) {
-            case 3:
-                return 300000.0;
-            case 6:
-                return 550000.0;
-            case 12:
-                return 1000000.0;
-            default:
-                throw new IllegalArgumentException("Số tháng không hợp lệ");
+    @Transactional
+    @Override
+    public SubscriptionPackage createPackage(SubscriptionPackage pack) {
+        if (pack.getName() == null || pack.getName().trim().isEmpty()) {
+            throw new RuntimeException("Tên gói không được để trống");
         }
+        if (pack.getMonths() == null || pack.getMonths() <= 0) {
+            throw new RuntimeException("Số tháng gia hạn phải lớn hơn 0");
+        }
+        if (pack.getPrice() == null || pack.getPrice() < 0) {
+            throw new RuntimeException("Giá tiền không hợp lệ");
+        }
+        return subscriptionPackageRepository.save(pack);
     }
+
+    @Transactional
+    @Override
+    public SubscriptionPackage updatePackage(UUID id, SubscriptionPackage pack) {
+        SubscriptionPackage existing = subscriptionPackageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
+
+        if (pack.getName() != null && !pack.getName().trim().isEmpty()) {
+            existing.setName(pack.getName());
+        }
+        if (pack.getMonths() != null && pack.getMonths() > 0) {
+            existing.setMonths(pack.getMonths());
+        }
+        if (pack.getPrice() != null && pack.getPrice() >= 0) {
+            existing.setPrice(pack.getPrice());
+        }
+        existing.setDescription(pack.getDescription());
+        existing.setActive(pack.isActive());
+
+        return subscriptionPackageRepository.save(existing);
+    }
+
+    @Transactional
+    @Override
+    public void deletePackage(UUID id) {
+        SubscriptionPackage existing = subscriptionPackageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói dịch vụ"));
+        subscriptionPackageRepository.delete(existing);
+    }
+
+    @Override
+    public List<SubscriptionPackage> getAllPackages() {
+        return subscriptionPackageRepository.findAllByOrderByMonthsAsc();
+    }
+
+    @Override
+    public List<SubscriptionPackage> getActivePackages() {
+        return subscriptionPackageRepository.findByActiveTrueOrderByMonthsAsc();
+    }
+
+    // ==========================================
+    // PRIVATE HELPERS
+    // ==========================================
 
     private String generateUniquePaymentContent(String username) {
         Random random = new Random();
