@@ -84,6 +84,12 @@ public class Invoice {
     @Column(name = "payment_claimed", nullable = false, columnDefinition = "boolean default false")
     private boolean paymentClaimed = false;
 
+    @Column(name = "payos_order_code", unique = true)
+    private Long payosOrderCode;
+
+    @Column(name = "payos_payment_link_id")
+    private String payosPaymentLinkId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;

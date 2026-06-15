@@ -47,11 +47,19 @@ public class SubscriptionController {
 
     @PostMapping("/request")
     public ResponseEntity<UpgradeRequestResponse> createRequest(
-            @RequestBody Map<String, Integer> payload,
+            @RequestBody Map<String, Object> payload,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        int months = payload.getOrDefault("months", 3);
+        int months = 3;
+        if (payload.containsKey("months")) {
+            Object monthsObj = payload.get("months");
+            if (monthsObj instanceof Number) {
+                months = ((Number) monthsObj).intValue();
+            }
+        }
+        String returnUrl = (String) payload.get("returnUrl");
+        String cancelUrl = (String) payload.get("cancelUrl");
         User landlord = userDetails.getUser();
-        UpgradeRequest request = subscriptionService.createUpgradeRequest(landlord, months);
+        UpgradeRequest request = subscriptionService.createUpgradeRequest(landlord, months, returnUrl, cancelUrl);
         return ResponseEntity.ok(UpgradeRequestResponse.fromEntity(request));
     }
 

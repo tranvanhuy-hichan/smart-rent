@@ -53,6 +53,15 @@ public class BoardingHouse {
     @Column(name = "rules", columnDefinition = "TEXT")
     private String rules;
 
+    @Column(name = "payos_client_id")
+    private String payosClientId;
+
+    @Column(name = "payos_api_key")
+    private String payosApiKey;
+
+    @Column(name = "payos_checksum_key")
+    private String payosChecksumKey;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "landlord_id", nullable = false)
     private User landlord;

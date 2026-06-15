@@ -12,7 +12,9 @@ public record UpgradeRequestResponse(
     String status,
     String paymentContent,
     LocalDateTime createdAt,
-    LocalDateTime processedAt
+    LocalDateTime processedAt,
+    Long payosOrderCode,
+    String checkoutUrl
 ) {
     public record UserMiniResponse(
         UUID id,
@@ -21,6 +23,11 @@ public record UpgradeRequestResponse(
     ) {}
 
     public static UpgradeRequestResponse fromEntity(UpgradeRequest request) {
+        if (request == null) return null;
+        return fromEntity(request, request.getCheckoutUrl());
+    }
+
+    public static UpgradeRequestResponse fromEntity(UpgradeRequest request, String checkoutUrl) {
         if (request == null) return null;
         
         UserMiniResponse userMini = null;
@@ -44,7 +51,9 @@ public record UpgradeRequestResponse(
             request.getStatus(),
             request.getPaymentContent(),
             request.getCreatedAt(),
-            request.getProcessedAt()
+            request.getProcessedAt(),
+            request.getPayosOrderCode(),
+            checkoutUrl
         );
     }
 }

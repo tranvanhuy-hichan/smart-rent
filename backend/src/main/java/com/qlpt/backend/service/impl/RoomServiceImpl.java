@@ -88,6 +88,15 @@ public class RoomServiceImpl implements RoomService {
         boardingHouse.setRules(bhDetails.getRules());
         boardingHouse.setFixedBillingDay(bhDetails.getFixedBillingDay());
         
+        // Cập nhật cấu hình PayOS bảo mật
+        boardingHouse.setPayosClientId(bhDetails.getPayosClientId());
+        if (bhDetails.getPayosApiKey() != null && !bhDetails.getPayosApiKey().trim().isEmpty() && !bhDetails.getPayosApiKey().equals("******")) {
+            boardingHouse.setPayosApiKey(bhDetails.getPayosApiKey().trim());
+        }
+        if (bhDetails.getPayosChecksumKey() != null && !bhDetails.getPayosChecksumKey().trim().isEmpty() && !bhDetails.getPayosChecksumKey().equals("******")) {
+            boardingHouse.setPayosChecksumKey(bhDetails.getPayosChecksumKey().trim());
+        }
+        
         // Cập nhật phụ phí dịch vụ qua JPA Cascade
         boardingHouse.getExtraFees().clear();
         if (bhDetails.getExtraFees() != null) {

@@ -350,4 +350,37 @@ public class InvoiceServiceTest {
             assertEquals(LocalDate.of(2026, 7, 5), status2.getNextBillingPeriodEnd());
         }
     }
+
+    @Test
+    public void testUpdatePaymentStatusAuto() {
+        // GIVEN
+        UUID invoiceId = UUID.randomUUID();
+        Invoice invoice = Invoice.builder()
+                .id(invoiceId)
+                .contract(contract)
+                .totalAmount(1000000.0)
+                .paidAmount(200000.0)
+                .status(InvoiceStatus.PARTIALLY_PAID)
+                .build();
+
+        when(invoiceRepository.findById(invoiceId)).thenReturn(Optional.of(invoice));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // WHEN
+        Invoice result = invoiceService.updatePaymentStatusAuto(invoiceId, 800000.0);
+
+        // THEN
+        assertNotNull(result);
+        assertEquals(1000000.0, result.getPaidAmount());
+        assertEquals(InvoiceStatus.PAID, result.getStatus());
+        assertNotNull(result.getPaymentDate());
+        verify(invoiceRepository, times(1)).save(any(Invoice.class));
+        verify(notificationService, times(1)).createNotification(
+                eq(tenant), 
+                anyString(), 
+                anyString(), 
+                eq("PAYMENT_CONFIRMED"), 
+                eq(result.getId())
+        );
+    }
 }

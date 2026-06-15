@@ -14,6 +14,7 @@ import java.util.UUID;
 public interface UpgradeRequestRepository extends JpaRepository<UpgradeRequest, UUID> {
     List<UpgradeRequest> findByUserIdOrderByCreatedAtDesc(UUID userId);
     Optional<UpgradeRequest> findByPaymentContent(String paymentContent);
+    Optional<UpgradeRequest> findByPayosOrderCode(Long payosOrderCode);
     Page<UpgradeRequest> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
     boolean existsByPaymentContent(String paymentContent);
 }

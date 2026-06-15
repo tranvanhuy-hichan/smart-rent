@@ -265,6 +265,47 @@ public class InvoiceServiceImpl implements InvoiceService {
         return result;
     }
 
+    @Transactional
+    @Override
+    public Invoice updatePaymentStatusAuto(UUID invoiceId, double paidAmount) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn"));
+
+        double newPaid = invoice.getPaidAmount() + paidAmount;
+        if (newPaid > invoice.getTotalAmount()) {
+            throw new RuntimeException("Số tiền thanh toán vượt quá số tiền còn nợ của hóa đơn");
+        }
+
+        invoice.setPaidAmount(newPaid);
+        invoice.setPaymentClaimed(false);
+        boolean isFullyPaid = false;
+        if (newPaid >= invoice.getTotalAmount()) {
+            invoice.setStatus(InvoiceStatus.PAID);
+            invoice.setPaymentDate(LocalDate.now());
+            isFullyPaid = true;
+        } else if (newPaid > 0) {
+            invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
+        }
+
+        Invoice saved = invoiceRepository.save(invoice);
+        Invoice result = invoiceRepository.findWithDetailsById(saved.getId()).orElse(saved);
+
+        if (isFullyPaid) {
+            try {
+                String title = "Xác nhận thanh toán hóa đơn";
+                String content = String.format("Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
+                        result.getContract().getRoom().getRoomNumber(),
+                        result.getBillingPeriodStart(),
+                        result.getBillingPeriodEnd());
+                notificationService.createNotification(result.getContract().getTenant(), title, content, "PAYMENT_CONFIRMED", result.getId());
+            } catch (Exception e) {
+                System.err.println("Lỗi khi gửi thông báo xác nhận thanh toán: " + e.getMessage());
+            }
+        }
+
+        return result;
+    }
+
     @Transactional(readOnly = true)
     @Override
     public Page<Invoice> getInvoicesByLandlord(User landlord, Pageable pageable) {

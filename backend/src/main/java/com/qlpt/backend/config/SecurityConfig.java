@@ -76,7 +76,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/support/**", "/error", "/ws/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/support/**", "/error", "/ws/**", "/api/payment/payos-webhook").permitAll()
                         .requestMatchers("/api/subscriptions/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

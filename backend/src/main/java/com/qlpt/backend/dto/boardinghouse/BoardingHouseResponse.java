@@ -23,7 +23,10 @@ public record BoardingHouseResponse(
     String bankAccountNumber,
     String bankAccountName,
     String rules,
-    Integer fixedBillingDay
+    Integer fixedBillingDay,
+    String payosClientId,
+    boolean hasPayosApiKey,
+    boolean hasPayosChecksumKey
 ) {
     public static BoardingHouseResponse fromEntity(BoardingHouse bh) {
         return fromEntity(bh, null);
@@ -64,7 +67,10 @@ public record BoardingHouseResponse(
             bh.getBankAccountNumber(),
             bh.getBankAccountName(),
             bh.getRules(),
-            bh.getFixedBillingDay()
+            bh.getFixedBillingDay(),
+            bh.getPayosClientId(),
+            bh.getPayosApiKey() != null && !bh.getPayosApiKey().trim().isEmpty(),
+            bh.getPayosChecksumKey() != null && !bh.getPayosChecksumKey().trim().isEmpty()
         );
     }
 
@@ -88,7 +94,10 @@ public record BoardingHouseResponse(
             null, // bankAccountNumber
             null, // bankAccountName
             null, // rules
-            bh.getFixedBillingDay()
+            bh.getFixedBillingDay(),
+            bh.getPayosClientId(),
+            bh.getPayosApiKey() != null && !bh.getPayosApiKey().trim().isEmpty(),
+            bh.getPayosChecksumKey() != null && !bh.getPayosChecksumKey().trim().isEmpty()
         );
     }
 }

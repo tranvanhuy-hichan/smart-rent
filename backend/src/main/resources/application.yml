@@ -51,5 +51,10 @@ app:
   imou:
     app-id: ${IMOU_APP_ID:}
     app-secret: ${IMOU_APP_SECRET:}
+  payos:
+    client-id: ${ADMIN_PAYOS_CLIENT_ID:}
+    api-key: ${ADMIN_PAYOS_API_KEY:}
+    checksum-key: ${ADMIN_PAYOS_CHECKSUM_KEY:}
+
 
 

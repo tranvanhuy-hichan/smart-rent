@@ -8,10 +8,14 @@ import com.qlpt.backend.entity.User;
 import com.qlpt.backend.exception.ResourceNotFoundException;
 import com.qlpt.backend.repository.UpgradeRequestRepository;
 import com.qlpt.backend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.payos.PayOS;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkRequest;
+import vn.payos.model.v2.paymentRequests.CreatePaymentLinkResponse;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +29,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UserRepository userRepository;
     private final com.qlpt.backend.service.NotificationService notificationService;
 
+    @Value("${app.payos.client-id:}")
+    private String adminPayosClientId;
+
+    @Value("${app.payos.api-key:}")
+    private String adminPayosApiKey;
+
+    @Value("${app.payos.checksum-key:}")
+    private String adminPayosChecksumKey;
+
     public SubscriptionServiceImpl(UpgradeRequestRepository upgradeRequestRepository,
                                    UserRepository userRepository,
                                    com.qlpt.backend.service.NotificationService notificationService) {
@@ -35,7 +48,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Transactional
     @Override
-    public UpgradeRequest createUpgradeRequest(User landlord, int months) {
+    public UpgradeRequest createUpgradeRequest(User landlord, int months, String returnUrl, String cancelUrl) {
         if (landlord.getRole() != Role.LANDLORD) {
             throw new RuntimeException("Chỉ tài khoản chủ trọ mới có thể mua gói nâng cấp");
         }
@@ -47,12 +60,53 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         double amount = calculateAmount(months);
         String paymentContent = generateUniquePaymentContent(landlord.getUsername());
 
+        long orderCode = System.currentTimeMillis();
+        String checkoutUrl = null;
+        String paymentLinkId = null;
+
+        if (adminPayosClientId != null && !adminPayosClientId.trim().isEmpty() &&
+            adminPayosApiKey != null && !adminPayosApiKey.trim().isEmpty() &&
+            adminPayosChecksumKey != null && !adminPayosChecksumKey.trim().isEmpty()) {
+            
+            try {
+                PayOS payOS = new PayOS(
+                        adminPayosClientId.trim(),
+                        adminPayosApiKey.trim(),
+                        adminPayosChecksumKey.trim()
+                );
+                
+                String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim() : "http://localhost:5173/landlord/dashboard";
+                String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim() : "http://localhost:5173/landlord/dashboard";
+                
+                String desc = "Nang cap " + months + " thang";
+                if (desc.length() > 25) {
+                    desc = desc.substring(0, 25);
+                }
+
+                CreatePaymentLinkRequest checkoutRequest = CreatePaymentLinkRequest.builder()
+                        .orderCode(orderCode)
+                        .amount((long) amount)
+                        .description(desc)
+                        .returnUrl(finalReturnUrl)
+                        .cancelUrl(finalCancelUrl)
+                        .build();
+
+                CreatePaymentLinkResponse paymentLinkData = payOS.paymentRequests().create(checkoutRequest);
+                checkoutUrl = paymentLinkData.getCheckoutUrl();
+                paymentLinkId = paymentLinkData.getPaymentLinkId();
+            } catch (Exception e) {
+                System.err.println("Lỗi tạo link thanh toán PayOS nâng cấp gói: " + e.getMessage());
+            }
+        }
+
         UpgradeRequest request = UpgradeRequest.builder()
                 .user(landlord)
                 .months(months)
                 .amount(amount)
                 .status("PENDING")
                 .paymentContent(paymentContent)
+                .payosOrderCode(checkoutUrl != null ? orderCode : null)
+                .payosPaymentLinkId(paymentLinkId)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -72,6 +126,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             System.err.println("Lỗi khi gửi thông báo nâng cấp gói cho Admin: " + e.getMessage());
         }
 
+        savedRequest.setCheckoutUrl(checkoutUrl);
         return savedRequest;
     }
 

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface SubscriptionService {
-    public UpgradeRequest createUpgradeRequest(User landlord, int months);
+    public UpgradeRequest createUpgradeRequest(User landlord, int months, String returnUrl, String cancelUrl);
 
     public List<UpgradeRequest> getMyRequests(User landlord);
 

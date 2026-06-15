@@ -37,6 +37,15 @@ public class UpgradeRequest {
     @Column(name = "payment_content", nullable = false, unique = true)
     private String paymentContent;
 
+    @Column(name = "payos_order_code", unique = true)
+    private Long payosOrderCode;
+
+    @Column(name = "payos_payment_link_id")
+    private String payosPaymentLinkId;
+
+    @Transient
+    private String checkoutUrl;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

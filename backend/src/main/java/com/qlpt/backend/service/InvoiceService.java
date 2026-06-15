@@ -14,6 +14,8 @@ public interface InvoiceService {
 
     public Invoice updatePaymentStatus(UUID invoiceId, double paidAmount, User landlord);
 
+    public Invoice updatePaymentStatusAuto(UUID invoiceId, double paidAmount);
+
     public Page<Invoice> getInvoicesByLandlord(User landlord, Pageable pageable);
 
     public Page<Invoice> getInvoicesByTenant(User tenant, Pageable pageable);
