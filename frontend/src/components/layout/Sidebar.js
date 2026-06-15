@@ -31,7 +31,6 @@ export default {
           authStore.user.fullName = res.data.fullName;
         }
       } catch (err) {
-        console.error('Không thể lấy thông tin cá nhân ở Sidebar:', err);
       }
     };
 

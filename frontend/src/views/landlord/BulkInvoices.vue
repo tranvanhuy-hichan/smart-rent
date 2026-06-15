@@ -118,8 +118,8 @@
                     />
                   </div>
                   <div v-else class="align-middle">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-text-sub">
-                      Cố định ({{ formatMoney(room.defaultWaterRate) }}đ)
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-text-sub gap-0.5">
+                      Cố định (<MoneyDisplay :value="room.defaultWaterRate" :bold="false" />)
                     </span>
                   </div>
                 </td>
@@ -214,8 +214,8 @@
                 />
               </div>
               <div v-else class="flex flex-col justify-center h-full pt-1">
-                <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-bold text-text-sub">
-                  Cố định ({{ formatMoney(room.defaultWaterRate) }}đ)
+                <span class="inline-flex items-center px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-bold text-text-sub gap-0.5">
+                  Cố định (<MoneyDisplay :value="room.defaultWaterRate" :bold="false" />)
                 </span>
               </div>
             </div>

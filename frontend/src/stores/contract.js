@@ -24,7 +24,6 @@ export const useContractStore = defineStore('contract', {
         this.totalElements = response.data.totalElements || 0;
         return this.contracts;
       } catch (error) {
-        console.error('Error fetching contracts:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -38,7 +37,6 @@ export const useContractStore = defineStore('contract', {
         this.activeContracts = list.filter(c => c.status === 'ACTIVE');
         return this.activeContracts;
       } catch (error) {
-        console.error('Error fetching active contracts:', error);
         throw error;
       }
     },
@@ -53,7 +51,6 @@ export const useContractStore = defineStore('contract', {
         this.currentExtraFees = feesRes.data || [];
         return { contract: this.currentContract, extraFees: this.currentExtraFees };
       } catch (error) {
-        console.error('Error fetching contract detail:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -64,7 +61,6 @@ export const useContractStore = defineStore('contract', {
         const response = await contractService.create(data);
         return response.data;
       } catch (error) {
-        console.error('Error creating contract:', error);
         throw error;
       }
     },
@@ -76,7 +72,6 @@ export const useContractStore = defineStore('contract', {
         }
         return response.data;
       } catch (error) {
-        console.error('Error updating contract:', error);
         throw error;
       }
     },
@@ -85,7 +80,6 @@ export const useContractStore = defineStore('contract', {
         const response = await contractService.terminate(id);
         return response.data;
       } catch (error) {
-        console.error('Error terminating contract:', error);
         throw error;
       }
     }

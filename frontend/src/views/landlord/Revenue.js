@@ -223,7 +223,6 @@ export default {
         allInvoices.value = invRes.data.content || [];
         allBoardingHouses.value = bhRes.data.content || [];
       } catch (e) {
-        console.error('Lỗi tải dữ liệu doanh thu:', e);
       } finally {
         loading.value = false;
       }

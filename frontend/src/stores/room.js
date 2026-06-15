@@ -18,7 +18,6 @@ export const useRoomStore = defineStore('room', {
         this.totalElements = response.data.totalElements || 0;
         return this.rooms;
       } catch (error) {
-        console.error('Error fetching rooms:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -30,7 +29,6 @@ export const useRoomStore = defineStore('room', {
         const response = await roomService.getById(id);
         return response.data;
       } catch (error) {
-        console.error('Error fetching room by id:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -45,7 +43,6 @@ export const useRoomStore = defineStore('room', {
         this.totalElements = response.data.totalElements || 0;
         return this.rooms;
       } catch (error) {
-        console.error('Error fetching rooms by boarding house:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -56,7 +53,6 @@ export const useRoomStore = defineStore('room', {
         const response = await roomService.create(houseId, data);
         return response.data;
       } catch (error) {
-        console.error('Error creating room:', error);
         throw error;
       }
     },
@@ -65,7 +61,6 @@ export const useRoomStore = defineStore('room', {
         const response = await roomService.update(id, data);
         return response.data;
       } catch (error) {
-        console.error('Error updating room:', error);
         throw error;
       }
     },
@@ -73,7 +68,6 @@ export const useRoomStore = defineStore('room', {
       try {
         await roomService.delete(id);
       } catch (error) {
-        console.error('Error deleting room:', error);
         throw error;
       }
     }

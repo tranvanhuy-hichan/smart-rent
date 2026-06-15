@@ -5,13 +5,16 @@ import { useContractStore } from '../../stores/contract.js';
 import { useAuthStore } from '../../stores/auth.js';
 import { useInvoiceStore } from '../../stores/invoice.js';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
-import { formatDate } from '../../utils/date.js';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
+import DateDisplay from '../../components/ui/DateDisplay.vue';
 
 export default {
   name: 'TenantDashboard',
   components: {
     PageHeader,
     AppIcon,
+    MoneyDisplay,
+    DateDisplay,
   },
   setup() {
     const router = useRouter();
@@ -56,11 +59,6 @@ export default {
       return invoiceStore.invoices.filter(inv => inv.status !== 'PAID');
     });
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
-
     const viewInvoiceDetails = (id) => {
       router.push({ name: 'TenantInvoiceDetail', params: { id } });
     };
@@ -74,7 +72,6 @@ export default {
         ]);
         activeContract.value = contractsList.find(c => c.status === 'ACTIVE') || null;
       } catch (err) {
-        console.error('Không thể tải dữ liệu người thuê:', err);
       } finally {
         loading.value = false;
       }
@@ -88,8 +85,6 @@ export default {
       tenantDashboardIcon,
       activeContract,
       loading,
-      formatMoney,
-      formatDate,
       greeting,
       currentDate,
       unpaidInvoices,

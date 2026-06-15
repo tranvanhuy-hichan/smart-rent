@@ -40,7 +40,6 @@ export default {
           }, 2500);
         })
         .catch(err => {
-          console.error('Lỗi khi sao chép:', err);
         });
     };
 
@@ -50,7 +49,6 @@ export default {
         const contractsList = await contractStore.fetchContracts();
         activeContract.value = contractsList.find(c => c.status === 'ACTIVE') || null;
       } catch (err) {
-        console.error('Không thể tải dữ liệu liên hệ chủ nhà:', err);
       } finally {
         loading.value = false;
       }

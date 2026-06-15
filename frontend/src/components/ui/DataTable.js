@@ -1,5 +1,7 @@
 import Pagination from "./Pagination.vue";
 import { computed } from "vue";
+import { formatMoney } from "../../utils/money.js";
+import { formatDate } from "../../utils/date.js";
 
 export default {
   name: "DataTable",
@@ -58,17 +60,6 @@ export default {
     const resolveKeyPath = (object, path) => {
       if (!object || !path) return "";
       return path.split(".").reduce((acc, part) => acc && acc[part], object);
-    };
-
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return "0";
-      return Math.round(amount).toLocaleString("vi-VN");
-    };
-
-    const formatDate = (dateString) => {
-      if (!dateString) return "";
-      const d = new Date(dateString);
-      return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
     };
 
     const formatValue = (value, type) => {

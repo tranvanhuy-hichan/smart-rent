@@ -8,7 +8,9 @@ import ConfirmModal from '../../components/ui/ConfirmModal.vue';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
 import LoadingState from '../../components/ui/LoadingState.vue';
 import Modal from '../../components/ui/Modal.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
+import { formatMoney } from '../../utils/money.js';
 
 export default {
   name: 'BoardingHouseDetail',
@@ -20,6 +22,7 @@ export default {
     AppIcon,
     LoadingState,
     Modal,
+    MoneyDisplay
   },
   setup() {
     const route = useRoute();
@@ -81,11 +84,6 @@ export default {
       enabledRegister: true,
       enabledSocialEvils: true,
     });
-
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
 
     const addExtraFeeRow = () => {
       form.value.extraFees.push({
@@ -195,7 +193,6 @@ export default {
           })),
         };
       } catch (err) {
-        console.error('Lỗi khi tải thông tin dãy trọ:', err);
         showAlert('Lỗi', 'Không thể tải thông tin chi tiết dãy trọ', 'danger');
         router.push({ name: 'BoardingHouses' });
       } finally {
@@ -258,7 +255,6 @@ export default {
       handleSave,
       handleDelete,
       goBack,
-      formatMoney,
       confirmModal,
       onConfirmModal,
       closeConfirmModal,

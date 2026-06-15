@@ -74,17 +74,17 @@
           <div
             class="flex items-center gap-1 px-2.5 py-1 bg-slate-50 dark:bg-slate-900/30 border border-border-main/50 rounded-lg shrink-0">
             <span class="text-text-sub font-semibold">Tổng:</span>
-            <span class="text-text-main">{{ formatMoney(invoice.totalAmount) }} đ</span>
+            <MoneyDisplay :value="invoice.totalAmount" />
           </div>
           <div
             class="flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 border border-green-200/30 rounded-lg shrink-0">
             <span class="font-semibold">Đã đóng:</span>
-            <span>{{ formatMoney(invoice.paidAmount) }} đ</span>
+            <MoneyDisplay :value="invoice.paidAmount" type="success" />
           </div>
           <div
             class="flex items-center gap-1 px-2.5 py-1 bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 border border-rose-200/30 rounded-lg shrink-0">
             <span class="font-semibold">Còn nợ:</span>
-            <span>{{ formatMoney(invoice.totalAmount - invoice.paidAmount) }} đ</span>
+            <MoneyDisplay :value="invoice.totalAmount - invoice.paidAmount" type="danger" />
           </div>
         </div>
       </div>
@@ -161,12 +161,15 @@
                   toán
                 </h3>
                 <div class="grid grid-cols-1 gap-y-3 text-xs">
-                  <DetailField label="Ngày lập hóa đơn:" :value="formatDate(invoice.invoiceDate)" layout="inline"
-                    value-class="font-semibold" />
-                  <DetailField label="Kỳ thanh toán từ:" :value="formatDate(invoice.billingPeriodStart)" layout="inline"
-                    value-class="font-semibold" />
-                  <DetailField label="Đến ngày:" :value="formatDate(invoice.billingPeriodEnd)" layout="inline"
-                    value-class="font-semibold" />
+                  <DetailField label="Ngày lập hóa đơn:" layout="inline" value-class="font-semibold">
+                    <DateDisplay :value="invoice.invoiceDate" />
+                  </DetailField>
+                  <DetailField label="Kỳ thanh toán từ:" layout="inline" value-class="font-semibold">
+                    <DateDisplay :value="invoice.billingPeriodStart" />
+                  </DetailField>
+                  <DetailField label="Đến ngày:" layout="inline" value-class="font-semibold">
+                    <DateDisplay :value="invoice.billingPeriodEnd" />
+                  </DetailField>
                   <DetailField label="Mã hóa đơn:" layout="inline" value-class="font-mono text-text-sub">
                     #{{ invoice.id }}
                   </DetailField>
@@ -179,10 +182,10 @@
                 </h3>
                 <div class="grid grid-cols-1 gap-y-3 text-xs">
                   <DetailField label="Đơn giá thuê gốc:" layout="inline" value-class="font-semibold">
-                    {{ formatMoney(invoice.contractedRoomPrice) }} đ/tháng
+                    <MoneyDisplay :value="invoice.contractedRoomPrice" suffix="đ/tháng" />
                   </DetailField>
                   <DetailField label="Tiền phòng tính thực tế:" layout="inline" value-class="font-bold text-primary">
-                    {{ formatMoney(invoice.roomPrice) }} đ
+                    <MoneyDisplay :value="invoice.roomPrice" type="primary" />
                   </DetailField>
                 </div>
               </div>
@@ -206,13 +209,11 @@
                     <div class="flex justify-between border-b border-border-main/20 pb-1"><span>Tiêu thụ:</span> <strong
                         class="text-primary">{{ invoice.newElectricityIndex - invoice.oldElectricityIndex }}
                         kWh</strong></div>
-                    <div class="flex justify-between pt-1"><span>Đơn giá:</span> <strong>{{
-                      formatMoney(invoice.electricityRate) }} đ/kWh</strong></div>
+                    <div class="flex justify-between pt-1"><span>Đơn giá:</span> <strong><MoneyDisplay :value="invoice.electricityRate" suffix="đ/kWh" :bold="false" /></strong></div>
                     <div
                       class="flex justify-between font-bold text-sm text-text-main pt-1.5 border-t border-border-main/20">
                       <span>Thành tiền:</span>
-                      <span class="text-primary">{{ formatMoney((invoice.newElectricityIndex -
-                        invoice.oldElectricityIndex) * invoice.electricityRate) }} đ</span>
+                      <MoneyDisplay :value="(invoice.newElectricityIndex - invoice.oldElectricityIndex) * invoice.electricityRate" type="primary" />
                     </div>
                   </div>
                 </div>
@@ -235,13 +236,11 @@
                       <div class="flex justify-between border-b border-border-main/20 pb-1"><span>Tiêu thụ:</span>
                         <strong class="text-blue-600">{{ invoice.newWaterIndex - invoice.oldWaterIndex }} m³</strong>
                       </div>
-                      <div class="flex justify-between pt-1"><span>Đơn giá nước:</span> <strong>{{
-                        formatMoney(invoice.waterRate) }} đ/m³</strong></div>
+                      <div class="flex justify-between pt-1"><span>Đơn giá nước:</span> <strong><MoneyDisplay :value="invoice.waterRate" suffix="đ/m³" :bold="false" /></strong></div>
                       <div
                         class="flex justify-between font-bold text-sm text-text-main pt-1.5 border-t border-border-main/20">
                         <span>Thành tiền:</span>
-                        <span class="text-blue-600">{{ formatMoney((invoice.newWaterIndex - invoice.oldWaterIndex) *
-                          invoice.waterRate) }} đ</span>
+                        <MoneyDisplay :value="(invoice.newWaterIndex - invoice.oldWaterIndex) * invoice.waterRate" type="primary" />
                       </div>
                     </template>
                     <template v-else>
@@ -252,15 +251,12 @@
                         invoice.contract?.room?.boardingHouse?.waterBillingType === 'FIXED_PER_PERSON' ?
                           invoice.contract?.numberOfTenants + ' người' : '1 phòng' }}</strong></div>
                       <div class="flex justify-between border-b border-border-main/20 pb-1"><span>Đơn giá:</span>
-                        <strong>{{ formatMoney(invoice.waterRate) }} đ</strong>
+                        <strong><MoneyDisplay :value="invoice.waterRate" :bold="false" /></strong>
                       </div>
                       <div
                         class="flex justify-between font-bold text-sm text-text-main pt-1.5 border-t border-border-main/20">
                         <span>Thành tiền:</span>
-                        <span class="text-blue-600">
-                          {{ formatMoney(invoice.contract?.room?.boardingHouse?.waterBillingType === 'FIXED_PER_PERSON'
-                            ? invoice.contract?.numberOfTenants * invoice.waterRate : invoice.waterRate) }} đ
-                        </span>
+                        <MoneyDisplay :value="invoice.contract?.room?.boardingHouse?.waterBillingType === 'FIXED_PER_PERSON' ? invoice.contract?.numberOfTenants * invoice.waterRate : invoice.waterRate" type="primary" />
                       </div>
                     </template>
                   </div>
@@ -282,12 +278,14 @@
                       class="border border-border-main/40 rounded-lg p-2.5 bg-slate-50/50 dark:bg-slate-900/10 flex justify-between items-center text-xs">
                       <div>
                         <span class="font-semibold text-text-main block">{{ item.name }}</span>
-                        <span class="text-[10px] text-text-sub">
-                          Đơn giá: {{ formatMoney(item.price) }} đ x {{ item.quantity }}
+                        <span class="text-[10px] text-text-sub flex items-center gap-1">
+                          <span>Đơn giá:</span>
+                          <MoneyDisplay :value="item.price" :bold="false" />
+                          <span>x {{ item.quantity }}</span>
                         </span>
                       </div>
                       <span class="font-bold text-primary shrink-0 ml-2">
-                        {{ formatMoney(item.subtotal) }} đ
+                        <MoneyDisplay :value="item.subtotal" type="primary" />
                       </span>
                     </div>
                   </div>
@@ -328,9 +326,7 @@
                 </div>
                 <div class="flex justify-between border-b border-border-main/20 pb-1.5">
                   <span class="text-text-sub font-semibold">Số tiền cần đóng:</span>
-                  <span class="font-extrabold text-danger text-sm">{{ formatMoney(invoice.totalAmount -
-                    invoice.paidAmount) }}
-                    đ</span>
+                  <MoneyDisplay :value="invoice.totalAmount - invoice.paidAmount" type="danger" />
                 </div>
                 <div class="flex flex-col gap-1">
                   <span class="text-text-sub font-semibold">Nội dung chuyển khoản:</span>

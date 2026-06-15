@@ -9,7 +9,11 @@ import ConfirmModal from '../../components/ui/ConfirmModal.vue';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
 import DetailField from '../../components/ui/DetailField.vue';
 import LoadingState from '../../components/ui/LoadingState.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
+import DateDisplay from '../../components/ui/DateDisplay.vue';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
+import { formatMoney } from '../../utils/money.js';
+import { formatDate } from '../../utils/date.js';
 
 export default {
   name: 'InvoiceDetail',
@@ -21,6 +25,8 @@ export default {
     AppIcon,
     DetailField,
     LoadingState,
+    MoneyDisplay,
+    DateDisplay
   },
   setup() {
     const route = useRoute();
@@ -57,17 +63,6 @@ export default {
       
       return `https://img.vietqr.io/image/${bh.bankName}-${bh.bankAccountNumber}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
     });
-
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
-
-    const formatDate = (dateString) => {
-      if (!dateString) return '-';
-      const d = new Date(dateString);
-      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-    };
 
     const fetchInvoiceDetail = async () => {
       try {
@@ -361,7 +356,6 @@ export default {
         await navigator.clipboard.writeText(msg);
         showAlert('Đã sao chép', 'Đã sao chép nội dung hóa đơn vào bộ nhớ tạm! Hệ thống sẽ mở Zalo để gửi cho khách thuê.', 'success');
       } catch (err) {
-        console.error('Không thể tự động sao chép:', err);
       }
 
       const phone = inv.contract?.tenant?.phone;

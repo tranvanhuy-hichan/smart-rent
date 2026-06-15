@@ -10,11 +10,13 @@ import FormSelect from "../../components/ui/FormSelect.vue";
 import FormButton from "../../components/ui/FormButton.vue";
 import AppIcon from "../../components/ui/icons/AppIcon.vue";
 import ConfirmModal from "../../components/ui/ConfirmModal.vue";
+import MoneyDisplay from "../../components/ui/MoneyDisplay.vue";
 import { useInvoiceStore } from "../../stores/invoice.js";
 import { useContractStore } from "../../stores/contract.js";
 import invoiceService from "../../services/invoiceService.js";
 import { useConfirmModal } from "../../composables/useConfirmModal.js";
 import { formatDate } from "../../utils/date.js";
+import DateDisplay from "../../components/ui/DateDisplay.vue";
 
 export default {
   name: "Invoices",
@@ -28,6 +30,8 @@ export default {
     FormSelect,
     FormButton,
     ConfirmModal,
+    MoneyDisplay,
+    DateDisplay,
     AppIcon,
   },
   setup() {
@@ -134,11 +138,6 @@ export default {
       router.push({ name: "BulkInvoices" });
     };
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return "0";
-      return Math.round(amount).toLocaleString("vi-VN");
-    };
-
 
 
     const fetchInvoices = async () => {
@@ -170,7 +169,6 @@ export default {
       try {
         await contractStore.fetchActiveContracts();
       } catch (err) {
-        console.error("Không tải được danh sách hợp đồng:", err);
       }
     };
 
@@ -191,7 +189,6 @@ export default {
             const detail = await contractStore.fetchContractDetail(form.value.contractId);
             contractExtraFees.value = detail.extraFees || [];
           } catch (err) {
-            console.error("Không tải được chi tiết hợp đồng:", err);
           }
 
           const room = selectedContract.value.room;
@@ -315,7 +312,6 @@ export default {
         const res = await invoiceService.getAll({ page: 0, size: 1000 });
         allInvoices.value = res.data?.content || [];
       } catch (err) {
-        console.error("Không tải được danh sách hóa đơn:", err);
       }
       if (activeContracts.value.length > 0) {
         form.value.contractId = activeContracts.value[0].id;
@@ -490,7 +486,6 @@ export default {
             const res = await invoiceService.getAll({ page: 0, size: 1000 });
             allInvoices.value = res.data?.content || [];
           } catch (err) {
-            console.error("Không tải được danh sách hóa đơn:", err);
           }
           form.value.contractId = contractIdQuery;
           await onContractChange();
@@ -530,7 +525,6 @@ export default {
 
       changePage,
       closeModal,
-      formatMoney,
       formatDate,
       tableHeaders,
 

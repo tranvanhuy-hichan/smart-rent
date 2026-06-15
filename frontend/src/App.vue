@@ -275,7 +275,6 @@ export default {
 
         await StatusBar.setBackgroundColor({ color: hexColor });
       } catch (err) {
-        console.error('Lỗi khi cập nhật Status Bar:', err);
       }
     };
 
@@ -331,7 +330,6 @@ export default {
         try {
           await authStore.checkSubscription();
         } catch (err) {
-          console.error('Lỗi khi tự động kiểm tra trạng thái gói dịch vụ:', err);
         }
       }
 

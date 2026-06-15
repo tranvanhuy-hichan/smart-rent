@@ -22,6 +22,10 @@ export default {
     const authStore = useAuthStore();
     const { confirmModal, showAlert, showConfirm, onConfirmModal, closeConfirmModal } = useConfirmModal();
 
+    const getErrorMessage = (err, defaultMsg) => {
+      return err.response?.data?.error || err.message || (typeof err === 'string' ? err : defaultMsg);
+    };
+
     const activeTab = ref('profile'); // 'profile' | 'security' | 'preferences' | 'imou'
     const theme = ref(localStorage.getItem('theme') || 'light');
     const fontSize = ref(localStorage.getItem('fontSize') || 'medium');
@@ -71,8 +75,7 @@ export default {
         const res = await userService.getLoginHistory();
         sessions.value = res.data || [];
       } catch (err) {
-        console.error('Không thể lấy lịch sử đăng nhập:', err);
-        showAlert('Lỗi', 'Không thể tải danh sách phiên đăng nhập. Vui lòng thử lại!', 'danger');
+        showAlert('Lỗi', getErrorMessage(err, 'Không thể tải danh sách phiên đăng nhập. Vui lòng thử lại!'), 'danger');
       } finally {
         loadingSessions.value = false;
       }
@@ -89,8 +92,7 @@ export default {
             showAlert('Thành công', 'Đã đăng xuất thiết bị thành công!', 'success');
             fetchSessions();
           } catch (err) {
-            console.error(err);
-            showAlert('Lỗi', err.response?.data?.error || 'Không thể đăng xuất thiết bị', 'danger');
+            showAlert('Lỗi', getErrorMessage(err, 'Không thể đăng xuất thiết bị'), 'danger');
           }
         }
       );
@@ -138,8 +140,7 @@ export default {
         resetProfileForm();
         resetImouForm();
       } catch (err) {
-        console.error('Không thể lấy thông tin người dùng:', err);
-        showAlert('Lỗi', 'Không thể tải thông tin cá nhân. Vui lòng thử lại!', 'danger');
+        showAlert('Lỗi', getErrorMessage(err, 'Không thể tải thông tin cá nhân. Vui lòng thử lại!'), 'danger');
       } finally {
         loadingProfile.value = false;
       }
@@ -181,8 +182,7 @@ export default {
         resetImouForm();
         showAlert('Thành công', 'Cập nhật cấu hình Imou Cloud thành công!', 'success');
       } catch (err) {
-        console.error(err);
-        showAlert('Lỗi', err.response?.data?.error || 'Cập nhật cấu hình thất bại', 'danger');
+        showAlert('Lỗi', getErrorMessage(err, 'Cập nhật cấu hình thất bại'), 'danger');
       } finally {
         savingImou.value = false;
       }
@@ -209,8 +209,7 @@ export default {
         }
         showAlert('Thành công', 'Cập nhật thông tin cá nhân thành công!', 'success');
       } catch (err) {
-        console.error(err);
-        showAlert('Lỗi', err.response?.data?.error || 'Cập nhật thông tin thất bại', 'danger');
+        showAlert('Lỗi', getErrorMessage(err, 'Cập nhật thông tin thất bại'), 'danger');
       } finally {
         savingProfile.value = false;
       }
@@ -240,8 +239,7 @@ export default {
           confirmPassword: '',
         };
       } catch (err) {
-        console.error(err);
-        showAlert('Lỗi', err.response?.data?.error || 'Thay đổi mật khẩu thất bại', 'danger');
+        showAlert('Lỗi', getErrorMessage(err, 'Thay đổi mật khẩu thất bại'), 'danger');
       } finally {
         savingPassword.value = false;
       }

@@ -86,7 +86,7 @@ api.interceptors.response.use(
           user.isExpired = true;
           localStorage.setItem('user', JSON.stringify(user));
         } catch (e) {
-          console.error('Lỗi phân tích thông tin user khi hết hạn:', e);
+          // Ignored
         }
       }
       

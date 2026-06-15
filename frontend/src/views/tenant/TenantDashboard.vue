@@ -72,14 +72,13 @@
               <h3 class="text-sm font-bold text-success uppercase tracking-wider mb-4">📄 Chi Tiết Hợp Đồng</h3>
               <div class="space-y-2 text-sm text-text-main">
                 <div class="flex justify-between border-b border-border-main/30 pb-2"><strong>Giá thuê phòng:</strong>
-                  <span class="font-bold text-primary">{{ formatMoney(activeContract.contractedRoomPrice) }}
-                    đ/tháng</span>
+                  <MoneyDisplay :value="activeContract.contractedRoomPrice" type="primary" suffix="đ/tháng" />
                 </div>
                 <div class="flex justify-between border-b border-border-main/30 pb-2"><strong>Tiền đặt cọc:</strong>
-                  <span class="font-semibold">{{ formatMoney(activeContract.deposit) }} đ</span>
+                  <MoneyDisplay :value="activeContract.deposit" :bold="false" />
                 </div>
                 <div class="flex justify-between border-b border-border-main/30 pb-2"><strong>Ngày bắt đầu:</strong>
-                  <span class="text-text-sub">{{ formatDate(activeContract.startDate) }}</span>
+                  <DateDisplay :value="activeContract.startDate" class="text-text-sub" />
                 </div>
                 <div class="flex justify-between pb-1"><strong>Kỳ đóng tiền:</strong>
                   <span class="text-text-sub text-right">{{
@@ -182,14 +181,18 @@
                 <tr v-for="invoice in unpaidInvoices" :key="invoice.id" @click="viewInvoiceDetails(invoice.id)"
                   class="border-b border-border-main/30 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 cursor-pointer transition-colors duration-150">
                   <td class="py-3 px-4 font-semibold text-primary flex items-center gap-1.5">
-                    <span>{{ formatDate(invoice.billingPeriodStart) }} – {{ formatDate(invoice.billingPeriodEnd) }}</span>
+                    <span class="flex items-center gap-1">
+                      <DateDisplay :value="invoice.billingPeriodStart" />
+                      <span>–</span>
+                      <DateDisplay :value="invoice.billingPeriodEnd" />
+                    </span>
                     <span v-if="invoice.paymentClaimed" class="w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse shrink-0" title="Chờ xác nhận"></span>
                   </td>
                   <td class="py-3 px-4 text-text-sub">
-                    {{ formatDate(invoice.invoiceDate) }}
+                    <DateDisplay :value="invoice.invoiceDate" />
                   </td>
-                  <td class="py-3 px-4 text-right font-semibold text-rose-500">
-                    {{ formatMoney(invoice.totalAmount - invoice.paidAmount) }} đ
+                  <td class="py-3 px-4 text-right">
+                    <MoneyDisplay :value="invoice.totalAmount - invoice.paidAmount" type="danger" />
                   </td>
                 </tr>
                 <tr v-if="unpaidInvoices.length === 0">

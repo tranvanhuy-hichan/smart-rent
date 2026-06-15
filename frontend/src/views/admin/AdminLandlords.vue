@@ -47,7 +47,7 @@
                   <div class="text-[11px] text-text-main font-medium">{{ item.email || '-' }}</div>
                   <div class="text-[10px] text-text-sub mt-0.5">{{ item.phone || '-' }}</div>
                 </td>
-                <td class="py-3 px-4 text-text-sub">{{ formatDate(item.createdAt) }}</td>
+                <td class="py-3 px-4 text-text-sub"><DateDisplay :value="item.createdAt" /></td>
                 <td class="py-3 px-4">
                   <span :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border', getSubscriptionStatusInfo(item).badgeClass]">
                     {{ getSubscriptionStatusInfo(item).label }}
@@ -136,7 +136,7 @@
             </div>
             <div class="flex justify-between items-center text-[11px]">
               <span class="text-text-sub font-medium">Ngày đăng ký:</span>
-              <strong class="font-medium text-text-sub">{{ formatDate(selectedLandlord.createdAt) }}</strong>
+              <strong class="font-medium text-text-sub"><DateDisplay :value="selectedLandlord.createdAt" /></strong>
             </div>
           </div>
         </div>

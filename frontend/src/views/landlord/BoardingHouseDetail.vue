@@ -355,13 +355,15 @@
               </div>
               <div class="flex justify-between items-center py-1 border-b border-border-main/40">
                 <span class="text-text-sub">Đơn giá điện:</span>
-                <span class="font-bold text-text-main text-primary">{{ formatMoney(house.defaultElectricityRate) }}
-                  đ/kWh</span>
+                <span class="font-bold text-text-main text-primary">
+                  <MoneyDisplay :value="house.defaultElectricityRate" type="primary" suffix="đ/kWh" />
+                </span>
               </div>
               <div class="flex justify-between items-center py-1 border-b border-border-main/40">
                 <span class="text-text-sub">Đơn giá nước:</span>
-                <span class="font-bold text-text-main text-primary">{{ formatMoney(house.defaultWaterRate) }} đ ({{
-                  house.waterBillingType === 'BY_INDEX' ? 'Đồng hồ' : 'Đầu người' }})</span>
+                <span class="font-bold text-text-main text-primary">
+                  <MoneyDisplay :value="house.defaultWaterRate" type="primary" :suffix="house.waterBillingType === 'BY_INDEX' ? 'đ (Đồng hồ)' : 'đ (Đầu người)'" />
+                </span>
               </div>
               <div class="flex justify-between items-center py-1 border-b border-border-main/40">
                 <span class="text-text-sub">Ngày chốt tiền:</span>

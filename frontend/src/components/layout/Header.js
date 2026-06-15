@@ -89,7 +89,6 @@ export default {
           localStorage.setItem('user', JSON.stringify(authStore.user));
         }
       } catch (err) {
-        console.error('Không thể lấy thông tin cá nhân:', err);
       }
     };
 

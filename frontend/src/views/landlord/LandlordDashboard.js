@@ -349,7 +349,6 @@ export default {
         upcomingBillingContracts.value = upcoming.sort((a, b) => a.diffDays - b.diffDays);
 
       } catch (err) {
-        console.error('Không thể tải dữ liệu thống kê tổng quan:', err);
       } finally {
         loading.value = false;
       }

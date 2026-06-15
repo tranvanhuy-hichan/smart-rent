@@ -25,7 +25,6 @@ export default {
         const response = await cameraService.getTenantCameras();
         cameras.value = response.data;
       } catch (err) {
-        console.error('Lỗi khi tải camera:', err);
         showAlert('Lỗi', 'Không thể tải luồng camera của dãy trọ.', 'danger');
       } finally {
         loading.value = false;

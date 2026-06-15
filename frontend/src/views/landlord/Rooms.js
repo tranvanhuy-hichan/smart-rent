@@ -7,6 +7,7 @@ import FormInput from '../../components/ui/FormInput.vue';
 import FormSelect from '../../components/ui/FormSelect.vue';
 import FormButton from '../../components/ui/FormButton.vue';
 import ConfirmModal from '../../components/ui/ConfirmModal.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
 import { useRoomStore } from '../../stores/room.js';
 import { useBoardingHouseStore } from '../../stores/boardingHouse.js';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
@@ -21,6 +22,7 @@ export default {
     FormSelect,
     FormButton,
     ConfirmModal,
+    MoneyDisplay,
   },
   setup() {
     const router = useRouter();
@@ -84,10 +86,7 @@ export default {
       currentWaterIndex: 0,
     });
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
+
 
     const fetchBoardingHouses = async () => {
       try {
@@ -96,7 +95,6 @@ export default {
           form.value.boardingHouseId = boardingHouses.value[0].id;
         }
       } catch (err) {
-        console.error('Không tải được danh sách dãy trọ', err);
       }
     };
 
@@ -190,7 +188,6 @@ export default {
       changePage,
       onHouseFilterChange,
       closeModal,
-      formatMoney,
       tableHeaders,
       confirmModal,
       onConfirmModal,

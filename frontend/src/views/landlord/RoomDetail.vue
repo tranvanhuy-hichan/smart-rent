@@ -107,7 +107,7 @@
               </div>
               <div class="flex justify-between items-center py-1 border-b border-border-main/40">
                 <span class="text-text-sub">Giá cơ bản:</span>
-                <span class="font-bold text-text-main">{{ formatMoney(room.basePrice) }} đ/tháng</span>
+                <MoneyDisplay :value="room.basePrice" suffix="đ/tháng" />
               </div>
               <div class="flex justify-between items-center py-1 border-b border-border-main/40">
                 <span class="text-text-sub">Sức chứa:</span>

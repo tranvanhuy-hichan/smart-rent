@@ -24,7 +24,6 @@ export default {
         const contractsList = await contractStore.fetchContracts();
         activeContract.value = contractsList.find(c => c.status === 'ACTIVE') || null;
       } catch (err) {
-        console.error('Không thể tải dữ liệu nội quy:', err);
       } finally {
         loading.value = false;
       }

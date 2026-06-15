@@ -5,14 +5,19 @@ import userService from '../../services/userService.js';
 import Modal from '../../components/ui/Modal.vue';
 import FormButton from '../../components/ui/FormButton.vue';
 import ConfirmModal from '../../components/ui/ConfirmModal.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
+import DateDisplay from '../../components/ui/DateDisplay.vue';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
+import { formatDate } from '../../utils/date.js';
 
 export default {
   name: 'AdminLandlords',
   components: {
     Modal,
     FormButton,
-    ConfirmModal
+    ConfirmModal,
+    MoneyDisplay,
+    DateDisplay
   },
   setup() {
     const landlords = ref([]);
@@ -126,24 +131,6 @@ export default {
       }
     };
 
-    // Helper functions
-    const formatMoney = (val) => {
-      if (!val) return '0';
-      return new Intl.NumberFormat('vi-VN').format(val);
-    };
-
-    const formatDate = (dateStr) => {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-    };
-
-    const formatDateTime = (dateTimeStr) => {
-      if (!dateTimeStr) return '';
-      const d = new Date(dateTimeStr);
-      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-    };
-
     const getSubscriptionStatusInfo = (user) => {
       const trialExpiry = user.createdAt ? new Date(new Date(user.createdAt).getTime() + 45 * 24 * 60 * 60 * 1000) : null;
       const subExpiry = user.subscriptionExpiredAt ? new Date(user.subscriptionExpiredAt) : null;
@@ -202,9 +189,6 @@ export default {
       openExtendModal,
       submitManualExtension,
       changePage,
-      formatMoney,
-      formatDate,
-      formatDateTime,
       getSubscriptionStatusInfo
     };
   }

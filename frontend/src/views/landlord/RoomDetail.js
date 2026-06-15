@@ -8,6 +8,7 @@ import FormInput from '../../components/ui/FormInput.vue';
 import FormButton from '../../components/ui/FormButton.vue';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
 import LoadingState from '../../components/ui/LoadingState.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
 
 export default {
@@ -19,6 +20,7 @@ export default {
     FormButton,
     AppIcon,
     LoadingState,
+    MoneyDisplay
   },
   setup() {
     const route = useRoute();
@@ -63,17 +65,6 @@ export default {
       },
     ];
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
-
-    const formatDate = (dateString) => {
-      if (!dateString) return '---';
-      const d = new Date(dateString);
-      return d.toLocaleDateString('vi-VN');
-    };
-
     const loadRoomData = async () => {
       loading.value = true;
       try {
@@ -94,7 +85,6 @@ export default {
         const contractsData = await contractStore.fetchContracts({ roomId, size: 100, showAll: true });
         contracts.value = contractsData || [];
       } catch (err) {
-        console.error('Lỗi khi tải thông tin phòng:', err);
         showAlert('Lỗi', err.response?.data?.error || 'Không thể tải thông tin chi tiết phòng trọ', 'danger');
       } finally {
         loading.value = false;
@@ -153,8 +143,6 @@ export default {
       activeTab,
       form,
       tableHeaders,
-      formatMoney,
-      formatDate,
       handleSave,
       goBack,
       viewContractDetails,

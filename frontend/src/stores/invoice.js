@@ -22,7 +22,6 @@ export const useInvoiceStore = defineStore('invoice', {
         this.totalElements = response.data.totalElements || 0;
         return this.invoices;
       } catch (error) {
-        console.error('Error fetching invoices:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -39,7 +38,6 @@ export const useInvoiceStore = defineStore('invoice', {
           items: this.currentInvoiceItems
         };
       } catch (error) {
-        console.error('Error fetching invoice detail:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -51,7 +49,6 @@ export const useInvoiceStore = defineStore('invoice', {
         this.currentInvoiceItems = response.data || [];
         return this.currentInvoiceItems;
       } catch (error) {
-        console.error('Error fetching invoice items:', error);
         throw error;
       }
     },
@@ -60,7 +57,6 @@ export const useInvoiceStore = defineStore('invoice', {
         const response = await invoiceService.create(data);
         return response.data;
       } catch (error) {
-        console.error('Error creating invoice:', error);
         throw error;
       }
     },
@@ -69,7 +65,6 @@ export const useInvoiceStore = defineStore('invoice', {
         const response = await invoiceService.pay(id, paidAmount);
         return response.data;
       } catch (error) {
-        console.error('Error paying invoice:', error);
         throw error;
       }
     },
@@ -78,7 +73,6 @@ export const useInvoiceStore = defineStore('invoice', {
         const response = await invoiceService.notifyPayment(id);
         return response.data;
       } catch (error) {
-        console.error('Error notifying payment:', error);
         throw error;
       }
     }

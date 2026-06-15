@@ -72,7 +72,7 @@
                 Phòng {{ contract.room.roomNumber }}
               </DetailField>
               <DetailField label="Giá phòng gốc:" layout="inline" value-class="font-bold">
-                {{ formatMoney(contract.contractedRoomPrice) }} đ/tháng
+                <MoneyDisplay :value="contract.contractedRoomPrice" suffix="đ/tháng" />
               </DetailField>
               <DetailField label="Sức chứa tối đa:" layout="inline" value-class="font-bold">
                 {{ contract.room.maxPeople }} người
@@ -90,12 +90,14 @@
           <div class="bg-card border border-border-main rounded-xl p-4 shadow-xs">
             <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-2.5 mb-4">Điều khoản hợp đồng</h3>
             <div class="grid grid-cols-1 gap-y-3 text-xs">
-              <DetailField label="Ngày bắt đầu thuê:" :value="formatDate(contract.startDate)" layout="inline"
-                value-class="font-semibold" />
-              <DetailField label="Ngày hết hạn:" :value="formatDate(contract.endDate)" layout="inline"
-                value-class="font-semibold" />
+              <DetailField label="Ngày bắt đầu thuê:" layout="inline" value-class="font-semibold">
+                <DateDisplay :value="contract.startDate" />
+              </DetailField>
+              <DetailField label="Ngày hết hạn:" layout="inline" value-class="font-semibold">
+                <DateDisplay :value="contract.endDate" />
+              </DetailField>
               <DetailField label="Tiền đặt cọc:" layout="inline" value-class="font-bold text-green-600">
-                {{ formatMoney(contract.deposit) }} đ
+                <MoneyDisplay :value="contract.deposit" type="success" />
               </DetailField>
               <DetailField label="Kỳ hạn tính tiền:" value="Thanh toán vào cuối tháng" layout="inline"
                 value-class="font-semibold" />
@@ -149,13 +151,11 @@
                     <div>
                       <span class="font-semibold text-text-main block">{{ cef.extraFee.name }}</span>
                       <span class="text-[10px] text-text-sub">
-                        {{ formatMoney(cef.customPrice) }} đ/{{ cef.extraFee.unitType === 'FIXED_PER_PERSON' ? 'người' :
-                          'phòng' }}
+                        <MoneyDisplay :value="cef.customPrice" :bold="false" :suffix="cef.extraFee.unitType === 'FIXED_PER_PERSON' ? 'đ/người' : 'đ/phòng'" />
                       </span>
                     </div>
                     <span class="font-bold text-primary shrink-0 ml-2">
-                      {{ formatMoney(cef.extraFee.unitType === 'FIXED_PER_PERSON' ? cef.customPrice *
-                        contract.numberOfTenants : cef.customPrice) }} đ
+                      <MoneyDisplay :value="cef.extraFee.unitType === 'FIXED_PER_PERSON' ? cef.customPrice * contract.numberOfTenants : cef.customPrice" type="primary" />
                     </span>
                   </div>
                 </div>
@@ -194,7 +194,7 @@
                     class="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-semibold">Hiện hành</span>
                 </span>
                 <div class="flex items-center gap-2">
-                  <span class="text-text-sub text-[11px]">Từ {{ formatDate(addendum.startDate) }}</span>
+                  <span class="text-text-sub text-[11px]">Từ <DateDisplay :value="addendum.startDate" /></span>
                   <FormButton @click.stop="openPrintAddendumModal(addendum, addendums.length - index)"
                     variant="secondary" class="!p-1" title="In phụ lục hợp đồng">
                     <AppIcon name="printer" size="sm" />
@@ -202,12 +202,9 @@
                 </div>
               </div>
               <div class="flex flex-col gap-y-2 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-x-6 md:gap-y-1.5">
-                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá phòng:</span> <span class="font-bold text-text-main text-right">{{
-                  formatMoney(addendum.roomPrice) }} đ</span></div>
-                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá điện:</span> <span class="font-bold text-text-main text-right">{{
-                  formatMoney(addendum.electricityRate) }} đ/kWh</span></div>
-                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá nước:</span> <span class="font-bold text-text-main text-right">{{
-                  formatMoney(addendum.waterRate) }} đ</span></div>
+                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá phòng:</span> <span class="font-bold text-text-main text-right"><MoneyDisplay :value="addendum.roomPrice" /></span></div>
+                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá điện:</span> <span class="font-bold text-text-main text-right"><MoneyDisplay :value="addendum.electricityRate" suffix="đ/kWh" /></span></div>
+                <div class="flex justify-between items-center md:block"><span class="text-text-sub">Giá nước:</span> <span class="font-bold text-text-main text-right"><MoneyDisplay :value="addendum.waterRate" /></span></div>
                 <div class="flex justify-between items-center md:block"><span class="text-text-sub">Tính nước:</span> <span class="font-semibold text-text-main text-right">{{
                   formatWaterBillingType(addendum.waterBillingType) }}</span></div>
                 <div class="flex justify-between items-center md:block"><span class="text-text-sub">Số người:</span> <span class="font-bold text-text-main text-right">{{
@@ -220,7 +217,7 @@
                   <div v-for="ef in addendum.extraFees" :key="ef.id"
                     class="flex justify-between items-center md:inline-flex md:px-2 md:py-0.5 rounded md:bg-slate-100 md:dark:bg-slate-800 text-[11px] md:text-[10px] font-medium">
                     <span class="text-text-sub md:text-text-sub">{{ ef.extraFee.name }}<span class="hidden md:inline">:</span></span>
-                    <span class="font-bold text-text-main md:font-medium md:text-text-sub md:ml-1">{{ formatMoney(ef.customPrice) }}đ</span>
+                    <span class="font-bold text-text-main md:font-medium md:text-text-sub md:ml-1"><MoneyDisplay :value="ef.customPrice" /></span>
                   </div>
                 </div>
               </div>

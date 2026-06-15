@@ -94,7 +94,6 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(this.user));
         return isExpired;
       } catch (error) {
-        console.error('Không thể kiểm tra thời hạn gói cước:', error);
         return false;
       }
     },

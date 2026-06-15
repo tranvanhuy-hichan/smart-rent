@@ -27,7 +27,6 @@ export const formatDate = (dateOrStr) => {
     });
     return `${p.day}/${p.month}/${p.year}`;
   } catch (e) {
-    console.error('Error formatting date:', e);
     return dateOrStr;
   }
 };
@@ -60,7 +59,6 @@ export const formatDateTime = (dateOrStr) => {
     });
     return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`;
   } catch (e) {
-    console.error('Error formatting datetime:', e);
     return dateOrStr;
   }
 };

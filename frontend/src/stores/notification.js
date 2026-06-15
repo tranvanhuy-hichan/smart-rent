@@ -34,7 +34,6 @@ export const useNotificationStore = defineStore('notification', {
         this.currentPage = page;
         this.hasMore = !response.data.last;
       } catch (error) {
-        console.error('Lỗi khi tải thông báo:', error);
       } finally {
         this.loading = false;
       }
@@ -47,7 +46,6 @@ export const useNotificationStore = defineStore('notification', {
         const response = await notificationService.getUnreadCount();
         this.unreadCount = response.data;
       } catch (error) {
-        console.error('Lỗi khi lấy số thông báo chưa đọc:', error);
       }
     },
     async markAsRead(id) {
@@ -59,7 +57,6 @@ export const useNotificationStore = defineStore('notification', {
           this.unreadCount = Math.max(0, this.unreadCount - 1);
         }
       } catch (error) {
-        console.error('Lỗi khi đánh dấu đã đọc thông báo:', error);
       }
     },
     async markAllAsRead() {
@@ -70,7 +67,6 @@ export const useNotificationStore = defineStore('notification', {
         });
         this.unreadCount = 0;
       } catch (error) {
-        console.error('Lỗi khi đánh dấu tất cả đã đọc:', error);
       }
     },
     connectWebSocket() {
@@ -136,12 +132,10 @@ export const useNotificationStore = defineStore('notification', {
             this.playNotificationSound();
           }
         } catch (e) {
-          console.error('Lỗi phân tích tin nhắn WebSocket:', e);
         }
       };
 
       socket.onerror = (error) => {
-        console.error('Lỗi kết nối WebSocket:', error);
       };
 
       socket.onclose = (event) => {

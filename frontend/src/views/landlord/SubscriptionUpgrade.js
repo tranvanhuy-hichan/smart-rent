@@ -31,7 +31,6 @@ export default {
         const response = await subscriptionService.getAdminBankInfo();
         adminBankInfo.value = response.data;
       } catch (err) {
-        console.error('Lỗi khi tải thông tin ngân hàng Admin:', err);
       }
     };
 
@@ -41,7 +40,6 @@ export default {
         const response = await subscriptionService.getActiveStatus();
         status.value = response.data;
       } catch (err) {
-        console.error('Lỗi khi tải thông tin gói cước:', err);
       } finally {
         loadingStatus.value = false;
       }
@@ -59,7 +57,6 @@ export default {
           currentRequest.value = pending;
         }
       } catch (err) {
-        console.error('Lỗi khi tải lịch sử yêu cầu gia hạn:', err);
       } finally {
         loadingRequests.value = false;
       }
@@ -73,7 +70,6 @@ export default {
         await loadRequests(); // Reload list
         alert('Yêu cầu thanh toán đã được tạo! Vui lòng thực hiện chuyển khoản theo thông tin hướng dẫn.');
       } catch (err) {
-        console.error(err);
         alert(err.response?.data?.error || 'Có lỗi xảy ra khi tạo yêu cầu thanh toán!');
       } finally {
         submitting.value = false;

@@ -7,11 +7,28 @@
         :page="page" :totalPages="totalPages" :totalElements="totalElements" unit="hóa đơn" clickable
         @change-page="changePage" @row-click="(item) => viewDetails(item.id)"
       >
+        <!-- Custom slots for money formatting in table cells -->
+        <template #cell(roomPrice)="{ value }">
+          <MoneyDisplay :value="value" type="default" :bold="false" />
+        </template>
+
+        <template #cell(totalAmount)="{ value }">
+          <MoneyDisplay :value="value" type="primary" />
+        </template>
+
+        <template #cell(paidAmount)="{ value }">
+          <MoneyDisplay :value="value" type="success" :bold="false" />
+        </template>
+
+        <template #cell(remainingAmount)="{ item }">
+          <MoneyDisplay :value="item.totalAmount - item.paidAmount" type="danger" />
+        </template>
+
         <!-- Custom slot for Billing Period (2 lines) -->
         <template #cell(billingPeriod)="{ item }">
           <div class="flex flex-col gap-0.5 text-xs text-text-sub font-semibold">
-            <span>{{ formatDate(item.billingPeriodStart) }}</span>
-            <span>- {{ formatDate(item.billingPeriodEnd) }}</span>
+            <DateDisplay :value="item.billingPeriodStart" />
+            <span>- <DateDisplay :value="item.billingPeriodEnd" /></span>
           </div>
         </template>
 

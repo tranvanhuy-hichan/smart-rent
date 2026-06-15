@@ -17,7 +17,6 @@ export const useBoardingHouseStore = defineStore('boardingHouse', {
         this.boardingHouses = response.data.content || [];
         return this.boardingHouses;
       } catch (error) {
-        console.error('Error fetching boarding houses:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -29,7 +28,6 @@ export const useBoardingHouseStore = defineStore('boardingHouse', {
         const response = await boardingHouseService.getById(id);
         return response.data;
       } catch (error) {
-        console.error('Error fetching boarding house by id:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -41,7 +39,6 @@ export const useBoardingHouseStore = defineStore('boardingHouse', {
         await this.fetchBoardingHouses(true);
         return response.data;
       } catch (error) {
-        console.error('Error creating boarding house:', error);
         throw error;
       }
     },
@@ -51,7 +48,6 @@ export const useBoardingHouseStore = defineStore('boardingHouse', {
         await this.fetchBoardingHouses(true);
         return response.data;
       } catch (error) {
-        console.error('Error updating boarding house:', error);
         throw error;
       }
     },
@@ -60,7 +56,6 @@ export const useBoardingHouseStore = defineStore('boardingHouse', {
         await boardingHouseService.delete(id);
         await this.fetchBoardingHouses(true);
       } catch (error) {
-        console.error('Error deleting boarding house:', error);
         throw error;
       }
     }

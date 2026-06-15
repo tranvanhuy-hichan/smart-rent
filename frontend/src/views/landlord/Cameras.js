@@ -64,7 +64,6 @@ export default {
         const response = await cameraService.getAllCameras();
         cameras.value = response.data;
       } catch (err) {
-        console.error('Lỗi khi tải dữ liệu camera:', err);
         showAlert('Lỗi', 'Không thể tải danh sách camera', 'danger');
       } finally {
         loading.value = false;
@@ -147,7 +146,6 @@ export default {
         showModal.value = false;
         await loadData();
       } catch (err) {
-        console.error('Lỗi khi lưu camera:', err);
         showAlert('Lỗi', err.response?.data?.error || 'Lưu camera thất bại', 'danger');
       } finally {
         saving.value = false;
@@ -167,7 +165,6 @@ export default {
             showAlert('Thành công', 'Xóa camera thành công!', 'success');
             await loadData();
           } catch (err) {
-            console.error('Lỗi khi xóa camera:', err);
             showAlert('Lỗi', err.response?.data?.error || 'Xóa camera thất bại', 'danger');
           }
         }

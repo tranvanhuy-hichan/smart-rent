@@ -12,6 +12,8 @@ import DetailField from '../../components/ui/DetailField.vue';
 import LoadingState from '../../components/ui/LoadingState.vue';
 import ContractPrint from '../../components/document/ContractPrint.vue';
 import AddendumPrint from '../../components/document/AddendumPrint.vue';
+import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
+import DateDisplay from '../../components/ui/DateDisplay.vue';
 import contractService from '../../services/contractService.js';
 import { validateDateRange } from '../../utils/validation.js';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
@@ -31,6 +33,8 @@ export default {
     LoadingState,
     ContractPrint,
     AddendumPrint,
+    MoneyDisplay,
+    DateDisplay,
   },
   setup() {
     const route = useRoute();
@@ -187,17 +191,6 @@ export default {
       printWindow.document.close();
     };
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
-
-    const formatDate = (dateString) => {
-      if (!dateString) return '-';
-      const d = new Date(dateString);
-      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-    };
-
     const formatWaterBillingType = (type) => {
       switch (type) {
         case 'BY_INDEX': return 'Theo chỉ số (đ/m³)';
@@ -225,7 +218,6 @@ export default {
         const res = await contractService.getAddendums(contractId);
         addendums.value = res.data || [];
       } catch (err) {
-        console.error('Không tải được danh sách phụ lục:', err);
       } finally {
         loadingAddendums.value = false;
       }
@@ -260,7 +252,6 @@ export default {
           };
         });
       } catch (err) {
-        console.error('Không tải được dịch vụ dãy trọ:', err);
         availableExtraFees.value = [];
       }
 
@@ -523,8 +514,6 @@ export default {
       contract,
       extraFees,
       loading,
-      formatMoney,
-      formatDate,
       formatWaterBillingType,
       docTienBangChu,
       goBack,

@@ -11,6 +11,7 @@ import ConfirmModal from '../../components/ui/ConfirmModal.vue';
 import { useBoardingHouseStore } from '../../stores/boardingHouse.js';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
 import { useAuthStore } from '../../stores/auth.js';
+import { formatMoney } from '../../utils/money.js';
 
 export default {
   name: 'BoardingHouses',
@@ -77,11 +78,6 @@ export default {
       fixedBillingDay: null,
       extraFees: [],
     });
-
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return '0';
-      return Math.round(amount).toLocaleString('vi-VN');
-    };
 
     const formatWaterBillingType = (type) => {
       switch (type) {
@@ -313,7 +309,6 @@ export default {
       deleteHouse,
       closeModal,
       openAddModal,
-      formatMoney,
       formatWaterBillingType,
       addExtraFeeRow,
       removeExtraFeeRow,

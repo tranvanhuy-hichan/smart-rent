@@ -18,7 +18,6 @@ export const useTenantStore = defineStore('tenant', {
         this.totalElements = response.data.totalElements || 0;
         return this.tenants;
       } catch (error) {
-        console.error('Error fetching tenants:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -29,7 +28,6 @@ export const useTenantStore = defineStore('tenant', {
         const response = await tenantService.create(data);
         return response.data;
       } catch (error) {
-        console.error('Error creating tenant account:', error);
         throw error;
       }
     },
@@ -42,7 +40,6 @@ export const useTenantStore = defineStore('tenant', {
         }
         return response.data;
       } catch (error) {
-        console.error('Error toggling tenant status:', error);
         throw error;
       }
     }

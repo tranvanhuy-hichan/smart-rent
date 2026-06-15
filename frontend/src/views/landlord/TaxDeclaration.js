@@ -163,7 +163,6 @@ export default {
         const res = await taxService.calculateTax(payload);
         preview.value = res.data;
       } catch (err) {
-        console.error("Lỗi tính toán xem trước thuế:", err);
         showToast("Không thể tính toán dữ liệu thuế cho kỳ này.", "danger");
       } finally {
         calculating.value = false;
@@ -184,7 +183,6 @@ export default {
         showConfig.value = false;
         calculatePreview();
       } catch (err) {
-        console.error("Lỗi lưu cấu hình thuế:", err);
         showToast(
           "Cập nhật cấu hình thất bại. Vui lòng kiểm tra lại.",
           "danger",
@@ -214,7 +212,6 @@ export default {
         // Reload history declarations
         loadHistory();
       } catch (err) {
-        console.error("Lỗi nộp tờ khai thuế:", err);
         const errMsg =
           err.response?.data?.message ||
           "Nộp tờ khai thuế thất bại. Kỳ này đã được nộp hoặc xảy ra lỗi.";
@@ -266,7 +263,6 @@ export default {
         window.URL.revokeObjectURL(url);
         showToast("Xuất báo cáo Excel thành công!");
       } catch (err) {
-        console.error("Lỗi xuất Excel:", err);
         let errMsg = "Xuấtt báo cáo Excel thất bại.";
         if (err.response?.data instanceof Blob) {
           try {
@@ -276,7 +272,7 @@ export default {
               errMsg = `Xuất Excel thất bại: ${json.message}`;
             }
           } catch (e) {
-            console.error("Không thể đọc chi tiết lỗi từ Blob:", e);
+            // Ignored
           }
         } else if (err.response?.data?.message) {
           errMsg = `Xuất Excel thất bại: ${err.response.data.message}`;
@@ -293,7 +289,6 @@ export default {
         const res = await taxService.getDeclarations();
         declarations.value = res.data;
       } catch (err) {
-        console.error("Lỗi tải lịch sử tờ khai:", err);
       }
     };
 
@@ -320,7 +315,6 @@ export default {
         // Compute preview
         await calculatePreview();
       } catch (err) {
-        console.error("Lỗi tải dữ liệu khởi tạo:", err);
       } finally {
         loading.value = false;
       }

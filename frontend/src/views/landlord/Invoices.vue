@@ -42,11 +42,32 @@
           </div>
         </template>
 
+        <!-- Custom slots for money formatting in table cells -->
+        <template #cell(contract_room_basePrice)="{ value }">
+          <MoneyDisplay :value="value" type="sub" :bold="false" />
+        </template>
+
+        <template #cell(extraFeesAmount)="{ value }">
+          <MoneyDisplay :value="value" type="sub" :bold="false" />
+        </template>
+
+        <template #cell(totalAmount)="{ value }">
+          <MoneyDisplay :value="value" />
+        </template>
+
+        <template #cell(paidAmount)="{ value }">
+          <MoneyDisplay :value="value" type="success" />
+        </template>
+
+        <template #cell(remainingAmount)="{ value }">
+          <MoneyDisplay :value="value" type="danger" />
+        </template>
+
         <!-- Custom slot for Billing Period (2 lines) -->
         <template #cell(billingPeriod)="{ item }">
           <div class="flex flex-col gap-0.5 text-xs text-text-sub font-semibold">
-            <span>{{ formatDate(item.billingPeriodStart) }}</span>
-            <span>- {{ formatDate(item.billingPeriodEnd) }}</span>
+            <DateDisplay :value="item.billingPeriodStart" />
+            <span>- <DateDisplay :value="item.billingPeriodEnd" /></span>
           </div>
         </template>
 
@@ -100,7 +121,7 @@
           <div class="text-text-main" v-else>
             Tiền nước cố định:
             <span class="font-bold">
-              {{ formatMoney(selectedContract.room.boardingHouse.defaultWaterRate) }} đ
+              <MoneyDisplay :value="selectedContract.room.boardingHouse.defaultWaterRate" />
               ({{ selectedContract.room.boardingHouse.waterBillingType === 'FIXED_PER_PERSON' ?
                 'mỗi người' : 'mỗi phòng' }})
             </span>
@@ -184,7 +205,7 @@
             <div class="flex justify-between items-center">
               <span class="text-text-sub font-medium">Tiền phòng</span>
               <span class="font-semibold">
-                {{ formatMoney(computedRoomPrice) }} đ
+                <MoneyDisplay :value="computedRoomPrice" />
               </span>
             </div>
 
@@ -193,7 +214,7 @@
               <span class="text-text-sub font-medium">
                 Điện (Tiêu thụ: <span class="font-bold text-text-main">{{ computedElectricityUsage }} kWh</span>)
               </span>
-              <span class="font-semibold">{{ formatMoney(computedElectricityCost) }} đ</span>
+              <span class="font-semibold"><MoneyDisplay :value="computedElectricityCost" type="default" /></span>
             </div>
 
             <!-- Tiền nước -->
@@ -207,7 +228,7 @@
                   (Cố định: <span class="font-bold text-text-main">{{ selectedContract.numberOfTenants }} người</span>)
                 </span>
               </span>
-              <span class="font-semibold">{{ formatMoney(computedWaterCost) }} đ</span>
+              <span class="font-semibold"><MoneyDisplay :value="computedWaterCost" type="default" /></span>
             </div>
 
             <!-- Phụ phí dịch vụ -->
@@ -218,9 +239,9 @@
                   <div v-for="(item, index) in computedExtraFeesList" :key="index" class="flex justify-between items-center pl-2">
                     <span class="text-text-sub">
                       • {{ item.name }} 
-                      <span class="text-[10px] text-text-sub">({{ formatMoney(item.price) }} đ x {{ item.quantity }})</span>
+                      <span class="text-[10px] text-text-sub">(<MoneyDisplay :value="item.price" :bold="false" /> x {{ item.quantity }})</span>
                     </span>
-                    <span class="font-semibold text-text-main">{{ formatMoney(item.subtotal) }} đ</span>
+                    <span class="font-semibold text-text-main"><MoneyDisplay :value="item.subtotal" type="default" /></span>
                   </div>
                 </div>
               </div>
@@ -233,14 +254,14 @@
             <!-- Giảm giá -->
             <div v-if="form.discount > 0" class="flex justify-between items-center text-rose-600 dark:text-rose-400 font-semibold border-t border-border-main/30 pt-2 mt-2">
               <span>Giảm giá:</span>
-              <span>-{{ formatMoney(form.discount) }} đ</span>
+              <span>-<MoneyDisplay :value="form.discount" type="danger" /></span>
             </div>
           </div>
 
           <!-- Total Row -->
           <div class="px-4 py-3.5 bg-slate-50 dark:bg-slate-900/60 border-t border-border-main flex justify-between items-center">
             <span class="text-xs font-bold text-text-main">Tổng cộng ước tính:</span>
-            <span class="text-base font-extrabold text-primary">{{ formatMoney(computedTotalAmount) }} đ</span>
+            <span class="text-base font-extrabold"><MoneyDisplay :value="computedTotalAmount" type="primary" /></span>
           </div>
         </div>
 
@@ -254,8 +275,7 @@
     <!-- Record Payment Modal -->
     <Modal v-if="showPayModal" title="Ghi Nhận Thanh Toán" maxWidth="sm" @close="closeModal">
       <p class="text-xs text-text-sub mb-5">
-        Phòng {{ payForm.roomNumber }} - Tổng nợ: <span class="font-bold text-danger">{{
-          formatMoney(payForm.remainingAmount) }} đ</span>
+        Phòng {{ payForm.roomNumber }} - Tổng nợ: <MoneyDisplay :value="payForm.remainingAmount" type="danger" />
       </p>
 
       <form @submit.prevent="submitPayment">

@@ -41,7 +41,6 @@ export default {
           end: Math.min((currentPage.value + 1) * 15, res.data.totalElements)
         };
       } catch (err) {
-        console.error('Lỗi khi tải lịch sử đăng nhập:', err);
       } finally {
         loading.value = false;
       }

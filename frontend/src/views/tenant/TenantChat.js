@@ -64,7 +64,6 @@ export default {
         await nextTick();
         scrollToBottom();
       } catch (error) {
-        console.error('Không thể gửi tin nhắn:', error);
         newMessageText.value = text;
       } finally {
         isSending.value = false;

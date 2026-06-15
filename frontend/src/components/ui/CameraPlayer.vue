@@ -188,7 +188,6 @@ export default {
     };
 
     const onError = (e) => {
-      console.error('Camera playback error:', e);
       loading.value = false;
       isError.value = true;
     };
@@ -213,7 +212,6 @@ export default {
           const response = await cameraService.getCameraStream(props.camera.id);
           liveStreamUrl.value = response.data.streamUrl;
         } catch (err) {
-          console.error('Lỗi khi lấy luồng động camera Imou:', err);
           onError(err);
           return;
         }
@@ -233,7 +231,6 @@ export default {
         }
 
         if (!video) {
-          console.error('Không tìm thấy phần tử videoRef để khởi tạo trình phát');
           onError('Không thể khởi tạo trình phát video trong DOM');
           return;
         }
@@ -258,11 +255,9 @@ export default {
             if (data.fatal) {
               switch (data.type) {
                 case Hls.ErrorTypes.NETWORK_ERROR:
-                  console.error('Fatal network error in HLS, attempting to recover...');
                   hls.startLoad();
                   break;
                 case Hls.ErrorTypes.MEDIA_ERROR:
-                  console.error('Fatal media error in HLS, attempting to recover...');
                   hls.recoverMediaError();
                   break;
                 default:
@@ -327,7 +322,6 @@ export default {
           }
         }
       } catch (err) {
-        console.error('Fullscreen toggle error:', err);
       }
     };
 

@@ -39,6 +39,10 @@
             <span class="text-xs text-text-sub font-semibold">{{ item.room.boardingHouse.name }}</span>
           </div>
         </template>
+
+        <template #cell(startDate)="{ value }">
+          <DateDisplay :value="value" />
+        </template>
       </DataTable>
     </div>
 

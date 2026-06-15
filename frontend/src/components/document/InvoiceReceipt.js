@@ -1,6 +1,8 @@
 import html2canvas from "html2canvas-pro";
 import { useConfirmModal } from "../../composables/useConfirmModal.js";
 import ConfirmModal from "../ui/ConfirmModal.vue";
+import { formatMoney } from "../../utils/money.js";
+import { formatDate } from "../../utils/date.js";
 
 export default {
   name: "InvoiceReceipt",
@@ -34,16 +36,7 @@ export default {
       closeConfirmModal
     } = useConfirmModal();
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return "0";
-      return Math.round(amount).toLocaleString("vi-VN");
-    };
 
-    const formatDate = (dateString) => {
-      if (!dateString) return "";
-      const d = new Date(dateString);
-      return `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
-    };
 
     const printReceipt = () => {
       const printContent = document.getElementById("receipt-print-area-shared").innerHTML;
@@ -411,7 +404,6 @@ export default {
         link.click();
         document.body.removeChild(link);
       } catch (err) {
-        console.error("Không thể lưu ảnh biên lai:", err);
         showAlert("Lỗi", "Không thể xuất ảnh biên lai: " + err.message, "danger");
       } finally {
         document.body.removeChild(container);

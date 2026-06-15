@@ -44,7 +44,6 @@ export default {
         const response = await adminService.getStatistics();
         stats.value = response.data;
       } catch (err) {
-        console.error('Lỗi khi tải số liệu thống kê:', err);
         error.value = err.response?.data?.message || 'Không thể kết nối đến máy chủ. Vui lòng thử lại sau.';
       } finally {
         loading.value = false;

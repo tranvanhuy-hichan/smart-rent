@@ -68,13 +68,13 @@
                   <div class="text-[10px] text-text-sub font-medium mt-0.5">{{ req.user?.fullName }}</div>
                 </td>
                 <td class="py-3.5 px-4 font-semibold text-text-main">Mua gói {{ req.months }} tháng</td>
-                <td class="py-3.5 px-4 font-bold text-text-main">{{ formatMoney(req.amount) }} đ</td>
+                <td class="py-3.5 px-4 font-bold text-text-main"><MoneyDisplay :value="req.amount" /></td>
                 <td class="py-3.5 px-4">
                   <span class="font-mono bg-slate-100 dark:bg-slate-800 border border-border-main/60 px-2.5 py-1.5 rounded text-xs text-text-main font-bold select-all">
                     {{ req.paymentContent }}
                   </span>
                 </td>
-                <td class="py-3.5 px-4 text-text-sub">{{ formatDateTime(req.createdAt) }}</td>
+                <td class="py-3.5 px-4 text-text-sub"><DateDisplay :value="req.createdAt" type="datetime" /></td>
                 <td class="py-3.5 px-4 text-right">
                   <!-- Actions for PENDING status -->
                   <div v-if="req.status === 'PENDING'" class="flex justify-end gap-2">

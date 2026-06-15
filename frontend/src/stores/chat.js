@@ -31,10 +31,6 @@ export const useChatStore = defineStore('chat', {
         const response = await chatService.getChatRooms(0, 100);
         this.rooms = response.data.content || [];
       } catch (error) {
-        console.error('Lỗi khi tải danh sách phòng chat:', error);
-        if (error.response && error.response.data) {
-          console.error('Chi tiết lỗi từ server:', error.response.data);
-        }
       } finally {
         this.loadingRooms = false;
       }
@@ -65,7 +61,6 @@ export const useChatStore = defineStore('chat', {
         this.hasMore = !response.data.last;
         this.currentRoomId = roomId;
       } catch (error) {
-        console.error('Lỗi khi tải lịch sử tin nhắn:', error);
       } finally {
         this.loadingMessages = false;
       }
@@ -88,7 +83,6 @@ export const useChatStore = defineStore('chat', {
 
         return newMessage;
       } catch (error) {
-        console.error('Lỗi khi gửi tin nhắn:', error);
         throw error;
       }
     },
@@ -100,7 +94,6 @@ export const useChatStore = defineStore('chat', {
           room.unreadCount = 0;
         }
       } catch (error) {
-        console.error('Lỗi khi đánh dấu đã đọc phòng chat:', error);
       }
     },
     updateRoomInfo(roomId, content, time, isNewIncoming = false) {
@@ -201,12 +194,10 @@ export const useChatStore = defineStore('chat', {
             }
           }
         } catch (e) {
-          console.error('Lỗi phân tích tin nhắn WebSocket Chat:', e);
         }
       };
 
       socket.onerror = (error) => {
-        console.error('Lỗi kết nối WebSocket Chat:', error);
       };
 
       socket.onclose = (event) => {

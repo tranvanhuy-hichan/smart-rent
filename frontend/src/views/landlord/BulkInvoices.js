@@ -4,9 +4,11 @@ import FormInput from "../../components/ui/FormInput.vue";
 import FormSelect from "../../components/ui/FormSelect.vue";
 import FormButton from "../../components/ui/FormButton.vue";
 import AppIcon from "../../components/ui/icons/AppIcon.vue";
+import MoneyDisplay from "../../components/ui/MoneyDisplay.vue";
 import { useBoardingHouseStore } from "../../stores/boardingHouse.js";
 import invoiceService from "../../services/invoiceService.js";
 import { useConfirmModal } from "../../composables/useConfirmModal.js";
+import { formatMoney } from "../../utils/money.js";
 
 export default {
   name: "BulkInvoices",
@@ -15,6 +17,7 @@ export default {
     FormSelect,
     FormButton,
     AppIcon,
+    MoneyDisplay
   },
   setup() {
     const router = useRouter();
@@ -47,17 +50,11 @@ export default {
     const isFetchingBulkStatus = ref(false);
     const isSavingBulk = ref(false);
 
-    const formatMoney = (amount) => {
-      if (amount === undefined || amount === null) return "0";
-      return Math.round(amount).toLocaleString("vi-VN");
-    };
-
     const fetchBoardingHouses = async () => {
       try {
         await boardingHouseStore.fetchBoardingHouses();
         boardingHouses.value = boardingHouseStore.boardingHouses;
       } catch (err) {
-        console.error("Không tải được danh sách dãy trọ:", err);
       }
     };
 
@@ -261,7 +258,6 @@ export default {
       onBulkBoardingHouseChange,
       adjustBulkDates,
       saveBulkInvoices,
-      formatMoney,
       goBack,
     };
   },

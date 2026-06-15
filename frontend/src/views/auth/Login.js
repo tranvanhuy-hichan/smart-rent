@@ -139,6 +139,18 @@ export default {
     // Rate limit warning (show remaining attempts)
     const attemptsWarning = ref('');
 
+    const redirectUserByRole = (user) => {
+      if (user.role === 'ADMIN') {
+        router.push('/admin');
+      } else if (user.role === 'LANDLORD') {
+        router.push('/landlord');
+      } else if (user.role === 'TENANT') {
+        router.push('/tenant');
+      } else {
+        error.value = 'Vai trò tài khoản không hợp lệ!';
+      }
+    };
+
     const handleLogin = async () => {
       error.value = '';
       attemptsWarning.value = '';
@@ -162,17 +174,7 @@ export default {
 
         // Login thành công → reset rate limit
         resetRateLimit();
-
-        // Điều hướng theo vai trò người dùng (Role-based redirection)
-        if (user.role === 'ADMIN') {
-          router.push('/admin');
-        } else if (user.role === 'LANDLORD') {
-          router.push('/landlord');
-        } else if (user.role === 'TENANT') {
-          router.push('/tenant');
-        } else {
-          error.value = 'Vai trò tài khoản không hợp lệ!';
-        }
+        redirectUserByRole(user);
       } catch (err) {
         // Ghi nhận lần đăng nhập thất bại
         const rateData = recordFailedAttempt();
@@ -200,18 +202,9 @@ export default {
         const user = await authStore.loginWithGoogle(response.credential);
 
         resetRateLimit();
-
-        if (user.role === 'ADMIN') {
-          router.push('/admin');
-        } else if (user.role === 'LANDLORD') {
-          router.push('/landlord');
-        } else if (user.role === 'TENANT') {
-          router.push('/tenant');
-        } else {
-          error.value = 'Vai trò tài khoản không hợp lệ!';
-        }
+        redirectUserByRole(user);
       } catch (err) {
-        error.value = err?.response?.data?.error || err?.message || 'Đăng nhập Google thất bại. Vui lòng thử lại!';
+        error.value = err || 'Đăng nhập Google thất bại. Vui lòng thử lại!';
       } finally {
         loading.value = false;
       }
@@ -240,7 +233,6 @@ export default {
             const idToken = googleUser.authentication.idToken;
             await handleGoogleLogin({ credential: idToken });
           } catch (err) {
-            console.error('Lỗi đăng nhập mobile:', err);
             error.value = 'Đăng nhập Google thất bại hoặc bị hủy.';
           } finally {
             loading.value = false;

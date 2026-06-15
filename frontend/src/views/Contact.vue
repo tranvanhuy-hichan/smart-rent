@@ -222,7 +222,6 @@ export default {
           message: 'Cảm ơn bạn đã gửi ý kiến/yêu cầu. Hệ thống đã tiếp nhận và sẽ liên hệ lại với bạn sớm nhất.'
         };
       } catch (error) {
-        console.error('Lỗi khi gửi mail liên hệ lên backend:', error);
         const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Đã có lỗi xảy ra trong quá trình gửi yêu cầu. Vui lòng kiểm tra kết nối mạng và thử lại sau.';
         modal.value = {
           show: true,

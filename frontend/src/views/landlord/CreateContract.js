@@ -79,7 +79,6 @@ export default {
         const list = await roomStore.fetchRooms({ size: 200 });
         vacantRooms.value = list.filter((r) => r.status === "VACANT");
       } catch (err) {
-        console.error("Không tải được danh sách phòng trống:", err);
       }
     };
 
@@ -92,7 +91,6 @@ export default {
         });
         tenantsList.value = list || [];
       } catch (err) {
-        console.error("Không tải được danh sách người thuê:", err);
       }
     };
 
@@ -116,7 +114,6 @@ export default {
             customPrice: ef.defaultPrice,
           }));
         } catch (err) {
-          console.error("Không tải được dịch vụ dãy trọ:", err);
         }
       }
     };
