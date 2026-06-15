@@ -77,6 +77,9 @@ export default {
       rules: '',
       fixedBillingDay: null,
       extraFees: [],
+      payosClientId: '',
+      payosApiKey: '',
+      payosChecksumKey: '',
     });
 
     const formatWaterBillingType = (type) => {
@@ -139,6 +142,9 @@ export default {
           defaultPrice: ef.defaultPrice,
           unitType: ef.unitType,
         })),
+        payosClientId: house.payosClientId || '',
+        payosApiKey: house.hasPayosApiKey ? '******' : '',
+        payosChecksumKey: house.hasPayosChecksumKey ? '******' : '',
       };
       showEditModal.value = true;
       authStore.setBottomBarHidden(true);
@@ -176,6 +182,9 @@ export default {
         rules: '',
         fixedBillingDay: null,
         extraFees: [],
+        payosClientId: '',
+        payosApiKey: '',
+        payosChecksumKey: '',
       };
       authStore.setBottomBarHidden(false);
       authStore.setHeaderHidden(false);

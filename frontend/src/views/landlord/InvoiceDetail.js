@@ -14,6 +14,7 @@ import DateDisplay from '../../components/ui/DateDisplay.vue';
 import { useConfirmModal } from '../../composables/useConfirmModal.js';
 import { formatMoney } from '../../utils/money.js';
 import { formatDate } from '../../utils/date.js';
+import invoiceService from '../../services/invoiceService.js';
 
 export default {
   name: 'InvoiceDetail',
@@ -378,6 +379,28 @@ export default {
       }
     };
 
+    const loadingPayos = ref(false);
+
+    const payWithPayos = async () => {
+      if (!invoice.value) return;
+      loadingPayos.value = true;
+      try {
+        const res = await invoiceService.getPayosLink(invoice.value.id, {
+          returnUrl: window.location.href,
+          cancelUrl: window.location.href
+        });
+        if (res.data && res.data.checkoutUrl) {
+          window.location.href = res.data.checkoutUrl;
+        } else {
+          throw new Error("Không nhận được link thanh toán từ hệ thống");
+        }
+      } catch (err) {
+        showAlert('Lỗi', err.response?.data?.error || err.message || 'Lỗi kết nối cổng thanh toán PayOS', 'danger');
+      } finally {
+        loadingPayos.value = false;
+      }
+    };
+
     onMounted(() => {
       fetchInvoiceDetail();
     });
@@ -407,6 +430,8 @@ export default {
       closeConfirmModal,
       paymentNotified,
       sendPaymentNotification,
+      loadingPayos,
+      payWithPayos,
     };
   }
 };

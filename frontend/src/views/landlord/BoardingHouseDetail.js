@@ -62,6 +62,9 @@ export default {
       rules: '',
       fixedBillingDay: null,
       extraFees: [],
+      payosClientId: '',
+      payosApiKey: '',
+      payosChecksumKey: '',
     });
 
     const showRuleBuilder = ref(false);
@@ -191,6 +194,9 @@ export default {
             defaultPrice: ef.defaultPrice,
             unitType: ef.unitType,
           })),
+          payosClientId: data.payosClientId || '',
+          payosApiKey: data.hasPayosApiKey ? '******' : '',
+          payosChecksumKey: data.hasPayosChecksumKey ? '******' : '',
         };
       } catch (err) {
         showAlert('Lỗi', 'Không thể tải thông tin chi tiết dãy trọ', 'danger');

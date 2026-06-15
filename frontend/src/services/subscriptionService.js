@@ -2,8 +2,8 @@ import api from './api.js';
 
 export default {
   // Landlord endpoints
-  createRequest(months) {
-    return api.post('/api/subscriptions/request', { months });
+  createRequest(months, returnUrl, cancelUrl) {
+    return api.post('/api/subscriptions/request', { months, returnUrl, cancelUrl });
   },
   
   getMyRequests() {
@@ -41,5 +41,9 @@ export default {
 
   updateAdminBankInfo(setting) {
     return api.put('/api/subscriptions/admin-bank-info', setting);
+  },
+
+  getPayosLink(requestId, params) {
+    return api.get(`/api/payment/subscriptions/requests/${requestId}/payos-link`, { params });
   }
 };

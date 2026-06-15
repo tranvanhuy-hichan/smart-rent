@@ -24,5 +24,8 @@ export default {
   },
   notifyPayment(id) {
     return api.post(`/api/invoices/${id}/notify-payment`);
+  },
+  getPayosLink(id, params) {
+    return api.get(`/api/payment/invoices/${id}/payos-link`, { params });
   }
 };

@@ -60,11 +60,11 @@
               <AppIcon name="check-circle" class="!w-4 !h-4" />
               <span class="hidden sm:inline">Thu đủ</span>
             </FormButton>
-            <FormButton v-if="!isLandlord && invoice.status !== 'PAID' && activeTab === 'summary'"
-              :variant="paymentNotified ? 'secondary' : 'primary'" size="sm" :disabled="paymentNotified"
-              @click="sendPaymentNotification">
-              <AppIcon name="check-circle" class="!w-4 !h-4" />
-              <span>{{ paymentNotified ? 'Đã báo chuyển khoản' : 'Tôi đã thanh toán' }}</span>
+            <FormButton v-if="!isLandlord && invoice.status !== 'PAID' && activeTab === 'summary' && invoice.contract?.room?.boardingHouse?.payosClientId"
+              variant="primary" size="sm" :disabled="loadingPayos"
+              @click="payWithPayos">
+              <AppIcon name="credit-card" class="!w-4 !h-4" />
+              <span>{{ loadingPayos ? 'Đang kết nối...' : 'Thanh toán PayOS' }}</span>
             </FormButton>
           </div>
         </div>
@@ -100,14 +100,14 @@
       <div v-if="activeTab === 'summary'">
         <div :class="[
           'gap-6 w-full',
-          (invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && vietQrUrl && !isLandlord)
+          (invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && !isLandlord)
             ? 'grid grid-cols-1 lg:grid-cols-3'
             : 'flex flex-col'
         ]">
           <!-- Left Column: Invoice Details -->
           <div :class="[
             'flex flex-col gap-4',
-            (invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && vietQrUrl && !isLandlord) ? 'lg:col-span-2' : 'w-full'
+            (invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && !isLandlord) ? 'lg:col-span-2' : 'w-full'
           ]">
             <!-- 2x2 Grid for the first 4 cards on PC -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,13 +294,47 @@
             </div>
           </div>
 
-          <!-- Right Column: VietQR Payment Card (Only show for tenant when unpaid and bank configured) -->
-          <div v-if="invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && vietQrUrl && !isLandlord" class="lg:col-span-1">
-            <div
+          <!-- Right Column: Payment Card (Only show for tenant when unpaid) -->
+          <div v-if="invoice.status !== 'PAID' && (invoice.totalAmount - invoice.paidAmount) > 0 && !isLandlord" class="lg:col-span-1">
+            <!-- Case 1: PayOS is configured -->
+            <div v-if="invoice.contract?.room?.boardingHouse?.payosClientId"
+              class="bg-card border border-border-main rounded-xl p-5 shadow-xs flex flex-col items-center sticky top-20">
+              <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 text-primary shrink-0">
+                <AppIcon name="credit-card" size="md" />
+              </div>
+              <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán tự động PayOS</h3>
+              <p class="text-[11px] text-text-sub mb-4 text-center leading-relaxed">
+                Hóa đơn của bạn hỗ trợ thanh toán trực tuyến qua cổng PayOS. Giao dịch sẽ được hệ thống đối soát và tự động gạch nợ ngay lập tức.
+              </p>
+
+              <!-- Amount detail box -->
+              <div class="w-full bg-slate-50 dark:bg-slate-900/30 rounded-xl p-3 border border-border-main/50 mb-5 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-text-sub">Số tiền cần đóng:</span>
+                  <MoneyDisplay :value="invoice.totalAmount - invoice.paidAmount" type="danger" class="text-sm font-bold" />
+                </div>
+              </div>
+
+              <!-- Pay Button -->
+              <FormButton variant="primary" class="w-full justify-center py-2.5 font-bold shadow-md shadow-primary/20 hover:shadow-lg active:scale-95 transition-all flex items-center gap-2"
+                :disabled="loadingPayos" @click="payWithPayos">
+                <span v-if="loadingPayos" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0"></span>
+                <AppIcon v-else name="check-circle" class="!w-4 !h-4" />
+                <span>{{ loadingPayos ? 'Đang kết nối PayOS...' : 'Thanh toán ngay' }}</span>
+              </FormButton>
+
+              <!-- Secure badge -->
+              <div class="mt-4 flex items-center gap-1.5 justify-center text-[10px] text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200/50 px-2.5 py-1 rounded-full">
+                <span>🛡️</span>
+                <span>Thanh toán an toàn qua PayOS</span>
+              </div>
+            </div>
+
+            <!-- Case 2: Fallback to static VietQR if PayOS is not configured -->
+            <div v-else-if="vietQrUrl"
               class="bg-card border border-border-main rounded-xl p-5 shadow-xs flex flex-col items-center sticky top-20">
               <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán chuyển khoản nhanh</h3>
-              <p class="text-[11px] text-text-sub mb-4 text-center">Quét mã QR bằng ứng dụng ngân hàng để thanh toán tự
-                động.</p>
+              <p class="text-[11px] text-text-sub mb-4 text-center">Quét mã QR bằng ứng dụng ngân hàng để chuyển khoản.</p>
 
               <!-- QR Code (Large) -->
               <div
@@ -343,9 +377,7 @@
                 <AppIcon name="exclamation-triangle" class="!w-4 !h-4 shrink-0 mt-0.5" />
                 <div>
                   <span class="font-bold block text-[10px] mb-0.5">Lưu ý quan trọng:</span>
-                  <p class="text-[9px] leading-normal m-0">Sau khi chuyển khoản thành công, quý khách vui lòng đợi chủ
-                    trọ đối
-                    soát tài khoản và xác nhận duyệt trạng thái thanh toán trên hệ thống.</p>
+                  <p class="text-[9px] leading-normal m-0">Sau khi chuyển khoản thành công, quý khách vui lòng đợi chủ trọ đối soát tài khoản và xác nhận duyệt trạng thái thanh toán trên hệ thống.</p>
                 </div>
               </div>
             </div>

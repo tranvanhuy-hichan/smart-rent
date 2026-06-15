@@ -146,6 +146,49 @@
           </div>
         </div>
 
+        <!-- Cấu hình thanh toán tự động PayOS -->
+        <div class="mt-6 pt-4 border-t border-border-main">
+          <h4 class="text-sm font-bold text-text-main mb-3 flex items-center gap-2">
+            <span>⚡ Cấu Hình Thanh Tự Động PayOS</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">
+              Khuyên dùng
+            </span>
+          </h4>
+
+          <!-- Hướng dẫn đăng ký PayOS -->
+          <div class="mb-4 p-4 bg-slate-50 dark:bg-slate-900 border border-border-main rounded-xl text-xs text-text-sub space-y-2">
+            <p class="font-bold text-text-main flex items-center gap-1.5">
+              💡 Tại sao nên cấu hình PayOS?
+            </p>
+            <p>Hệ thống tự động đối soát và gạch nợ hóa đơn, khách thuê quét mã thanh toán tiền phòng tiền sẽ chuyển thẳng về tài khoản ngân hàng của bạn ngay lập tức.</p>
+            <div class="flex items-center gap-3 pt-1">
+              <a href="https://dashboard.payos.vn/" target="_blank" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover active:scale-95 transition-all">
+                Đăng ký tài khoản PayOS Miễn Phí ↗
+              </a>
+            </div>
+            <ul class="list-disc pl-4 space-y-1 pt-1 text-[11px]">
+              <li>Tạo một "Kênh thanh toán" mới trên dashboard PayOS.</li>
+              <li>Sao chép 3 tham số Client ID, API Key, Checksum Key và dán vào form bên dưới.</li>
+            </ul>
+          </div>
+
+          <div class="mb-4">
+            <FormInput type="text" label="Client ID" v-model="form.payosClientId"
+              placeholder="Nhập Client ID từ PayOS" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <FormInput type="password" label="API Key" v-model="form.payosApiKey"
+                placeholder="Nhập API Key từ PayOS" />
+            </div>
+            <div>
+              <FormInput type="password" label="Checksum Key" v-model="form.payosChecksumKey"
+                placeholder="Nhập Checksum Key từ PayOS" />
+            </div>
+          </div>
+        </div>
+
+
         <!-- Cấu hình các dịch vụ / phụ phí của dãy trọ -->
         <div class="mt-6 pt-4 border-t border-border-main">
           <div class="flex justify-between items-center mb-4">

@@ -65,14 +65,45 @@ export default {
     const submitUpgradeRequest = async () => {
       submitting.value = true;
       try {
-        const response = await subscriptionService.createRequest(selectedMonths.value);
+        const response = await subscriptionService.createRequest(
+          selectedMonths.value,
+          window.location.href,
+          window.location.href
+        );
         currentRequest.value = response.data;
         await loadRequests(); // Reload list
-        alert('Yêu cầu thanh toán đã được tạo! Vui lòng thực hiện chuyển khoản theo thông tin hướng dẫn.');
+        
+        if (response.data && response.data.checkoutUrl) {
+          window.location.href = response.data.checkoutUrl;
+        } else {
+          alert('Yêu cầu thanh toán đã được tạo! Vui lòng thực hiện chuyển khoản theo thông tin hướng dẫn.');
+        }
       } catch (err) {
         alert(err.response?.data?.error || 'Có lỗi xảy ra khi tạo yêu cầu thanh toán!');
       } finally {
         submitting.value = false;
+      }
+    };
+
+    const loadingPayos = ref(false);
+
+    const payPendingRequestWithPayos = async () => {
+      if (!currentRequest.value) return;
+      loadingPayos.value = true;
+      try {
+        const res = await subscriptionService.getPayosLink(currentRequest.value.id, {
+          returnUrl: window.location.href,
+          cancelUrl: window.location.href
+        });
+        if (res.data && res.data.checkoutUrl) {
+          window.location.href = res.data.checkoutUrl;
+        } else {
+          throw new Error("Không nhận được link thanh toán từ hệ thống");
+        }
+      } catch (err) {
+        alert(err.response?.data?.error || err.message || 'Lỗi kết nối cổng thanh toán PayOS');
+      } finally {
+        loadingPayos.value = false;
       }
     };
 
@@ -142,7 +173,8 @@ export default {
       goBack,
       formatMoney,
       formatDate,
-      formatDateTime
+      loadingPayos,
+      payPendingRequestWithPayos
     };
   }
 };
