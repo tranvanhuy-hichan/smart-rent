@@ -268,13 +268,25 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(readOnly = true)
     @Override
     public Page<Invoice> getInvoicesByLandlord(User landlord, Pageable pageable) {
-        return invoiceRepository.findByContractRoomBoardingHouseLandlordId(landlord.getId(), pageable);
+        Page<Invoice> page = invoiceRepository.findByContractRoomBoardingHouseLandlordId(landlord.getId(), pageable);
+        page.forEach(i -> {
+            if (i.getContract() != null) {
+                org.hibernate.Hibernate.initialize(i.getContract().getAddendums());
+            }
+        });
+        return page;
     }
 
     @Transactional(readOnly = true)
     @Override
     public Page<Invoice> getInvoicesByTenant(User tenant, Pageable pageable) {
-        return invoiceRepository.findByContractTenantId(tenant.getId(), pageable);
+        Page<Invoice> page = invoiceRepository.findByContractTenantId(tenant.getId(), pageable);
+        page.forEach(i -> {
+            if (i.getContract() != null) {
+                org.hibernate.Hibernate.initialize(i.getContract().getAddendums());
+            }
+        });
+        return page;
     }
 
     @Transactional(readOnly = true)

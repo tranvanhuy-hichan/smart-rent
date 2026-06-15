@@ -219,11 +219,14 @@ public class ContractServiceImpl implements ContractService {
     @Transactional(readOnly = true)
     @Override
     public Page<Contract> getContractsByLandlord(User landlord, Boolean showAll, Pageable pageable) {
+        Page<Contract> page;
         if (showAll != null && showAll) {
-            return contractRepository.findByRoomBoardingHouseLandlordId(landlord.getId(), pageable);
+            page = contractRepository.findByRoomBoardingHouseLandlordId(landlord.getId(), pageable);
         } else {
-            return contractRepository.findByRoomBoardingHouseLandlordIdAndStatus(landlord.getId(), ContractStatus.ACTIVE, pageable);
+            page = contractRepository.findByRoomBoardingHouseLandlordIdAndStatus(landlord.getId(), ContractStatus.ACTIVE, pageable);
         }
+        page.forEach(c -> org.hibernate.Hibernate.initialize(c.getAddendums()));
+        return page;
     }
 
     @Transactional(readOnly = true)
@@ -234,11 +237,14 @@ public class ContractServiceImpl implements ContractService {
         if (!room.getBoardingHouse().getLandlord().getId().equals(landlord.getId())) {
             throw new RuntimeException("Bạn không có quyền quản lý phòng trọ này");
         }
+        Page<Contract> page;
         if (showAll != null && showAll) {
-            return contractRepository.findByRoomId(roomId, pageable);
+            page = contractRepository.findByRoomId(roomId, pageable);
         } else {
-            return contractRepository.findByRoomIdAndStatus(roomId, ContractStatus.ACTIVE, pageable);
+            page = contractRepository.findByRoomIdAndStatus(roomId, ContractStatus.ACTIVE, pageable);
         }
+        page.forEach(c -> org.hibernate.Hibernate.initialize(c.getAddendums()));
+        return page;
     }
 
     @Transactional(readOnly = true)
@@ -276,11 +282,14 @@ public class ContractServiceImpl implements ContractService {
     @Transactional(readOnly = true)
     @Override
     public Page<Contract> getContractsByTenant(User tenant, Boolean showAll, Pageable pageable) {
+        Page<Contract> page;
         if (showAll != null && showAll) {
-            return contractRepository.findByTenantId(tenant.getId(), pageable);
+            page = contractRepository.findByTenantId(tenant.getId(), pageable);
         } else {
-            return contractRepository.findByTenantIdAndStatus(tenant.getId(), ContractStatus.ACTIVE, pageable);
+            page = contractRepository.findByTenantIdAndStatus(tenant.getId(), ContractStatus.ACTIVE, pageable);
         }
+        page.forEach(c -> org.hibernate.Hibernate.initialize(c.getAddendums()));
+        return page;
     }
 
     @Transactional(readOnly = true)
