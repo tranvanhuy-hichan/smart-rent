@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.qlpt.backend.service.ChatService;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -40,17 +41,20 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final com.qlpt.backend.repository.UserSessionRepository userSessionRepository;
+    private final ChatService chatService;
 
     public AuthServiceImpl(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtTokenProvider tokenProvider,
-                       com.qlpt.backend.repository.UserSessionRepository userSessionRepository) {
+                       com.qlpt.backend.repository.UserSessionRepository userSessionRepository,
+                       ChatService chatService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.userSessionRepository = userSessionRepository;
+        this.chatService = chatService;
     }
 
     private void createSession(User user, String token) {
@@ -184,7 +188,16 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(java.time.LocalDateTime.now())
                 .build();
 
-        return userRepository.save(tenant);
+        User savedTenant = userRepository.save(tenant);
+
+        // Tự động tạo phòng chat giữa Landlord và Tenant mới
+        try {
+            chatService.getOrCreateChatRoomBetweenUsers(landlord, savedTenant);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tự động tạo phòng chat cho khách thuê mới: " + e.getMessage());
+        }
+
+        return savedTenant;
     }
 
     @Transactional

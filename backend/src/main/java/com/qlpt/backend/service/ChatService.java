@@ -15,6 +15,8 @@ public interface ChatService {
 
     ChatRoom getOrCreateChatRoom(Contract contract);
 
+    ChatRoom getOrCreateChatRoomBetweenUsers(User landlord, User tenant);
+
     Page<ChatRoomResponse> getChatRooms(User user, Pageable pageable);
 
     Page<MessageResponse> getRoomMessages(UUID roomId, User user, Pageable pageable);

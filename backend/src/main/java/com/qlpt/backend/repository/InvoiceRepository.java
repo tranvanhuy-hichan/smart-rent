@@ -18,10 +18,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
     @EntityGraph(attributePaths = {"contract", "contract.room", "contract.tenant", "contract.room.boardingHouse", "contract.room.boardingHouse.landlord", "contract.addendums"})
     Optional<Invoice> findWithDetailsById(UUID id);
 
-    @EntityGraph(attributePaths = {"contract", "contract.room", "contract.tenant", "contract.room.boardingHouse", "contract.room.boardingHouse.landlord", "contract.addendums"})
+    @EntityGraph(attributePaths = {"contract", "contract.room", "contract.tenant", "contract.room.boardingHouse", "contract.room.boardingHouse.landlord"})
     Page<Invoice> findByContractTenantId(UUID tenantId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"contract", "contract.room", "contract.tenant", "contract.room.boardingHouse", "contract.room.boardingHouse.landlord", "contract.addendums"})
+    @EntityGraph(attributePaths = {"contract", "contract.room", "contract.tenant", "contract.room.boardingHouse", "contract.room.boardingHouse.landlord"})
     Page<Invoice> findByContractRoomBoardingHouseLandlordId(UUID landlordId, Pageable pageable);
 
     List<Invoice> findByContractId(UUID contractId);

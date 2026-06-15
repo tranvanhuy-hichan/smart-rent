@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "messages", indexes = {
-    @Index(name = "idx_messages_chat_room_id", columnList = "chat_room_id"),
+    @Index(name = "idx_messages_chat_room_created", columnList = "chat_room_id, created_at DESC"),
     @Index(name = "idx_messages_created_at", columnList = "created_at")
 })
 @Data

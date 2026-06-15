@@ -47,7 +47,8 @@ public class ChatServiceImpl implements ChatService {
         this.userRepository = userRepository;
     }
 
-    private ChatRoom getOrCreateChatRoomBetweenUsers(User landlord, User tenant) {
+    @Override
+    public ChatRoom getOrCreateChatRoomBetweenUsers(User landlord, User tenant) {
         Optional<ChatRoom> existingRoom = chatRoomRepository.findChatRoomBetweenUsers(landlord, tenant);
         if (existingRoom.isPresent()) {
             return existingRoom.get();
@@ -89,35 +90,11 @@ public class ChatServiceImpl implements ChatService {
         return getOrCreateChatRoomBetweenUsers(landlord, tenant);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public Page<ChatRoomResponse> getChatRooms(User user, Pageable pageable) {
         User currentUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
-
-        // Self-healing check: Make sure all active contracts and landlord-created tenants have a chat room
-        try {
-            if (currentUser.getRole() == Role.TENANT) {
-                if (currentUser.getLandlord() != null) {
-                    getOrCreateChatRoomBetweenUsers(currentUser.getLandlord(), currentUser);
-                }
-                Page<Contract> tenantContracts = contractRepository.findByTenantIdAndStatus(currentUser.getId(), ContractStatus.ACTIVE, PageRequest.of(0, 10));
-                for (Contract c : tenantContracts.getContent()) {
-                    getOrCreateChatRoom(c);
-                }
-            } else if (currentUser.getRole() == Role.LANDLORD) {
-                List<User> tenants = userRepository.findByRoleAndLandlordId(Role.TENANT, currentUser.getId());
-                for (User t : tenants) {
-                    getOrCreateChatRoomBetweenUsers(currentUser, t);
-                }
-                Page<Contract> landlordContracts = contractRepository.findByRoomBoardingHouseLandlordIdAndStatus(currentUser.getId(), ContractStatus.ACTIVE, PageRequest.of(0, 100));
-                for (Contract c : landlordContracts.getContent()) {
-                    getOrCreateChatRoom(c);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Lỗi khi tự động kiểm tra và tạo phòng chat: " + e.getMessage());
-        }
 
         Page<ChatRoom> rooms = chatRoomRepository.findByUserOrderByUpdatedAtDesc(currentUser, pageable);
         return rooms.map(room -> {

@@ -20,22 +20,22 @@ public interface ContractRepository extends JpaRepository<Contract, UUID> {
     @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
     Optional<Contract> findWithDetailsById(UUID id);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByTenantId(UUID tenantId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByTenantIdAndStatus(UUID tenantId, ContractStatus status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByRoomBoardingHouseLandlordId(UUID landlordId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByRoomBoardingHouseLandlordIdAndStatus(UUID landlordId, ContractStatus status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByRoomId(UUID roomId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord", "addendums"})
+    @EntityGraph(attributePaths = {"room", "tenant", "room.boardingHouse", "room.boardingHouse.landlord"})
     Page<Contract> findByRoomIdAndStatus(UUID roomId, ContractStatus status, Pageable pageable);
 
     @Query("SELECT c.tenant.id FROM Contract c WHERE c.status = com.qlpt.backend.enums.ContractStatus.ACTIVE AND c.tenant.id IN :tenantIds")
