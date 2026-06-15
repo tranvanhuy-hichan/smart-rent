@@ -32,6 +32,7 @@ public class PaymentController {
     private final InvoiceRepository invoiceRepository;
     private final SubscriptionService subscriptionService;
     private final UpgradeRequestRepository upgradeRequestRepository;
+    private final com.qlpt.backend.service.SystemSettingService systemSettingService;
 
     @Value("${app.payos.client-id:}")
     private String adminPayosClientId;
@@ -45,11 +46,13 @@ public class PaymentController {
     public PaymentController(InvoiceService invoiceService,
             InvoiceRepository invoiceRepository,
             SubscriptionService subscriptionService,
-            UpgradeRequestRepository upgradeRequestRepository) {
+            UpgradeRequestRepository upgradeRequestRepository,
+            com.qlpt.backend.service.SystemSettingService systemSettingService) {
         this.invoiceService = invoiceService;
         this.invoiceRepository = invoiceRepository;
         this.subscriptionService = subscriptionService;
         this.upgradeRequestRepository = upgradeRequestRepository;
+        this.systemSettingService = systemSettingService;
     }
 
     @GetMapping("/invoices/{invoiceId}/payos-link")
@@ -147,9 +150,8 @@ public class PaymentController {
             throw new RuntimeException("Yêu cầu này đã được xử lý");
         }
 
-        if (adminPayosClientId == null || adminPayosApiKey == null || adminPayosChecksumKey == null ||
-                adminPayosClientId.trim().isEmpty() || adminPayosApiKey.trim().isEmpty()
-                || adminPayosChecksumKey.trim().isEmpty()) {
+        PayOS payOS = getAdminPayOS();
+        if (payOS == null) {
             throw new RuntimeException("Cổng thanh toán tự động của hệ thống chưa được cấu hình.");
         }
 
@@ -160,11 +162,6 @@ public class PaymentController {
         }
 
         try {
-            PayOS payOS = new PayOS(
-                    adminPayosClientId.trim(),
-                    adminPayosApiKey.trim(),
-                    adminPayosChecksumKey.trim());
-
             String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim()
                     : "http://localhost:5173/landlord/dashboard";
             String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim()
@@ -245,17 +242,10 @@ public class PaymentController {
             if (upgradeOpt.isPresent()) {
                 UpgradeRequest upgradeReq = upgradeOpt.get();
 
-                if (adminPayosClientId == null || adminPayosApiKey == null || adminPayosChecksumKey == null ||
-                        adminPayosClientId.trim().isEmpty() || adminPayosApiKey.trim().isEmpty()
-                        || adminPayosChecksumKey.trim().isEmpty()) {
+                PayOS payOS = getAdminPayOS();
+                if (payOS == null) {
                     return ResponseEntity.badRequest().body(Map.of("message", "Admin PayOS keys not configured"));
                 }
-
-                // Khởi tạo PayOS với cấu hình của hệ thống (Admin)
-                PayOS payOS = new PayOS(
-                        adminPayosClientId.trim(),
-                        adminPayosApiKey.trim(),
-                        adminPayosChecksumKey.trim());
 
                 // Xác thực chữ ký webhook từ PayOS
                 WebhookData verifiedData = payOS.webhooks().verify(webhookBody);
@@ -273,5 +263,29 @@ public class PaymentController {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "Webhook verification failed: " + e.getMessage()));
         }
+    }
+
+    private PayOS getAdminPayOS() {
+        var systemSetting = systemSettingService.getSetting();
+        String clientId = systemSetting.getPayosClientId();
+        String apiKey = systemSetting.getPayosApiKey();
+        String checksumKey = systemSetting.getPayosChecksumKey();
+        
+        if (clientId == null || clientId.trim().isEmpty()) {
+            clientId = adminPayosClientId;
+        }
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            apiKey = adminPayosApiKey;
+        }
+        if (checksumKey == null || checksumKey.trim().isEmpty()) {
+            checksumKey = adminPayosChecksumKey;
+        }
+        
+        if (clientId == null || apiKey == null || checksumKey == null ||
+            clientId.trim().isEmpty() || apiKey.trim().isEmpty() || checksumKey.trim().isEmpty()) {
+            return null;
+        }
+        
+        return new PayOS(clientId.trim(), apiKey.trim(), checksumKey.trim());
     }
 }

@@ -36,6 +36,9 @@ public class SystemSettingServiceImpl implements SystemSettingService {
                     .phone("0365943254")
                     .email("admin@gmail.com")
                     .fullName("Trần Văn Huy")
+                    .payosClientId("")
+                    .payosApiKey("")
+                    .payosChecksumKey("")
                     .build();
             return systemSettingRepository.save(defaultSetting);
         });
@@ -51,6 +54,9 @@ public class SystemSettingServiceImpl implements SystemSettingService {
         existing.setPhone(newSetting.getPhone());
         existing.setEmail(newSetting.getEmail());
         existing.setFullName(newSetting.getFullName());
+        existing.setPayosClientId(newSetting.getPayosClientId());
+        existing.setPayosApiKey(newSetting.getPayosApiKey());
+        existing.setPayosChecksumKey(newSetting.getPayosChecksumKey());
         return systemSettingRepository.save(existing);
     }
 }

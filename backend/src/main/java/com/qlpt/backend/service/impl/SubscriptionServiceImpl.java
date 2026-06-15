@@ -28,6 +28,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final UpgradeRequestRepository upgradeRequestRepository;
     private final UserRepository userRepository;
     private final com.qlpt.backend.service.NotificationService notificationService;
+    private final com.qlpt.backend.service.SystemSettingService systemSettingService;
 
     @Value("${app.payos.client-id:}")
     private String adminPayosClientId;
@@ -40,10 +41,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     public SubscriptionServiceImpl(UpgradeRequestRepository upgradeRequestRepository,
                                    UserRepository userRepository,
-                                   com.qlpt.backend.service.NotificationService notificationService) {
+                                   com.qlpt.backend.service.NotificationService notificationService,
+                                   com.qlpt.backend.service.SystemSettingService systemSettingService) {
         this.upgradeRequestRepository = upgradeRequestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.systemSettingService = systemSettingService;
     }
 
     @Transactional
@@ -64,17 +67,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String checkoutUrl = null;
         String paymentLinkId = null;
 
-        if (adminPayosClientId != null && !adminPayosClientId.trim().isEmpty() &&
-            adminPayosApiKey != null && !adminPayosApiKey.trim().isEmpty() &&
-            adminPayosChecksumKey != null && !adminPayosChecksumKey.trim().isEmpty()) {
-            
+        PayOS payOS = getAdminPayOS();
+        if (payOS != null) {
             try {
-                PayOS payOS = new PayOS(
-                        adminPayosClientId.trim(),
-                        adminPayosApiKey.trim(),
-                        adminPayosChecksumKey.trim()
-                );
-                
                 String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim() : "http://localhost:5173/landlord/dashboard";
                 String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim() : "http://localhost:5173/landlord/dashboard";
                 
@@ -130,19 +125,41 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return savedRequest;
     }
 
+    @Transactional
     @Override
     public List<UpgradeRequest> getMyRequests(User landlord) {
-        return upgradeRequestRepository.findByUserIdOrderByCreatedAtDesc(landlord.getId());
+        List<UpgradeRequest> requests = upgradeRequestRepository.findByUserIdOrderByCreatedAtDesc(landlord.getId());
+        List<UpgradeRequest> syncedRequests = new ArrayList<>();
+        for (UpgradeRequest req : requests) {
+            if ("PENDING".equals(req.getStatus()) && req.getPayosOrderCode() != null) {
+                syncedRequests.add(syncPayosStatus(req));
+            } else {
+                syncedRequests.add(req);
+            }
+        }
+        return syncedRequests;
     }
 
+    @Transactional
     @Override
     public Map<String, Object> getActiveStatus(User landlord) {
+        // Sync PayOS status for any PENDING requests first to ensure statusMap reflects the latest payment
+        List<UpgradeRequest> requests = upgradeRequestRepository.findByUserIdOrderByCreatedAtDesc(landlord.getId());
+        for (UpgradeRequest req : requests) {
+            if ("PENDING".equals(req.getStatus()) && req.getPayosOrderCode() != null) {
+                syncPayosStatus(req);
+            }
+        }
+
+        // Fetch fresh landlord from database to get the updated subscriptionExpiredAt field
+        User freshLandlord = userRepository.findById(landlord.getId()).orElse(landlord);
+
         Map<String, Object> statusMap = new HashMap<>();
         
-        LocalDateTime regDateTime = landlord.getCreatedAt() != null ? landlord.getCreatedAt() : LocalDateTime.now().minusDays(50);
+        LocalDateTime regDateTime = freshLandlord.getCreatedAt() != null ? freshLandlord.getCreatedAt() : LocalDateTime.now().minusDays(50);
         LocalDate regDate = regDateTime.toLocalDate();
         LocalDate trialExpiredAt = regDate.plusDays(45);
-        LocalDate subscriptionExpiredAt = landlord.getSubscriptionExpiredAt();
+        LocalDate subscriptionExpiredAt = freshLandlord.getSubscriptionExpiredAt();
         
         LocalDate today = LocalDate.now();
         
@@ -161,7 +178,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         statusMap.put("isExpired", isExpired);
         statusMap.put("trialDaysLeft", trialDaysLeft);
         statusMap.put("subscriptionDaysLeft", subscriptionDaysLeft);
-        statusMap.put("role", landlord.getRole().name());
+        statusMap.put("role", freshLandlord.getRole().name());
         
         return statusMap;
     }
@@ -211,7 +228,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         request.setStatus("APPROVED");
         request.setProcessedAt(LocalDateTime.now());
         
-        return upgradeRequestRepository.save(request);
+        UpgradeRequest saved = upgradeRequestRepository.save(request);
+
+        // Gửi thông báo đến chủ trọ sau khi duyệt nâng cấp thành công
+        try {
+            String title = "Gia hạn tài khoản thành công";
+            String content = String.format("Yêu cầu nâng cấp gói %d tháng của bạn đã được kích hoạt thành công. Hạn sử dụng mới là %s.",
+                    months, newExpiry.toString());
+            notificationService.createNotification(landlord, title, content, "SUBSCRIPTION_APPROVED", saved.getId());
+        } catch (Exception ne) {
+            System.err.println("Lỗi khi gửi thông báo đồng bộ duyệt gia hạn: " + ne.getMessage());
+        }
+
+        return saved;
     }
 
     @Transactional
@@ -279,5 +308,59 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         } while (upgradeRequestRepository.existsByPaymentContent(content));
         
         return content;
+    }
+
+    private PayOS getAdminPayOS() {
+        var systemSetting = systemSettingService.getSetting();
+        String clientId = systemSetting.getPayosClientId();
+        String apiKey = systemSetting.getPayosApiKey();
+        String checksumKey = systemSetting.getPayosChecksumKey();
+        
+        if (clientId == null || clientId.trim().isEmpty()) {
+            clientId = adminPayosClientId;
+        }
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            apiKey = adminPayosApiKey;
+        }
+        if (checksumKey == null || checksumKey.trim().isEmpty()) {
+            checksumKey = adminPayosChecksumKey;
+        }
+        
+        if (clientId == null || apiKey == null || checksumKey == null ||
+            clientId.trim().isEmpty() || apiKey.trim().isEmpty() || checksumKey.trim().isEmpty()) {
+            return null;
+        }
+        
+        return new PayOS(clientId.trim(), apiKey.trim(), checksumKey.trim());
+    }
+
+    private UpgradeRequest syncPayosStatus(UpgradeRequest request) {
+        System.out.println("[PayOS Upgrade Sync] Bat dau dong bo yeu cau ID: " + request.getId() + ", OrderCode: " + request.getPayosOrderCode());
+        PayOS payOS = getAdminPayOS();
+        if (payOS == null) {
+            System.out.println("[PayOS Upgrade Sync] Admin chua cau hinh PayOS (ca o database va file cau hinh), bo qua dong bo.");
+            return request;
+        }
+
+        try {
+            var paymentLinkData = payOS.paymentRequests().get(request.getPayosOrderCode());
+            if (paymentLinkData != null) {
+                System.out.println("[PayOS Upgrade Sync] Trang thai thanh toan tren PayOS: " + paymentLinkData.getStatus() + ", So tien da thanh toan: " + paymentLinkData.getAmountPaid());
+                if ("PAID".equals(String.valueOf(paymentLinkData.getStatus()))) {
+                    // Update the request status and upgrade subscription
+                    UpgradeRequest approved = approveRequest(request.getId());
+                    System.out.println("[PayOS Upgrade Sync] Cap nhat yeu cau ID " + request.getId() + " thanh cong sang APPROVED!");
+                    return approved;
+                } else {
+                    System.out.println("[PayOS Upgrade Sync] Trang thai khong phai PAID. Bo qua cap nhat.");
+                }
+            } else {
+                System.out.println("[PayOS Upgrade Sync] Khong tim thay thong tin link thanh toan tu PayOS.");
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi đồng bộ trạng thái PayOS cho yeu cau nang cap " + request.getId() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        return request;
     }
 }

@@ -28,4 +28,13 @@ public class SystemSetting {
 
     @Column(name = "full_name")
     private String fullName;
+
+    @Column(name = "payos_client_id")
+    private String payosClientId;
+
+    @Column(name = "payos_api_key")
+    private String payosApiKey;
+
+    @Column(name = "payos_checksum_key")
+    private String payosChecksumKey;
 }
