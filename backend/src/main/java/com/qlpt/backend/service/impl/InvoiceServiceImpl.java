@@ -370,9 +370,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private Invoice syncPayosStatus(Invoice invoice) {
         BoardingHouse bh = invoice.getContract().getRoom().getBoardingHouse();
+        System.out.println("[PayOS Sync] Bat dau dong bo hoa don ID: " + invoice.getId() + ", OrderCode: " + invoice.getPayosOrderCode());
         if (bh.getPayosClientId() == null || bh.getPayosApiKey() == null || bh.getPayosChecksumKey() == null ||
                 bh.getPayosClientId().trim().isEmpty() || bh.getPayosApiKey().trim().isEmpty()
                 || bh.getPayosChecksumKey().trim().isEmpty()) {
+            System.out.println("[PayOS Sync] Day tro chua cau hinh PayOS, bo qua dong bo.");
             return invoice;
         }
 
@@ -383,32 +385,41 @@ public class InvoiceServiceImpl implements InvoiceService {
                     bh.getPayosChecksumKey().trim());
 
             var paymentLinkData = payOS.paymentRequests().get(invoice.getPayosOrderCode());
-            if (paymentLinkData != null && "PAID".equals(paymentLinkData.getStatus())) {
-                invoice.setPaidAmount(invoice.getTotalAmount());
-                invoice.setStatus(InvoiceStatus.PAID);
-                invoice.setPaymentDate(LocalDate.now());
-                invoice.setPaymentClaimed(false);
+            if (paymentLinkData != null) {
+                System.out.println("[PayOS Sync] Trang thai thanh toan tren PayOS: " + paymentLinkData.getStatus() + ", So tien da thanh toan: " + paymentLinkData.getAmountPaid());
+                if ("PAID".equals(paymentLinkData.getStatus())) {
+                    invoice.setPaidAmount(invoice.getTotalAmount());
+                    invoice.setStatus(InvoiceStatus.PAID);
+                    invoice.setPaymentDate(LocalDate.now());
+                    invoice.setPaymentClaimed(false);
 
-                Invoice saved = invoiceRepository.save(invoice);
+                    Invoice saved = invoiceRepository.save(invoice);
+                    System.out.println("[PayOS Sync] Cap nhat hoa don ID " + invoice.getId() + " thanh cong sang PAID!");
 
-                // Gửi thông báo đến người thuê
-                try {
-                    String title = "Xác nhận thanh toán hóa đơn";
-                    String content = String.format(
-                            "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công qua PayOS.",
-                            saved.getContract().getRoom().getRoomNumber(),
-                            saved.getBillingPeriodStart(),
-                            saved.getBillingPeriodEnd());
-                    notificationService.createNotification(saved.getContract().getTenant(), title, content,
-                            "PAYMENT_CONFIRMED", saved.getId());
-                } catch (Exception ne) {
-                    System.err.println("Lỗi khi gửi thông báo đồng bộ PayOS: " + ne.getMessage());
+                    // Gửi thông báo đến người thuê
+                    try {
+                        String title = "Xác nhận thanh toán hóa đơn";
+                        String content = String.format(
+                                "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công qua PayOS.",
+                                saved.getContract().getRoom().getRoomNumber(),
+                                saved.getBillingPeriodStart(),
+                                saved.getBillingPeriodEnd());
+                        notificationService.createNotification(saved.getContract().getTenant(), title, content,
+                                "PAYMENT_CONFIRMED", saved.getId());
+                    } catch (Exception ne) {
+                        System.err.println("Lỗi khi gửi thông báo đồng bộ PayOS: " + ne.getMessage());
+                    }
+
+                    return invoiceRepository.findWithDetailsById(saved.getId()).orElse(saved);
+                } else {
+                    System.out.println("[PayOS Sync] Trang thai hoa don khong phai PAID. Bo qua cap nhat.");
                 }
-
-                return invoiceRepository.findWithDetailsById(saved.getId()).orElse(saved);
+            } else {
+                System.out.println("[PayOS Sync] Khong tim thay thong tin link thanh toan tu PayOS.");
             }
         } catch (Exception e) {
             System.err.println("Lỗi đồng bộ trạng thái PayOS cho hóa đơn " + invoice.getId() + ": " + e.getMessage());
+            e.printStackTrace();
         }
         return invoice;
     }
