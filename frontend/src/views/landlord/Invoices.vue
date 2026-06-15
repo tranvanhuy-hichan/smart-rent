@@ -59,8 +59,8 @@
           <MoneyDisplay :value="value" type="success" />
         </template>
 
-        <template #cell(remainingAmount)="{ value }">
-          <MoneyDisplay :value="value" type="danger" />
+        <template #cell(remainingAmount)="{ item }">
+          <MoneyDisplay :value="item.totalAmount - item.paidAmount" type="danger" />
         </template>
 
         <!-- Custom slot for Billing Period (2 lines) -->

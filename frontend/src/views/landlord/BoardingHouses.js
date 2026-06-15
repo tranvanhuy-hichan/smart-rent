@@ -50,20 +50,6 @@ export default {
     const showEditModal = ref(false);
     const editId = ref(null);
 
-    const popularBanks = [
-      { code: 'MB', name: 'MBBank (Ngân hàng Quân đội)' },
-      { code: 'VCB', name: 'Vietcombank' },
-      { code: 'ICB', name: 'VietinBank' },
-      { code: 'BIDV', name: 'BIDV' },
-      { code: 'TCB', name: 'Techcombank' },
-      { code: 'ACB', name: 'ACB' },
-      { code: 'VPB', name: 'VPBank' },
-      { code: 'TPB', name: 'TPBank' },
-      { code: 'VIB', name: 'VIB' },
-      { code: 'STB', name: 'Sacombank' },
-      { code: 'HDB', name: 'HDBank' },
-      { code: 'SHB', name: 'SHB' }
-    ];
 
     const form = ref({
       name: '',
@@ -71,9 +57,6 @@ export default {
       defaultElectricityRate: 3500,
       defaultWaterRate: 15000,
       waterBillingType: 'BY_INDEX',
-      bankName: '',
-      bankAccountNumber: '',
-      bankAccountName: '',
       rules: '',
       fixedBillingDay: null,
       extraFees: [],
@@ -131,9 +114,6 @@ export default {
         defaultElectricityRate: house.defaultElectricityRate,
         defaultWaterRate: house.defaultWaterRate,
         waterBillingType: house.waterBillingType,
-        bankName: house.bankName || '',
-        bankAccountNumber: house.bankAccountNumber || '',
-        bankAccountName: house.bankAccountName || '',
         rules: house.rules || '',
         fixedBillingDay: house.fixedBillingDay || null,
         extraFees: (house.extraFees || []).map(ef => ({
@@ -176,9 +156,6 @@ export default {
         defaultElectricityRate: 3500,
         defaultWaterRate: 15000,
         waterBillingType: 'BY_INDEX',
-        bankName: '',
-        bankAccountNumber: '',
-        bankAccountName: '',
         rules: '',
         fixedBillingDay: null,
         extraFees: [],
@@ -308,7 +285,6 @@ export default {
       showAddModal,
       showEditModal,
       form,
-      popularBanks,
       showRuleBuilder,
       ruleTemplate,
       applyRulesTemplate,

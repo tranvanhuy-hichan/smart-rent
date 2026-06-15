@@ -330,38 +330,26 @@
               </div>
             </div>
 
-            <!-- Case 2: Fallback to manual bank transfer if PayOS is not configured -->
-            <div v-else-if="invoice.contract?.room?.boardingHouse?.bankAccountNumber"
+            <!-- Case 2: Fallback to cash payment if PayOS is not configured -->
+            <div v-else
               class="bg-card border border-border-main rounded-xl p-5 shadow-xs flex flex-col items-center sticky top-20">
-              <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán chuyển khoản</h3>
-              <p class="text-[11px] text-text-sub mb-4 text-center">Vui lòng chuyển khoản ngân hàng theo thông tin chi tiết dưới đây.</p>
+              <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 text-amber-500 shrink-0">
+                <span class="text-2xl">💵</span>
+              </div>
+              <h3 class="text-sm font-bold text-text-main mb-1 w-full text-center">Thanh toán bằng tiền mặt</h3>
+              <p class="text-[11px] text-text-sub mb-4 text-center leading-relaxed">
+                Dãy trọ này chưa được cấu hình thanh toán tự động qua PayOS. Quý khách vui lòng thanh toán trực tiếp bằng tiền mặt cho chủ trọ.
+              </p>
 
               <!-- Details -->
               <div class="space-y-2.5 text-xs w-full">
                 <div class="flex justify-between border-b border-border-main/20 pb-1.5">
-                  <span class="text-text-sub font-semibold">Ngân hàng:</span>
-                  <span class="font-bold text-text-main">{{ invoice.contract?.room?.boardingHouse?.bankName }}</span>
-                </div>
-                <div class="flex justify-between border-b border-border-main/20 pb-1.5">
-                  <span class="text-text-sub font-semibold">Số tài khoản:</span>
-                  <span class="font-bold text-primary">{{ invoice.contract?.room?.boardingHouse?.bankAccountNumber
-                  }}</span>
-                </div>
-                <div class="flex justify-between border-b border-border-main/20 pb-1.5">
-                  <span class="text-text-sub font-semibold">Tên chủ tài khoản:</span>
-                  <span class="font-bold text-text-main">{{ invoice.contract?.room?.boardingHouse?.bankAccountName
-                  }}</span>
+                  <span class="text-text-sub font-semibold">Hình thức:</span>
+                  <span class="font-bold text-text-main">Tiền mặt trực tiếp</span>
                 </div>
                 <div class="flex justify-between border-b border-border-main/20 pb-1.5">
                   <span class="text-text-sub font-semibold">Số tiền cần đóng:</span>
                   <MoneyDisplay :value="invoice.totalAmount - invoice.paidAmount" type="danger" />
-                </div>
-                <div class="flex flex-col gap-1">
-                  <span class="text-text-sub font-semibold">Nội dung chuyển khoản:</span>
-                  <span
-                    class="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-1.5 rounded text-text-main text-center text-[10.5px]">
-                    PHONG {{ invoice.contract?.room?.roomNumber }} CK TIEN PHONG
-                  </span>
                 </div>
               </div>
 
@@ -371,7 +359,7 @@
                 <AppIcon name="exclamation-triangle" class="!w-4 !h-4 shrink-0 mt-0.5" />
                 <div>
                   <span class="font-bold block text-[10px] mb-0.5">Lưu ý quan trọng:</span>
-                  <p class="text-[9px] leading-normal m-0">Sau khi chuyển khoản thành công, quý khách vui lòng đợi chủ trọ đối soát tài khoản và xác nhận duyệt trạng thái thanh toán trên hệ thống.</p>
+                  <p class="text-[9px] leading-normal m-0">Sau khi thanh toán tiền mặt thành công, quý khách vui lòng nhắc chủ trọ xác nhận và cập nhật trạng thái hóa đơn trên hệ thống.</p>
                 </div>
               </div>
             </div>

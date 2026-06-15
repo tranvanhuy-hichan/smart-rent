@@ -80,6 +80,32 @@
           />
         </div>
 
+        <div class="space-y-4 pt-2">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider border-b border-border-main/50 pb-2">Cấu hình cổng thanh toán tự động PayOS</h3>
+          
+          <FormInput
+            type="text"
+            label="PayOS Client ID"
+            v-model="form.payosClientId"
+            placeholder="Nhập Client ID từ cổng PayOS"
+          />
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <FormInput
+              type="password"
+              label="PayOS API Key"
+              v-model="form.payosApiKey"
+              placeholder="Nhập API Key"
+            />
+            <FormInput
+              type="password"
+              label="PayOS Checksum Key"
+              v-model="form.payosChecksumKey"
+              placeholder="Nhập Checksum Key"
+            />
+          </div>
+        </div>
+
         <div class="flex justify-end gap-3 pt-4 border-t border-border-main/60">
           <FormButton type="submit" variant="primary" :loading="saving">
             Lưu cài đặt

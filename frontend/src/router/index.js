@@ -44,6 +44,12 @@ const routes = [
     meta: { requiresAuth: true, requiresRole: 'ADMIN' },
   },
   {
+    path: '/admin/packages',
+    name: 'AdminPackages',
+    component: () => import('../views/admin/AdminPackages.vue'),
+    meta: { requiresAuth: true, requiresRole: 'ADMIN' },
+  },
+  {
     path: '/admin/login-history',
     name: 'AdminLoginHistory',
     component: () => import('../views/admin/AdminLoginHistory.vue'),

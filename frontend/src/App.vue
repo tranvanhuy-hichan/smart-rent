@@ -396,7 +396,7 @@ export default {
         }
       } else if (notif.type === 'SUBSCRIPTION_REQUEST') {
         if (authStore.role === 'ADMIN') {
-          router.push('/admin/requests');
+          router.push('/admin/landlords');
         }
       }
     };

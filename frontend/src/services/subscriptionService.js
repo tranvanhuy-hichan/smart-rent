@@ -2,8 +2,8 @@ import api from './api.js';
 
 export default {
   // Landlord endpoints
-  createRequest(months, returnUrl, cancelUrl) {
-    return api.post('/api/subscriptions/request', { months, returnUrl, cancelUrl });
+  createRequest(packageId, returnUrl, cancelUrl) {
+    return api.post('/api/subscriptions/request', { packageId, returnUrl, cancelUrl });
   },
   
   getMyRequests() {
@@ -12,6 +12,27 @@ export default {
   
   getActiveStatus() {
     return api.get('/api/subscriptions/active-status');
+  },
+  
+  // Package endpoints
+  getActivePackages() {
+    return api.get('/api/subscriptions/packages');
+  },
+
+  getAdminPackages() {
+    return api.get('/api/subscriptions/packages/admin');
+  },
+
+  createPackage(pack) {
+    return api.post('/api/subscriptions/packages', pack);
+  },
+
+  updatePackage(id, pack) {
+    return api.put(`/api/subscriptions/packages/${id}`, pack);
+  },
+
+  deletePackage(id) {
+    return api.delete(`/api/subscriptions/packages/${id}`);
   },
   
   // Admin endpoints

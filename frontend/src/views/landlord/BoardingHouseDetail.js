@@ -35,20 +35,7 @@ export default {
     const loading = ref(true);
     const activeTab = ref('info');
 
-    const popularBanks = [
-      { code: 'MB', name: 'MBBank (Ngân hàng Quân đội)' },
-      { code: 'VCB', name: 'Vietcombank' },
-      { code: 'ICB', name: 'VietinBank' },
-      { code: 'BIDV', name: 'BIDV' },
-      { code: 'TCB', name: 'Techcombank' },
-      { code: 'ACB', name: 'ACB' },
-      { code: 'VPB', name: 'VPBank' },
-      { code: 'TPB', name: 'TPBank' },
-      { code: 'VIB', name: 'VIB' },
-      { code: 'STB', name: 'Sacombank' },
-      { code: 'HDB', name: 'HDBank' },
-      { code: 'SHB', name: 'SHB' }
-    ];
+
 
     const form = ref({
       name: '',
@@ -56,9 +43,6 @@ export default {
       defaultElectricityRate: 3500,
       defaultWaterRate: 15000,
       waterBillingType: 'BY_INDEX',
-      bankName: '',
-      bankAccountNumber: '',
-      bankAccountName: '',
       rules: '',
       fixedBillingDay: null,
       extraFees: [],
@@ -183,9 +167,6 @@ export default {
           defaultElectricityRate: data.defaultElectricityRate,
           defaultWaterRate: data.defaultWaterRate,
           waterBillingType: data.waterBillingType,
-          bankName: data.bankName || '',
-          bankAccountNumber: data.bankAccountNumber || '',
-          bankAccountName: data.bankAccountName || '',
           rules: data.rules || '',
           fixedBillingDay: data.fixedBillingDay || null,
           extraFees: (data.extraFees || []).map(ef => ({
@@ -251,7 +232,6 @@ export default {
       house,
       loading,
       form,
-      popularBanks,
       activeTab,
       showRuleBuilder,
       ruleTemplate,

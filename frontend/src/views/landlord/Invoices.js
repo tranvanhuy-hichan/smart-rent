@@ -16,6 +16,7 @@ import { useContractStore } from "../../stores/contract.js";
 import invoiceService from "../../services/invoiceService.js";
 import { useConfirmModal } from "../../composables/useConfirmModal.js";
 import { formatDate } from "../../utils/date.js";
+import { formatMoney } from "../../utils/money.js";
 import DateDisplay from "../../components/ui/DateDisplay.vue";
 
 export default {

@@ -324,14 +324,10 @@ export default {
       msg += `Còn nợ: ${formatMoney(inv.totalAmount - inv.paidAmount)} đ\n`;
 
       const bh = inv.contract?.room?.boardingHouse;
-      if (bh && bh.bankName && bh.bankAccountNumber) {
-        msg += `\nThông tin chuyển khoản:\n`;
-        msg += `- Ngân hàng: ${bh.bankName}\n`;
-        msg += `- Số tài khoản: ${bh.bankAccountNumber}\n`;
-        if (bh.bankAccountName) {
-          msg += `- Chủ tài khoản: ${bh.bankAccountName}\n`;
-        }
-        msg += `- Nội dung chuyển khoản: PHONG ${roomNum} CK TIEN PHONG\n`;
+      if (bh && bh.payosClientId) {
+        msg += `\n- Hình thức thanh toán: Thanh toán trực tuyến qua cổng PayOS (Vui lòng truy cập hệ thống để thanh toán).\n`;
+      } else {
+        msg += `\n- Hình thức thanh toán: Vui lòng thanh toán trực tiếp bằng tiền mặt cho chủ trọ.\n`;
       }
 
       msg += `\nAnh/Chị vui lòng kiểm tra và thanh toán sớm. Xin cảm ơn!`;
@@ -386,6 +382,15 @@ export default {
 
     onMounted(() => {
       fetchInvoiceDetail();
+      
+      // Kiểm tra tham số từ cổng thanh toán PayOS chuyển hướng về
+      if (route.query.status === 'PAID' || route.query.code === '00') {
+        showAlert('Thành công', 'Thanh toán tiền phòng qua cổng PayOS thành công!', 'success');
+        router.replace({ query: {} });
+      } else if (route.query.status === 'CANCELLED' || route.query.cancel === 'true') {
+        showAlert('Thông tin', 'Giao dịch thanh toán qua PayOS đã được hủy.', 'info');
+        router.replace({ query: {} });
+      }
     });
 
     return {

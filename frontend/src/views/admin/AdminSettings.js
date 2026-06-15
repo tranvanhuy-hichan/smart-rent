@@ -18,7 +18,10 @@ export default {
       accountName: '',
       phone: '',
       email: '',
-      fullName: ''
+      fullName: '',
+      payosClientId: '',
+      payosApiKey: '',
+      payosChecksumKey: ''
     });
 
     const loadSettings = async () => {

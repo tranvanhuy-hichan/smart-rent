@@ -69,14 +69,7 @@
               </div>
             </div>
 
-            <!-- Banking information preview (ẩn ở list, xem trong chi tiết) -->
-            <div v-if="house.bankAccountNumber"
-              class="pt-1 border-t border-border-main/40 flex items-center gap-1 text-[11px] text-text-sub">
-              <span>🏦</span>
-              <span class="font-medium">{{ house.bankName }}</span>
-              <span class="opacity-60">···</span>
-              <span>{{ house.bankAccountNumber.slice(-4) }}</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -123,28 +116,7 @@
 
 
 
-        <!-- Cấu hình nhận thanh toán bằng QR Code -->
-        <div class="mt-6 pt-4 border-t border-border-main">
-          <h4 class="text-sm font-bold text-text-main mb-3">Tài Khoản Ngân Hàng Nhận Tiền</h4>
-          <div class="mb-4">
-            <FormSelect label="Ngân hàng nhận" v-model="form.bankName">
-              <option value="">-- Chọn ngân hàng --</option>
-              <option v-for="bank in popularBanks" :key="bank.code" :value="bank.code">
-                {{ bank.name }}
-              </option>
-            </FormSelect>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <FormInput type="text" label="Số tài khoản" v-model="form.bankAccountNumber"
-                placeholder="Nhập số tài khoản" />
-            </div>
-            <div>
-              <FormInput type="text" label="Tên chủ tài khoản" v-model="form.bankAccountName"
-                placeholder="Chữ in hoa không dấu" />
-            </div>
-          </div>
-        </div>
+
 
         <!-- Cấu hình thanh toán tự động PayOS -->
         <div class="mt-6 pt-4 border-t border-border-main">

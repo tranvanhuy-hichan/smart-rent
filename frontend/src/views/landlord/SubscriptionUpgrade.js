@@ -1,5 +1,5 @@
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth.js';
 import subscriptionService from '../../services/subscriptionService.js';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
@@ -13,10 +13,12 @@ export default {
     FormButton
   },
   setup() {
+    const route = useRoute();
     const router = useRouter();
     const authStore = useAuthStore();
     
-    const selectedMonths = ref(6); // Default to 6 months
+    const selectedPackageId = ref(null);
+    const activePackages = ref([]);
     const currentRequest = ref(null);
     const status = ref(null);
     const requests = ref([]);
@@ -24,6 +26,7 @@ export default {
     
     const loadingStatus = ref(true);
     const loadingRequests = ref(true);
+    const loadingPackages = ref(true);
     const submitting = ref(false);
 
     const loadAdminBankInfo = async () => {
@@ -45,6 +48,21 @@ export default {
       }
     };
 
+    const loadPackages = async () => {
+      loadingPackages.value = true;
+      try {
+        const response = await subscriptionService.getActivePackages();
+        activePackages.value = response.data;
+        if (response.data && response.data.length > 0) {
+          // Select the first active package by default
+          selectedPackageId.value = response.data[0].id;
+        }
+      } catch (err) {
+      } finally {
+        loadingPackages.value = false;
+      }
+    };
+
     const loadRequests = async () => {
       loadingRequests.value = true;
       try {
@@ -63,10 +81,14 @@ export default {
     };
 
     const submitUpgradeRequest = async () => {
+      if (!selectedPackageId.value) {
+        alert('Vui lòng chọn gói nâng cấp!');
+        return;
+      }
       submitting.value = true;
       try {
         const response = await subscriptionService.createRequest(
-          selectedMonths.value,
+          selectedPackageId.value,
           window.location.href,
           window.location.href
         );
@@ -132,7 +154,7 @@ export default {
       const username = authStore.username || '';
       const months = currentRequest.value.months;
       const content = currentRequest.value.paymentContent;
-      const message = `Tôi đã chuyển khoản nâng cấp tài khoản ${username} gói ${months} tháng với nội dung chuyển khoản: "${content}". Vui lòng kiểm tra và kích hoạt tài khoản giúp tôi!`;
+      const message = `Tôi muốn nâng cấp tài khoản ${username} gói ${months} tháng, mã yêu cầu đối soát: "${content}". Vui lòng hỗ trợ kích hoạt tài khoản giúp tôi!`;
       return `https://zalo.me/${phone}?text=${encodeURIComponent(message)}`;
     });
 
@@ -143,19 +165,31 @@ export default {
     };
 
     onMounted(() => {
+      // Check query parameters from PayOS redirection
+      if (route.query.status === 'PAID' || route.query.code === '00') {
+        alert('Thanh toán nâng cấp gói thành công! Gói cước của bạn đã được kích hoạt.');
+        router.replace({ query: {} });
+      } else if (route.query.status === 'CANCELLED' || route.query.cancel === 'true') {
+        alert('Giao dịch thanh toán nâng cấp gói đã được hủy.');
+        router.replace({ query: {} });
+      }
+
       loadStatus();
       loadRequests();
+      loadPackages();
       loadAdminBankInfo();
     });
 
     return {
-      selectedMonths,
+      selectedPackageId,
+      activePackages,
       currentRequest,
       status,
       requests,
       adminBankInfo,
       loadingStatus,
       loadingRequests,
+      loadingPackages,
       submitting,
       zaloUrl,
       submitUpgradeRequest,

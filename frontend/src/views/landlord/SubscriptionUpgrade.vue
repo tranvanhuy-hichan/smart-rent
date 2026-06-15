@@ -95,122 +95,95 @@
           <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-5">1. Chọn gói thời gian gia
             hạn</h3>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- 3 Months -->
-            <div @click="selectedMonths = 3"
-              :class="['border rounded-2xl p-4 cursor-pointer transition-all duration-150 relative flex flex-col justify-between min-h-[140px]',
-                selectedMonths === 3 ? 'border-primary bg-primary/5 dark:bg-primary/5 shadow-xs ring-1 ring-primary' : 'border-border-main hover:bg-slate-50/50 dark:hover:bg-slate-900/20']">
-              <div>
-                <span class="font-bold text-sm text-text-main block">Gói 3 Tháng</span>
-                <span class="text-[10px] text-text-sub mt-1 block">Tiết kiệm, linh hoạt</span>
-              </div>
-              <div class="mt-4 pt-2 border-t border-border-main/20">
-                <span class="text-lg font-extrabold text-primary">300.000 đ</span>
-                <span class="text-[10px] text-text-sub block">(100.000đ/tháng)</span>
-              </div>
-            </div>
-
-            <!-- 6 Months -->
-            <div @click="selectedMonths = 6"
-              :class="['border rounded-2xl p-4 cursor-pointer transition-all duration-150 relative flex flex-col justify-between min-h-[140px]',
-                selectedMonths === 6 ? 'border-primary bg-primary/5 dark:bg-primary/5 shadow-xs ring-1 ring-primary' : 'border-border-main hover:bg-slate-50/50 dark:hover:bg-slate-900/20']">
-              <div
-                class="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-indigo-600 text-white font-bold text-[8px] uppercase tracking-wider">
-                Phổ biến</div>
-              <div>
-                <span class="font-bold text-sm text-text-main block">Gói 6 Tháng</span>
-                <span class="text-[10px] text-text-sub mt-1 block">Tối ưu chi phí</span>
-              </div>
-              <div class="mt-4 pt-2 border-t border-border-main/20">
-                <span class="text-lg font-extrabold text-primary">550.000 đ</span>
-                <span class="text-[10px] text-text-sub block">(~91.000đ/tháng)</span>
-              </div>
-            </div>
-
-            <!-- 12 Months -->
-            <div @click="selectedMonths = 12"
-              :class="['border rounded-2xl p-4 cursor-pointer transition-all duration-150 relative flex flex-col justify-between min-h-[140px]',
-                selectedMonths === 12 ? 'border-primary bg-primary/5 dark:bg-primary/5 shadow-xs ring-1 ring-primary' : 'border-border-main hover:bg-slate-50/50 dark:hover:bg-slate-900/20']">
-              <div
-                class="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[8px] uppercase tracking-wider">
-                Tiết kiệm 20%</div>
-              <div>
-                <span class="font-bold text-sm text-text-main block">Gói 12 Tháng</span>
-                <span class="text-[10px] text-text-sub mt-1 block">Dài hạn, ổn định tốt nhất</span>
-              </div>
-              <div class="mt-4 pt-2 border-t border-border-main/20">
-                <span class="text-lg font-extrabold text-primary">1.000.000 đ</span>
-                <span class="text-[10px] text-text-sub block">(~83.000đ/tháng)</span>
-              </div>
-            </div>
+          <!-- Loading Packages -->
+          <div v-if="loadingPackages" class="flex flex-col items-center justify-center py-10 gap-3 text-text-sub">
+            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-xs">Đang tải danh sách gói cước...</span>
           </div>
 
-          <div class="mt-6 flex justify-end">
-            <FormButton @click="submitUpgradeRequest" :loading="submitting" variant="primary" class="w-full sm:w-auto">
-              <AppIcon name="credit-card" class="!w-4 !h-4" />
-              <span>Tiến hành thanh toán</span>
-            </FormButton>
+          <!-- Empty State -->
+          <div v-else-if="activePackages.length === 0" class="text-center py-10 text-text-sub italic text-xs border border-dashed border-border-main rounded-2xl">
+            Hiện tại không có gói dịch vụ nào đang hoạt động. Vui lòng liên hệ Admin để cấu hình.
+          </div>
+
+          <!-- Packages Grid -->
+          <div v-else>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div v-for="pack in activePackages" :key="pack.id" @click="selectedPackageId = pack.id"
+                :class="['border rounded-2xl p-4 cursor-pointer transition-all duration-150 relative flex flex-col justify-between min-h-[140px]',
+                  selectedPackageId === pack.id ? 'border-primary bg-primary/5 dark:bg-primary/5 shadow-xs ring-1 ring-primary' : 'border-border-main hover:bg-slate-50/50 dark:hover:bg-slate-900/20']">
+                
+                <!-- Badge for 6 months / 12 months -->
+                <div v-if="pack.months === 6"
+                  class="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-indigo-600 text-white font-bold text-[8px] uppercase tracking-wider">
+                  Phổ biến
+                </div>
+                <div v-else-if="pack.months === 12"
+                  class="absolute -top-2.5 right-4 px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[8px] uppercase tracking-wider">
+                  Tiết kiệm nhất
+                </div>
+
+                <div>
+                  <span class="font-bold text-sm text-text-main block">{{ pack.name }}</span>
+                  <span class="text-[10px] text-text-sub mt-1 block line-clamp-2" :title="pack.description">
+                    {{ pack.description || `${pack.months} tháng gia hạn` }}
+                  </span>
+                </div>
+                <div class="mt-4 pt-2 border-t border-border-main/20">
+                  <span class="text-lg font-extrabold text-primary">{{ formatMoney(pack.price) }} đ</span>
+                  <span class="text-[10px] text-text-sub block">(~{{ formatMoney(Math.round(pack.price / pack.months)) }} đ/tháng)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+              <FormButton @click="submitUpgradeRequest" :loading="submitting" :disabled="!selectedPackageId" variant="primary" class="w-full sm:w-auto">
+                <AppIcon name="credit-card" class="!w-4 !h-4" />
+                <span>Tiến hành thanh toán</span>
+              </FormButton>
+            </div>
           </div>
         </div>
 
         <!-- Payment Instructions (Shown after submit) -->
         <div v-if="currentRequest" class="bg-card border border-border-main rounded-2xl p-5 shadow-xs">
-          <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-4">2. Hướng dẫn thanh toán
-          </h3>
+          <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-4">2. Tiến hành thanh toán</h3>
 
-          <div class="max-w-md mx-auto w-full p-4 bg-slate-50 dark:bg-slate-900/40 border border-border-main/50 rounded-2xl">
-            <!-- Account Transfer Info -->
-            <div class="space-y-3.5 text-xs">
+          <div class="max-w-md mx-auto w-full p-5 bg-slate-50 dark:bg-slate-900/40 border border-border-main/50 rounded-2xl">
+            <!-- Payment Info -->
+            <div class="space-y-4 text-xs">
               <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Ngân hàng thụ hưởng:</span>
-                <span class="font-bold text-text-main">{{ adminBankInfo?.bankName || 'VietinBank' }}</span>
+                <span class="text-text-sub font-semibold">Gói đăng ký:</span>
+                <span class="font-bold text-text-main">Gói {{ currentRequest.months }} tháng</span>
               </div>
               <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Số tài khoản:</span>
-                <span class="font-bold text-primary text-[13px] select-all">{{ adminBankInfo?.bankAccount ||
-                  '102882915218' }}</span>
-              </div>
-              <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Tên tài khoản:</span>
-                <span class="font-bold text-text-main">{{ adminBankInfo?.accountName || 'TRAN VAN HUY' }}</span>
-              </div>
-              <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Số tiền cần chuyển:</span>
+                <span class="text-text-sub font-semibold">Số tiền cần thanh toán:</span>
                 <span class="font-extrabold text-danger text-sm">{{ formatMoney(currentRequest.amount) }} đ</span>
               </div>
-              <div class="flex flex-col gap-1">
-                <span class="text-text-sub font-semibold">Nội dung chuyển khoản (Bắt buộc nhập chính xác):</span>
-                <div class="flex gap-2 items-center">
-                  <span
-                    class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1.5 rounded text-text-main text-center font-bold text-xs flex-1 border border-border-main select-all">
-                    {{ currentRequest.paymentContent }}
-                  </span>
-                  <button @click="copyContent(currentRequest.paymentContent)"
-                    class="p-2 border border-border-main hover:bg-slate-100 rounded-lg cursor-pointer"
-                    title="Sao chép nội dung">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                      stroke="currentColor" class="w-4 h-4 text-text-sub">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0015 2.25h-3a2.251 2.251 0 00-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5h10.5a.75.75 0 01.75.75v12a.75.75 0 01-.75.75H6.75a.75.75 0 01-.75-.75V8.25a.75.75 0 01.75-.75z" />
-                    </svg>
-                  </button>
-                </div>
+              <div class="flex justify-between border-b border-border-main/20 pb-2">
+                <span class="text-text-sub font-semibold">Trạng thái yêu cầu:</span>
+                <span class="font-bold text-amber-500 uppercase">Chờ thanh toán</span>
+              </div>
+              
+              <div class="pt-2 flex flex-col gap-2.5">
+                <FormButton @click="payPendingRequestWithPayos" :loading="loadingPayos" variant="primary" class="w-full justify-center">
+                  <AppIcon name="credit-card" class="!w-4 !h-4" />
+                  <span>Thanh toán trực tuyến bằng PayOS</span>
+                </FormButton>
               </div>
             </div>
           </div>
 
-          <!-- Quick Zalo Notification -->
+          <!-- Quick Zalo Notification / Support -->
           <div class="mt-5 p-4 bg-primary/5 border border-primary/20 rounded-2xl flex flex-col gap-3">
             <p class="text-xs leading-relaxed text-text-sub m-0">
-              💡 <strong>Sau khi chuyển khoản thành công:</strong> Hệ thống đã lưu lại yêu cầu nâng cấp của bạn. Để được
-              duyệt và kích hoạt gói cước nhanh nhất, bạn vui lòng bấm vào nút bên dưới để nhắn tin Zalo thông báo trực
-              tiếp cho Admin.
+              💡 <strong>Hỗ trợ thanh toán nhanh:</strong> Hệ thống đã tạo yêu cầu nâng cấp dịch vụ. Nếu bạn không thể thanh toán trực tuyến hoặc cần Admin hỗ trợ kích hoạt trực tiếp, vui lòng gửi tin nhắn Zalo kèm theo mã nội dung đối soát: <strong class="select-all font-mono text-primary">{{ currentRequest.paymentContent }}</strong>.
             </p>
-            <div class="flex justify-end">
+            <div class="flex justify-end gap-3 flex-wrap">
               <a :href="zaloUrl" target="_blank"
                 class="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition-all duration-150 cursor-pointer bg-[#0068ff] hover:bg-[#0052cc] text-white shadow-xs text-center">
                 <AppIcon name="zalo" class="!w-4 !h-4" />
-                <span>Nhắn tin Zalo báo Admin duyệt gói</span>
+                <span>Liên hệ Zalo báo Admin</span>
               </a>
             </div>
           </div>
