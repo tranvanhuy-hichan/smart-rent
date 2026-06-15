@@ -52,6 +52,7 @@ export default {
     });
 
     const showRuleBuilder = ref(false);
+    const showPayosGuide = ref(false);
     const ruleTemplate = ref({
       enabledCurfew: true,
       curfewStart: '23:00',
@@ -72,13 +73,22 @@ export default {
       enabledSocialEvils: true,
     });
 
+    const newFee = ref({
+      name: '',
+      defaultPrice: '',
+      unitType: 'FIXED_PER_ROOM',
+    });
+
     const addExtraFeeRow = () => {
+      if (!newFee.value.name || !newFee.value.defaultPrice) return;
       form.value.extraFees.push({
         id: null,
-        name: '',
-        defaultPrice: 0,
-        unitType: 'FIXED_PER_ROOM',
+        name: newFee.value.name,
+        defaultPrice: Number(newFee.value.defaultPrice),
+        unitType: newFee.value.unitType,
       });
+      // reset form
+      newFee.value = { name: '', defaultPrice: '', unitType: 'FIXED_PER_ROOM' };
     };
 
     const removeExtraFeeRow = (index) => {
@@ -232,8 +242,10 @@ export default {
       house,
       loading,
       form,
+      newFee,
       activeTab,
       showRuleBuilder,
+      showPayosGuide,
       ruleTemplate,
       addExtraFeeRow,
       removeExtraFeeRow,

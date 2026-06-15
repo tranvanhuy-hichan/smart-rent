@@ -1,6 +1,5 @@
 <template>
   <div class="p-4 bg-bg-main min-h-full boarding-houses-page">
-
     <!-- FAB: Nút thêm dãy trọ - cố định góc dưới phải -->
     <button @click="openAddModal"
       class="fixed bottom-20 right-4 z-50 flex items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-primary-hover active:scale-95 transition-all duration-200"
@@ -11,14 +10,13 @@
       </svg>
     </button>
 
-
     <!-- Grid of Boarding Houses -->
     <div v-if="loading" class="flex flex-col items-center justify-center py-12 gap-4 text-text-sub">
       <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       <span>Đang tải danh sách dãy trọ...</span>
     </div>
 
-    <!-- Hiển thị nếu có lỗi xảy ra (Bổ sung thêm) -->
+    <!-- Hiển thị nếu có lỗi xảy ra -->
     <div v-else-if="error" class="flex flex-col items-center justify-center py-12 gap-4 text-rose-500">
       <AppIcon name="exclamation-circle" size="lg" />
       <span class="text-sm font-semibold">{{ error }}</span>
@@ -50,9 +48,7 @@
           <!-- Card Body -->
           <div class="px-5 py-3 flex-1 flex flex-col gap-2 text-xs">
             <div class="flex items-center justify-between">
-              <span class="text-text-sub flex items-center gap-1.5">
-                Ngày chốt tiền
-              </span>
+              <span class="text-text-sub flex items-center gap-1.5">Ngày chốt tiền</span>
               <span class="font-bold text-text-main">
                 {{ house.fixedBillingDay ? `Ngày ${house.fixedBillingDay} hàng tháng` : 'Theo ngày dọn vào' }}
               </span>
@@ -68,14 +64,12 @@
                 </span>
               </div>
             </div>
-
-
           </div>
         </div>
       </div>
 
       <EmptyState v-else
-        message="Bạn chưa có dãy trọ nào. Hãy nhấn nút 'Thêm Dãy Trọ Mới' ở góc trên bên phải để bắt đầu!" />
+        message="Bạn chưa có dãy trọ nào. Hãy nhấn nút 'Thêm Dãy Trọ Mới' ở góc dưới bên phải để bắt đầu!" />
     </template>
 
     <!-- Add/Edit Modal -->
@@ -96,16 +90,16 @@
             <FormInput type="number" label="Giá điện mặc định (đ/kWh)" v-model="form.defaultElectricityRate" min="0"
               required />
           </div>
-
           <div>
-            <FormInput type="number" label="Giá nước mặc định" v-model="form.defaultWaterRate" min="0" required />
+            <FormInput type="number" label="Giá nước mặc định (đ/m³)" v-model="form.defaultWaterRate" min="0"
+              required />
           </div>
         </div>
 
         <div class="mb-4">
           <FormSelect label="Cách tính tiền nước" v-model="form.waterBillingType" required>
-            <option value="BY_INDEX">Tính theo chỉ số đồng hồ (tiêu thụ thực tế)</option>
-            <option value="FIXED_PER_PERSON">Tính cố định theo đầu người (đ/người/tháng)</option>
+            <option value="BY_INDEX">Tính theo chỉ số đồng hồ</option>
+            <option value="FLAT_RATE">Tính theo hộ/phòng (giá cố định)</option>
           </FormSelect>
         </div>
 
@@ -113,53 +107,6 @@
           <FormInput type="number" label="Ngày tính tiền cố định hàng tháng (1-31, để trống nếu tính theo ngày dọn vào)"
             v-model="form.fixedBillingDay" min="1" max="31" />
         </div>
-
-
-
-
-
-        <!-- Cấu hình thanh toán tự động PayOS -->
-        <div class="mt-6 pt-4 border-t border-border-main">
-          <h4 class="text-sm font-bold text-text-main mb-3 flex items-center gap-2">
-            <span>⚡ Cấu Hình Thanh Tự Động PayOS</span>
-            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">
-              Khuyên dùng
-            </span>
-          </h4>
-
-          <!-- Hướng dẫn đăng ký PayOS -->
-          <div class="mb-4 p-4 bg-slate-50 dark:bg-slate-900 border border-border-main rounded-xl text-xs text-text-sub space-y-2">
-            <p class="font-bold text-text-main flex items-center gap-1.5">
-              💡 Tại sao nên cấu hình PayOS?
-            </p>
-            <p>Hệ thống tự động đối soát và gạch nợ hóa đơn, khách thuê quét mã thanh toán tiền phòng tiền sẽ chuyển thẳng về tài khoản ngân hàng của bạn ngay lập tức.</p>
-            <div class="flex items-center gap-3 pt-1">
-              <a href="https://dashboard.payos.vn/" target="_blank" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover active:scale-95 transition-all">
-                Đăng ký tài khoản PayOS Miễn Phí ↗
-              </a>
-            </div>
-            <ul class="list-disc pl-4 space-y-1 pt-1 text-[11px]">
-              <li>Tạo một "Kênh thanh toán" mới trên dashboard PayOS.</li>
-              <li>Sao chép 3 tham số Client ID, API Key, Checksum Key và dán vào form bên dưới.</li>
-            </ul>
-          </div>
-
-          <div class="mb-4">
-            <FormInput type="text" label="Client ID" v-model="form.payosClientId"
-              placeholder="Nhập Client ID từ PayOS" />
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <FormInput type="password" label="API Key" v-model="form.payosApiKey"
-                placeholder="Nhập API Key từ PayOS" />
-            </div>
-            <div>
-              <FormInput type="password" label="Checksum Key" v-model="form.payosChecksumKey"
-                placeholder="Nhập Checksum Key từ PayOS" />
-            </div>
-          </div>
-        </div>
-
 
         <!-- Cấu hình các dịch vụ / phụ phí của dãy trọ -->
         <div class="mt-6 pt-4 border-t border-border-main">
@@ -175,10 +122,9 @@
             Chưa cấu hình dịch vụ nào (Ví dụ: Wifi, rác, gửi xe, vệ sinh...)
           </div>
 
-          <div v-else class="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-1">
+          <div class="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-1" v-else>
             <div v-for="(ef, index) in form.extraFees" :key="index" class="flex gap-2 items-center">
-              <FormInput type="text" v-model="ef.name" placeholder="Tên dịch vụ (ví dụ: Wifi)" required size="sm"
-                class="flex-2" />
+              <FormInput type="text" v-model="ef.name" placeholder="Tên dịch vụ" required size="sm" class="flex-2" />
               <FormInput type="number" v-model="ef.defaultPrice" placeholder="Đơn giá" min="0" required size="sm"
                 class="flex-1.5 w-24 text-right" />
               <FormSelect v-model="ef.unitType" required size="sm" class="flex-1.5 w-24">
@@ -189,6 +135,63 @@
                 class="!p-1.5 shrink-0">
                 <AppIcon name="trash" size="sm" />
               </FormButton>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cấu hình thanh toán tự động PayOS -->
+        <div class="mt-6 pt-4 border-t border-border-main">
+          <h4 class="text-sm font-bold text-text-main mb-3 flex items-center gap-2">
+            <span>⚡ Cấu Hình Thanh Toán Tự Động PayOS</span>
+            <span
+              class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200">
+              Khuyên dùng
+            </span>
+          </h4>
+
+          <div
+            class="mb-4 p-4 bg-slate-50 dark:bg-slate-900 border border-border-main rounded-xl text-xs text-text-sub space-y-2">
+            <p class="font-bold text-text-main flex items-center gap-1.5">💡 Hướng dẫn tích hợp thanh toán tự động PayOS
+            </p>
+            <p class="leading-relaxed">Khách thuê quét mã QR chuyển khoản để thanh toán tiền phòng. Tiền chuyển thẳng về
+              tài
+              khoản ngân hàng của bạn ngay lập tức, hệ thống tự động gạch nợ hóa đơn mà không cần xác nhận thủ công.</p>
+            <div class="flex flex-col gap-2 pt-1">
+              <span class="font-semibold text-text-main text-[11px]">Các bước thực hiện:</span>
+              <ol class="list-decimal pl-4 space-y-1.5 text-[11px] leading-relaxed">
+                <li>Truy cập <a href="https://my.payos.vn/" target="_blank"
+                    class="text-primary hover:underline font-bold">my.payos.vn</a> đăng ký tài khoản và liên kết ngân
+                  hàng
+                  nhận tiền của bạn.</li>
+                <li>Vào mục <strong>"Kết nối kênh thanh toán"</strong> trên Dashboard PayOS để tạo một kênh mới.</li>
+                <li>Cấu hình địa chỉ Webhook trên PayOS trỏ về link máy chủ của bạn: <code
+                    class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded font-mono text-[10px]">https://[domain-cua-ban]/api/payment/payos-webhook</code>
+                </li>
+                <li>Sao chép 3 tham số: <strong>Client ID</strong>, <strong>API Key</strong>, <strong>Checksum
+                    Key</strong>
+                  và điền vào ô bên dưới.</li>
+              </ol>
+            </div>
+            <div class="pt-2">
+              <a href="https://my.payos.vn/" target="_blank"
+                class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-white hover:bg-primary-hover active:scale-95 transition-all">
+                Đăng ký & Cấu hình tại my.payos.vn ↗
+              </a>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <FormInput type="text" label="Client ID" v-model="form.payosClientId"
+              placeholder="Nhập Client ID từ PayOS" />
+          </div>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <FormInput type="password" label="API Key" v-model="form.payosApiKey"
+                placeholder="Nhập API Key từ PayOS" />
+            </div>
+            <div>
+              <FormInput type="password" label="Checksum Key" v-model="form.payosChecksumKey"
+                placeholder="Nhập Checksum Key từ PayOS" />
             </div>
           </div>
         </div>
@@ -329,7 +332,7 @@
                 </label>
               </div>
 
-              <!-- Illegal activities / Social evils -->
+              <!-- Illegal activities -->
               <div class="space-y-1.5">
                 <label class="flex items-center gap-2 font-medium text-text-main cursor-pointer">
                   <input type="checkbox" v-model="ruleTemplate.enabledSocialEvils"
@@ -357,7 +360,6 @@
               </div>
             </div>
 
-            <!-- Apply button -->
             <div class="flex justify-end pt-2 border-t border-border-main/40 mt-3">
               <FormButton type="button" @click="applyRulesTemplate" variant="primary" size="sm"
                 class="!px-3 !py-1 text-xs">
@@ -382,17 +384,9 @@
     </Modal>
 
     <!-- Confirm Modal -->
-    <ConfirmModal
-      :show="confirmModal.show"
-      :title="confirmModal.title"
-      :message="confirmModal.message"
-      :type="confirmModal.type"
-      :confirmText="confirmModal.confirmText"
-      :cancelText="confirmModal.cancelText"
-      :showCancel="confirmModal.showCancel"
-      @confirm="onConfirmModal"
-      @cancel="closeConfirmModal"
-    />
+    <ConfirmModal :show="confirmModal.show" :title="confirmModal.title" :message="confirmModal.message"
+      :type="confirmModal.type" :confirmText="confirmModal.confirmText" :cancelText="confirmModal.cancelText"
+      :showCancel="confirmModal.showCancel" @confirm="onConfirmModal" @cancel="closeConfirmModal" />
   </div>
 </template>
 

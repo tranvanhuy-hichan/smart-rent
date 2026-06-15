@@ -92,7 +92,7 @@
       <div class="lg:col-span-2 flex flex-col gap-6">
         <!-- Gói cước Selector -->
         <div class="bg-card border border-border-main rounded-2xl p-5 shadow-xs">
-          <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-5">1. Chọn gói thời gian gia
+          <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-5">Chọn gói thời gian gia
             hạn</h3>
 
           <!-- Loading Packages -->
@@ -144,50 +144,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Payment Instructions (Shown after submit) -->
-        <div v-if="currentRequest" class="bg-card border border-border-main rounded-2xl p-5 shadow-xs">
-          <h3 class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-4">2. Tiến hành thanh toán</h3>
-
-          <div class="max-w-md mx-auto w-full p-5 bg-slate-50 dark:bg-slate-900/40 border border-border-main/50 rounded-2xl">
-            <!-- Payment Info -->
-            <div class="space-y-4 text-xs">
-              <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Gói đăng ký:</span>
-                <span class="font-bold text-text-main">Gói {{ currentRequest.months }} tháng</span>
-              </div>
-              <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Số tiền cần thanh toán:</span>
-                <span class="font-extrabold text-danger text-sm">{{ formatMoney(currentRequest.amount) }} đ</span>
-              </div>
-              <div class="flex justify-between border-b border-border-main/20 pb-2">
-                <span class="text-text-sub font-semibold">Trạng thái yêu cầu:</span>
-                <span class="font-bold text-amber-500 uppercase">Chờ thanh toán</span>
-              </div>
-              
-              <div class="pt-2 flex flex-col gap-2.5">
-                <FormButton @click="payPendingRequestWithPayos" :loading="loadingPayos" variant="primary" class="w-full justify-center">
-                  <AppIcon name="credit-card" class="!w-4 !h-4" />
-                  <span>Thanh toán trực tuyến bằng PayOS</span>
-                </FormButton>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Zalo Notification / Support -->
-          <div class="mt-5 p-4 bg-primary/5 border border-primary/20 rounded-2xl flex flex-col gap-3">
-            <p class="text-xs leading-relaxed text-text-sub m-0">
-              💡 <strong>Hỗ trợ thanh toán nhanh:</strong> Hệ thống đã tạo yêu cầu nâng cấp dịch vụ. Nếu bạn không thể thanh toán trực tuyến hoặc cần Admin hỗ trợ kích hoạt trực tiếp, vui lòng gửi tin nhắn Zalo kèm theo mã nội dung đối soát: <strong class="select-all font-mono text-primary">{{ currentRequest.paymentContent }}</strong>.
-            </p>
-            <div class="flex justify-end gap-3 flex-wrap">
-              <a :href="zaloUrl" target="_blank"
-                class="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold rounded-lg transition-all duration-150 cursor-pointer bg-[#0068ff] hover:bg-[#0052cc] text-white shadow-xs text-center">
-                <AppIcon name="zalo" class="!w-4 !h-4" />
-                <span>Liên hệ Zalo báo Admin</span>
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Right Column: Note and Requests History -->
@@ -224,13 +180,13 @@
       </div>
     </div>
 
-    <!-- Requests History list -->
+    <!-- Package Upgrade History list -->
     <div class="bg-card border border-border-main rounded-2xl p-5 shadow-xs mt-6">
       <h3
         class="text-sm font-bold text-text-main border-b border-border-main pb-3 mb-4 flex items-center justify-between">
-        <span>Lịch sử yêu cầu gia hạn</span>
+        <span>Lịch sử nâng cấp gói</span>
         <span class="text-[11px] font-semibold text-text-sub bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-          {{ requests.length }} yêu cầu
+          {{ approvedRequests.length }} lần nâng cấp
         </span>
       </h3>
 
@@ -238,8 +194,8 @@
         <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
 
-      <div v-else-if="requests.length === 0" class="text-center py-8 text-text-sub italic text-xs">
-        Chưa từng phát sinh yêu cầu nâng cấp gói nào.
+      <div v-else-if="approvedRequests.length === 0" class="text-center py-8 text-text-sub italic text-xs">
+        Chưa từng phát sinh giao dịch nâng cấp gói nào.
       </div>
 
       <div v-else class="overflow-x-auto border border-border-main/50 rounded-xl bg-card">
@@ -255,18 +211,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="req in requests" :key="req.id"
+            <tr v-for="req in approvedRequests" :key="req.id"
               class="border-b border-border-main/30 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/20">
               <td class="py-3 px-4 font-semibold text-text-main">Gói {{ req.months }} tháng</td>
               <td class="py-3 px-4 font-bold text-text-main">{{ formatMoney(req.amount) }} đ</td>
               <td class="py-3 px-4 font-mono select-all">{{ req.paymentContent }}</td>
               <td class="py-3 px-4 text-text-sub">{{ formatDateTime(req.createdAt) }}</td>
               <td class="py-3 px-4">
-                <span :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border',
-                  req.status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400' :
-                    (req.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400')
-                ]">
-                  {{ req.status === 'APPROVED' ? 'Đã duyệt' : (req.status === 'PENDING' ? 'Chờ duyệt' : 'Từ chối') }}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400">
+                  Thành công
                 </span>
               </td>
             </tr>

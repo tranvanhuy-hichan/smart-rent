@@ -148,6 +148,10 @@ export default {
 
     // Computed properties
 
+    const approvedRequests = computed(() => {
+      return requests.value.filter(r => r.status === 'APPROVED');
+    });
+
     const zaloUrl = computed(() => {
       const phone = adminBankInfo.value?.phone || '0365943254';
       if (!currentRequest.value) return `https://zalo.me/${phone}`;
@@ -186,6 +190,7 @@ export default {
       currentRequest,
       status,
       requests,
+      approvedRequests,
       adminBankInfo,
       loadingStatus,
       loadingRequests,
@@ -197,6 +202,7 @@ export default {
       goBack,
       formatMoney,
       formatDate,
+      formatDateTime,
       loadingPayos,
       payPendingRequestWithPayos
     };
