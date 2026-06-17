@@ -8,6 +8,7 @@ import com.qlpt.backend.entity.*;
 import com.qlpt.backend.enums.ContractStatus;
 import com.qlpt.backend.enums.Role;
 import com.qlpt.backend.repository.*;
+import com.qlpt.backend.service.NotificationService;
 import com.qlpt.backend.service.impl.ChatServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +51,9 @@ public class ChatServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private ChatServiceImpl chatService;
@@ -185,5 +190,12 @@ public class ChatServiceTest {
         assertEquals("TEXT", response.type());
         verify(messageRepository, times(1)).save(any(Message.class));
         verify(chatWebSocketHandler, times(2)).sendMessageToUser(any(String.class), any(MessageResponse.class));
+        verify(notificationService, times(1)).createNotification(
+                eq(landlord),
+                eq("Tin nhắn mới từ Người thuê"),
+                eq("Hello"),
+                eq("CHAT_MESSAGE"),
+                eq(chatRoom.getId())
+        );
     }
 }

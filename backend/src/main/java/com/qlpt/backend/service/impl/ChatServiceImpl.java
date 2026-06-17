@@ -12,6 +12,7 @@ import com.qlpt.backend.enums.Role;
 import com.qlpt.backend.exception.ResourceNotFoundException;
 import com.qlpt.backend.repository.*;
 import com.qlpt.backend.service.ChatService;
+import com.qlpt.backend.service.NotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,19 +33,22 @@ public class ChatServiceImpl implements ChatService {
     private final ChatWebSocketHandler chatWebSocketHandler;
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public ChatServiceImpl(ChatRoomRepository chatRoomRepository,
                            ChatRoomMemberRepository chatRoomMemberRepository,
                            MessageRepository messageRepository,
                            ChatWebSocketHandler chatWebSocketHandler,
                            ContractRepository contractRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           NotificationService notificationService) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatRoomMemberRepository = chatRoomMemberRepository;
         this.messageRepository = messageRepository;
         this.chatWebSocketHandler = chatWebSocketHandler;
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -184,8 +188,24 @@ public class ChatServiceImpl implements ChatService {
         // Push real-time messages to all members of the chat room
         List<ChatRoomMember> members = chatRoomMemberRepository.findByChatRoom(chatRoom);
         for (ChatRoomMember member : members) {
-            // Push message to other members (or even the sender for confirmation)
+            // Push message via WebSocket
             chatWebSocketHandler.sendMessageToUser(member.getUser().getUsername(), response);
+
+            // Gửi thông báo đẩy và lưu thông báo nếu không phải là người gửi tin nhắn
+            if (!member.getUser().getId().equals(user.getId())) {
+                try {
+                    String title = "Tin nhắn mới từ " + user.getFullName();
+                    String contentText = request.content();
+                    if ("IMAGE".equals(request.type())) {
+                        contentText = "[Hình ảnh]";
+                    } else if ("FILE".equals(request.type())) {
+                        contentText = "[Tệp tin]";
+                    }
+                    notificationService.createNotification(member.getUser(), title, contentText, "CHAT_MESSAGE", chatRoom.getId());
+                } catch (Exception e) {
+                    System.err.println("Lỗi khi gửi thông báo tin nhắn: " + e.getMessage());
+                }
+            }
         }
 
         return response;
