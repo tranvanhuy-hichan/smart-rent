@@ -28,7 +28,7 @@ export default {
       return err.response?.data?.error || err.message || (typeof err === 'string' ? err : defaultMsg);
     };
 
-    const activeTab = ref('profile'); // 'profile' | 'security' | 'preferences' | 'imou'
+    const activeTab = ref(authStore.user?.mustChangePassword ? 'security' : 'profile'); // 'profile' | 'security' | 'preferences' | 'imou'
     const theme = ref(localStorage.getItem('theme') || 'light');
     const fontSize = ref(localStorage.getItem('fontSize') || 'medium');
     const isLandlord = computed(() => authStore.role === 'LANDLORD');
@@ -240,6 +240,11 @@ export default {
           newPassword: '',
           confirmPassword: '',
         };
+        // Cập nhật trạng thái đổi mật khẩu trong authStore và localStorage
+        if (authStore.user) {
+          authStore.user.mustChangePassword = false;
+          localStorage.setItem('user', JSON.stringify(authStore.user));
+        }
       } catch (err) {
         showAlert('Lỗi', getErrorMessage(err, 'Thay đổi mật khẩu thất bại'), 'danger');
       } finally {
@@ -339,8 +344,11 @@ export default {
       updatePermissionState();
     });
 
+    const mustChangePassword = computed(() => authStore.user?.mustChangePassword || false);
+
     return {
       activeTab,
+      mustChangePassword,
       theme,
       isLandlord,
       loadingProfile,

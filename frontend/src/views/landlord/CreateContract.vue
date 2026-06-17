@@ -93,18 +93,18 @@
               </div>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormInput type="text" label="Tên đăng nhập (username)" v-model="inlineTenantForm.username" placeholder="Ví dụ: nguyenvanan" required />
-                <FormInput type="password" label="Mật khẩu" v-model="inlineTenantForm.password" placeholder="Tối thiểu 6 ký tự" required />
+                <div>
+                  <FormInput type="text" label="Số CMND/CCCD" v-model="inlineTenantForm.identityCard" placeholder="Nhập số định danh cá nhân" required />
+                  <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+                    * Số CCCD này sẽ được dùng làm Tên đăng nhập và Mật khẩu mặc định cho khách thuê.
+                  </p>
+                </div>
+                <FormInput type="text" label="Họ và tên người thuê" v-model="inlineTenantForm.fullName" placeholder="Nhập tên đầy đủ" required />
               </div>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormInput type="text" label="Họ và tên người thuê" v-model="inlineTenantForm.fullName" placeholder="Nhập tên đầy đủ" required />
                 <FormInput type="text" label="Số điện thoại" v-model="inlineTenantForm.phone" placeholder="Số điện thoại liên hệ" />
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput type="email" label="Email" v-model="inlineTenantForm.email" placeholder="Địa chỉ email" />
-                <FormInput type="text" label="Số CMND/CCCD" v-model="inlineTenantForm.identityCard" placeholder="Nhập số định danh cá nhân" />
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

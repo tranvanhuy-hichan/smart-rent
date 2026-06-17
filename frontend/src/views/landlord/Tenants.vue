@@ -28,12 +28,11 @@
     <Modal v-if="showAddModal" title="Cấp Tài Khoản Cho Người Ở" maxWidth="md" @close="closeModal">
       <form @submit.prevent="createTenantAccount">
         <div class="mb-4">
-          <FormInput type="text" label="Tên đăng nhập" v-model="form.username"
-            placeholder="Ví dụ: nguyenvanan (viết liền không dấu)" required />
-        </div>
-        <div class="mb-4">
-          <FormInput type="password" label="Mật khẩu ban đầu" v-model="form.password"
-            placeholder="Tối thiểu 6 ký tự" required />
+          <FormInput type="text" label="Số CMND/CCCD" v-model="form.identityCard"
+            placeholder="Nhập số định danh cá nhân" required />
+          <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 font-medium">
+            * Số CCCD này sẽ được sử dụng làm Tên đăng nhập và Mật khẩu mặc định cho khách thuê.
+          </p>
         </div>
         <div class="mb-4">
           <FormInput type="text" label="Họ và tên người thuê" v-model="form.fullName"
@@ -47,10 +46,6 @@
           <div>
             <FormInput type="email" label="Email" v-model="form.email" placeholder="Địa chỉ email" />
           </div>
-        </div>
-        <div class="mb-4">
-          <FormInput type="text" label="Số CMND/CCCD" v-model="form.identityCard"
-            placeholder="Nhập số định danh cá nhân" />
         </div>
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>

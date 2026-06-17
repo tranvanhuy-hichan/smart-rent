@@ -3,8 +3,8 @@
     <!-- Header Block -->
     <div class="mb-6 pb-4 border-b border-border-main flex flex-col gap-4">
       <div class="flex items-center gap-2">
-        <FormButton @click="goBack" variant="secondary" class="!p-1.5">
-          <AppIcon name="arrow-left" class="text-text-sub !w-4 !h-4" />
+        <FormButton @click="goBack" variant="secondary" class="!p-1.5" :disabled="mustChangePassword">
+          <AppIcon name="arrow-left" class="text-text-sub !w-4 !h-4" :class="mustChangePassword ? 'opacity-30' : ''" />
         </FormButton>
         <h2 class="text-base sm:text-xl font-bold text-text-main flex items-center gap-2 flex-wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="text-primary w-5 h-5 shrink-0">
@@ -22,8 +22,10 @@
         <div class="bg-card border border-border-main rounded-2xl p-3 shadow-xs flex flex-col gap-1.5">
           <button 
             @click="activeTab = 'profile'"
+            :disabled="mustChangePassword"
             :class="['w-full text-left px-4 py-3 rounded-xl font-semibold text-xs transition-all duration-150 flex items-center gap-2.5 cursor-pointer',
-              activeTab === 'profile' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800']"
+              activeTab === 'profile' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800',
+              mustChangePassword ? 'opacity-40 cursor-not-allowed' : '']"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
@@ -44,8 +46,10 @@
 
           <button 
             @click="activeTab = 'sessions'"
+            :disabled="mustChangePassword"
             :class="['w-full text-left px-4 py-3 rounded-xl font-semibold text-xs transition-all duration-150 flex items-center gap-2.5 cursor-pointer',
-              activeTab === 'sessions' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800']"
+              activeTab === 'sessions' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800',
+              mustChangePassword ? 'opacity-40 cursor-not-allowed' : '']"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
@@ -55,8 +59,10 @@
 
           <button 
             @click="activeTab = 'preferences'"
+            :disabled="mustChangePassword"
             :class="['w-full text-left px-4 py-3 rounded-xl font-semibold text-xs transition-all duration-150 flex items-center gap-2.5 cursor-pointer',
-              activeTab === 'preferences' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800']"
+              activeTab === 'preferences' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800',
+              mustChangePassword ? 'opacity-40 cursor-not-allowed' : '']"
           >
             <!-- Sun/Moon icon in menu -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
@@ -68,8 +74,10 @@
           <button 
             v-if="isLandlord"
             @click="activeTab = 'imou'"
+            :disabled="mustChangePassword"
             :class="['w-full text-left px-4 py-3 rounded-xl font-semibold text-xs transition-all duration-150 flex items-center gap-2.5 cursor-pointer',
-              activeTab === 'imou' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800']"
+              activeTab === 'imou' ? 'bg-primary text-white shadow-sm' : 'text-text-main hover:bg-slate-50 dark:hover:bg-slate-800',
+              mustChangePassword ? 'opacity-40 cursor-not-allowed' : '']"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.333-7.26 5.977 5.977 0 0 0-10.807-3.911C7.82 7.586 5.86 8.513 5.373 9.91A4.49 4.49 0 0 0 2.25 15Z" />
@@ -168,6 +176,10 @@
             </svg>
             <span>Thay đổi Mật khẩu bảo mật</span>
           </h3>
+
+          <div v-if="mustChangePassword" class="mb-5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl p-4 text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-medium">
+            Tài khoản của bạn cần đổi mật khẩu mới ở lần đăng nhập đầu tiên hoặc sau khi mật khẩu được đặt lại để đảm bảo an toàn bảo mật.
+          </div>
 
           <form @submit.prevent="savePassword" class="space-y-4 max-w-lg">
             <FormInput

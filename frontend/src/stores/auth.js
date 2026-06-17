@@ -51,15 +51,16 @@ export const useAuthStore = defineStore('auth', {
     role: (state) => state.user?.role || null,
     username: (state) => state.user?.username || null,
     userId: (state) => state.user?.id || null,
+    mustChangePassword: (state) => state.user?.mustChangePassword || false,
   },
   actions: {
     async login(username, password) {
       try {
         const response = await api.post('/api/auth/login', { username, password });
-        const { token, id, role, isExpired } = response.data;
+        const { token, id, role, isExpired, mustChangePassword } = response.data;
         
         this.token = token;
-        this.user = { id, username, role, isExpired };
+        this.user = { id, username, role, isExpired, mustChangePassword };
         
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(this.user));
@@ -72,10 +73,10 @@ export const useAuthStore = defineStore('auth', {
     async loginWithGoogle(credential) {
       try {
         const response = await api.post('/api/auth/google', { credential });
-        const { token, id, role, isExpired } = response.data;
+        const { token, id, role, isExpired, mustChangePassword } = response.data;
         
         this.token = token;
-        this.user = { id, username: response.data.username, role, isExpired };
+        this.user = { id, username: response.data.username, role, isExpired, mustChangePassword };
         
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(this.user));

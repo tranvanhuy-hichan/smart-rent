@@ -166,10 +166,18 @@ export default {
     };
 
     const createInlineTenant = async () => {
-      if (!inlineTenantForm.value.fullName || !inlineTenantForm.value.username || !inlineTenantForm.value.password) {
-        showAlert("Lỗi", "Vui lòng nhập đầy đủ họ tên, tên đăng nhập và mật khẩu.", "warning");
+      if (!inlineTenantForm.value.identityCard || !inlineTenantForm.value.identityCard.trim()) {
+        showAlert("Lỗi", "Vui lòng nhập Số CMND/CCCD.", "warning");
         return;
       }
+      if (!inlineTenantForm.value.fullName || !inlineTenantForm.value.fullName.trim()) {
+        showAlert("Lỗi", "Vui lòng nhập họ và tên người thuê.", "warning");
+        return;
+      }
+
+      inlineTenantForm.value.username = inlineTenantForm.value.identityCard.trim();
+      inlineTenantForm.value.password = inlineTenantForm.value.identityCard.trim();
+
       inlineTenantLoading.value = true;
       try {
         const newTenant = await tenantStore.createTenantAccount(inlineTenantForm.value);

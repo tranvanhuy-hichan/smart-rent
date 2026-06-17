@@ -261,6 +261,11 @@ router.beforeEach((to, from) => {
       // Role không khớp -> chuyển về trang 404 (NotFound) để bảo mật phân quyền
       return { name: 'NotFound' };
     } else {
+      // Bắt buộc đổi mật khẩu ở lần đăng nhập đầu tiên hoặc khi được đặt lại mật khẩu
+      if (authStore.user?.mustChangePassword && to.name !== 'Settings') {
+        return { name: 'Settings', query: { forceChangePassword: 'true' } };
+      }
+
       // Kiểm tra trạng thái hết hạn gói dịch vụ của chủ trọ
       if (authStore.role === 'LANDLORD' && authStore.user?.isExpired && to.name !== 'SubscriptionUpgrade') {
         return { name: 'SubscriptionUpgrade' };

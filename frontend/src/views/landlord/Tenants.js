@@ -91,6 +91,14 @@ export default {
     });
 
     const createTenantAccount = async () => {
+      if (!form.value.identityCard || !form.value.identityCard.trim()) {
+        showAlert('Lỗi nhập liệu', 'Số CMND/CCCD không được trống.', 'warning');
+        return;
+      }
+
+      form.value.username = form.value.identityCard.trim();
+      form.value.password = form.value.identityCard.trim();
+
       if (form.value.email && !validateEmail(form.value.email)) {
         showAlert('Lỗi nhập liệu', 'Định dạng Email không hợp lệ.', 'warning');
         return;
