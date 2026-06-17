@@ -43,10 +43,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private String adminPayosChecksumKey;
 
     public SubscriptionServiceImpl(UpgradeRequestRepository upgradeRequestRepository,
-                                   UserRepository userRepository,
-                                   com.qlpt.backend.service.NotificationService notificationService,
-                                   com.qlpt.backend.service.SystemSettingService systemSettingService,
-                                   SubscriptionPackageRepository subscriptionPackageRepository) {
+            UserRepository userRepository,
+            com.qlpt.backend.service.NotificationService notificationService,
+            com.qlpt.backend.service.SystemSettingService systemSettingService,
+            SubscriptionPackageRepository subscriptionPackageRepository) {
         this.upgradeRequestRepository = upgradeRequestRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
@@ -87,9 +87,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         PayOS payOS = getAdminPayOS();
         if (payOS != null) {
             try {
-                String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim() : "http://localhost:5173/landlord/dashboard";
-                String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim() : "http://localhost:5173/landlord/dashboard";
-                
+                String finalReturnUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl.trim()
+                        : "http://localhost:5173/landlord/dashboard";
+                String finalCancelUrl = (cancelUrl != null && !cancelUrl.trim().isEmpty()) ? cancelUrl.trim()
+                        : "http://localhost:5173/landlord/dashboard";
+
                 String desc = "Nang cap " + months + " thang";
                 if (desc.length() > 25) {
                     desc = desc.substring(0, 25);
@@ -128,7 +130,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         try {
             List<User> admins = userRepository.findByRole(Role.ADMIN);
             String title = "Yêu cầu nâng cấp gói mới";
-            String content = String.format("Chủ trọ %s đã gửi yêu cầu nâng cấp gói %s (%d tháng). Vui lòng kiểm tra và phê duyệt.",
+            String content = String.format(
+                    "Chủ trọ %s đã gửi yêu cầu nâng cấp gói %s (%d tháng). Vui lòng kiểm tra và phê duyệt.",
                     landlord.getFullName(), pack.getName(), months);
             for (User admin : admins) {
                 notificationService.createNotification(admin, title, content, "SUBSCRIPTION_REQUEST");
@@ -160,7 +163,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     @Override
     public Map<String, Object> getActiveStatus(User landlord) {
-        // Sync PayOS status for any PENDING requests first to ensure statusMap reflects the latest payment
+        // Sync PayOS status for any PENDING requests first to ensure statusMap reflects
+        // the latest payment
         List<UpgradeRequest> requests = upgradeRequestRepository.findByUserIdOrderByCreatedAtDesc(landlord.getId());
         for (UpgradeRequest req : requests) {
             if ("PENDING".equals(req.getStatus()) && req.getPayosOrderCode() != null) {
@@ -168,24 +172,28 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         }
 
-        // Fetch fresh landlord from database to get the updated subscriptionExpiredAt field
+        // Fetch fresh landlord from database to get the updated subscriptionExpiredAt
+        // field
         User freshLandlord = userRepository.findById(landlord.getId()).orElse(landlord);
 
         Map<String, Object> statusMap = new HashMap<>();
-        
-        LocalDateTime regDateTime = freshLandlord.getCreatedAt() != null ? freshLandlord.getCreatedAt() : LocalDateTime.now().minusDays(50);
+
+        LocalDateTime regDateTime = freshLandlord.getCreatedAt() != null ? freshLandlord.getCreatedAt()
+                : LocalDateTime.now().minusDays(50);
         LocalDate regDate = regDateTime.toLocalDate();
         LocalDate trialExpiredAt = regDate.plusDays(45);
         LocalDate subscriptionExpiredAt = freshLandlord.getSubscriptionExpiredAt();
-        
+
         LocalDate today = LocalDate.now();
-        
+
         boolean isTrialActive = !today.isAfter(trialExpiredAt);
         boolean isSubscriptionActive = subscriptionExpiredAt != null && !today.isAfter(subscriptionExpiredAt);
         boolean isExpired = !isTrialActive && !isSubscriptionActive;
 
         long trialDaysLeft = Math.max(0, ChronoUnit.DAYS.between(today, trialExpiredAt));
-        long subscriptionDaysLeft = subscriptionExpiredAt != null ? Math.max(0, ChronoUnit.DAYS.between(today, subscriptionExpiredAt)) : 0;
+        long subscriptionDaysLeft = subscriptionExpiredAt != null
+                ? Math.max(0, ChronoUnit.DAYS.between(today, subscriptionExpiredAt))
+                : 0;
 
         statusMap.put("createdAt", regDateTime);
         statusMap.put("trialExpiredAt", trialExpiredAt);
@@ -196,7 +204,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         statusMap.put("trialDaysLeft", trialDaysLeft);
         statusMap.put("subscriptionDaysLeft", subscriptionDaysLeft);
         statusMap.put("role", freshLandlord.getRole().name());
-        
+
         return statusMap;
     }
 
@@ -232,7 +240,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         LocalDate currentExpiry = landlord.getSubscriptionExpiredAt();
         LocalDate newExpiry;
-        
+
         if (currentExpiry != null && currentExpiry.isAfter(LocalDate.now())) {
             newExpiry = currentExpiry.plusMonths(months);
         } else {
@@ -244,13 +252,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         request.setStatus("APPROVED");
         request.setProcessedAt(LocalDateTime.now());
-        
+
         UpgradeRequest saved = upgradeRequestRepository.save(request);
 
         // Gửi thông báo đến chủ trọ sau khi duyệt nâng cấp thành công
         try {
             String title = "Gia hạn tài khoản thành công";
-            String content = String.format("Yêu cầu nâng cấp gói %d tháng của bạn đã được kích hoạt thành công. Hạn sử dụng mới là %s.",
+            String content = String.format(
+                    "Yêu cầu nâng cấp gói %d tháng của bạn đã được kích hoạt thành công. Hạn sử dụng mới là %s.",
                     months, newExpiry.toString());
             notificationService.createNotification(landlord, title, content, "SUBSCRIPTION_APPROVED", saved.getId());
         } catch (Exception ne) {
@@ -272,7 +281,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         request.setStatus("REJECTED");
         request.setProcessedAt(LocalDateTime.now());
-        
+
         return upgradeRequestRepository.save(request);
     }
 
@@ -368,7 +377,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             int code = 1000 + random.nextInt(9000); // 4-digit code
             content = "GIAHAN " + username.toUpperCase() + " " + code;
         } while (upgradeRequestRepository.existsByPaymentContent(content));
-        
+
         return content;
     }
 
@@ -377,7 +386,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String clientId = systemSetting.getPayosClientId();
         String apiKey = systemSetting.getPayosApiKey();
         String checksumKey = systemSetting.getPayosChecksumKey();
-        
+
         if (clientId == null || clientId.trim().isEmpty()) {
             clientId = adminPayosClientId;
         }
@@ -387,31 +396,35 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (checksumKey == null || checksumKey.trim().isEmpty()) {
             checksumKey = adminPayosChecksumKey;
         }
-        
+
         if (clientId == null || apiKey == null || checksumKey == null ||
-            clientId.trim().isEmpty() || apiKey.trim().isEmpty() || checksumKey.trim().isEmpty()) {
+                clientId.trim().isEmpty() || apiKey.trim().isEmpty() || checksumKey.trim().isEmpty()) {
             return null;
         }
-        
+
         return new PayOS(clientId.trim(), apiKey.trim(), checksumKey.trim());
     }
 
     private UpgradeRequest syncPayosStatus(UpgradeRequest request) {
-        System.out.println("[PayOS Upgrade Sync] Bat dau dong bo yeu cau ID: " + request.getId() + ", OrderCode: " + request.getPayosOrderCode());
+        System.out.println("[PayOS Upgrade Sync] Bat dau dong bo yeu cau ID: " + request.getId() + ", OrderCode: "
+                + request.getPayosOrderCode());
         PayOS payOS = getAdminPayOS();
         if (payOS == null) {
-            System.out.println("[PayOS Upgrade Sync] Admin chua cau hinh PayOS (ca o database va file cau hinh), bo qua dong bo.");
+            System.out.println(
+                    "[PayOS Upgrade Sync] Admin chua cau hinh PayOS (ca o database va file cau hinh), bo qua dong bo.");
             return request;
         }
 
         try {
             var paymentLinkData = payOS.paymentRequests().get(request.getPayosOrderCode());
             if (paymentLinkData != null) {
-                System.out.println("[PayOS Upgrade Sync] Trang thai thanh toan tren PayOS: " + paymentLinkData.getStatus() + ", So tien da thanh toan: " + paymentLinkData.getAmountPaid());
+                System.out.println("[PayOS Upgrade Sync] Trang thai thanh toan tren PayOS: "
+                        + paymentLinkData.getStatus() + ", So tien da thanh toan: " + paymentLinkData.getAmountPaid());
                 if ("PAID".equals(String.valueOf(paymentLinkData.getStatus()))) {
                     // Update the request status and upgrade subscription
                     UpgradeRequest approved = approveRequest(request.getId());
-                    System.out.println("[PayOS Upgrade Sync] Cap nhat yeu cau ID " + request.getId() + " thanh cong sang APPROVED!");
+                    System.out.println("[PayOS Upgrade Sync] Cap nhat yeu cau ID " + request.getId()
+                            + " thanh cong sang APPROVED!");
                     return approved;
                 } else {
                     System.out.println("[PayOS Upgrade Sync] Trang thai khong phai PAID. Bo qua cap nhat.");
@@ -420,7 +433,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 System.out.println("[PayOS Upgrade Sync] Khong tim thay thong tin link thanh toan tu PayOS.");
             }
         } catch (Exception e) {
-            System.err.println("Lỗi đồng bộ trạng thái PayOS cho yeu cau nang cap " + request.getId() + ": " + e.getMessage());
+            System.err.println(
+                    "Lỗi đồng bộ trạng thái PayOS cho yeu cau nang cap " + request.getId() + ": " + e.getMessage());
             e.printStackTrace();
         }
         return request;

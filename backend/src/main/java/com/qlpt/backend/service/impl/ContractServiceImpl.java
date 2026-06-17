@@ -31,14 +31,14 @@ public class ContractServiceImpl implements ContractService {
     private final ChatService chatService;
 
     public ContractServiceImpl(ContractRepository contractRepository,
-                           RoomRepository roomRepository,
-                           UserRepository userRepository,
-                           ExtraFeeRepository extraFeeRepository,
-                           ContractExtraFeeRepository contractExtraFeeRepository,
-                           ContractAddendumRepository contractAddendumRepository,
-                           ContractAddendumExtraFeeRepository contractAddendumExtraFeeRepository,
-                           NotificationService notificationService,
-                           ChatService chatService) {
+            RoomRepository roomRepository,
+            UserRepository userRepository,
+            ExtraFeeRepository extraFeeRepository,
+            ContractExtraFeeRepository contractExtraFeeRepository,
+            ContractAddendumRepository contractAddendumRepository,
+            ContractAddendumExtraFeeRepository contractAddendumExtraFeeRepository,
+            NotificationService notificationService,
+            ChatService chatService) {
         this.contractRepository = contractRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
@@ -73,9 +73,11 @@ public class ContractServiceImpl implements ContractService {
             throw new RuntimeException("Tài khoản được chọn không phải là vai trò Người Thuê");
         }
 
-        double finalRoomPrice = request.getContractedRoomPrice() > 0 ? request.getContractedRoomPrice() : room.getBasePrice();
+        double finalRoomPrice = request.getContractedRoomPrice() > 0 ? request.getContractedRoomPrice()
+                : room.getBasePrice();
 
-        Integer fixedBillingDay = request.getFixedBillingDay() != null ? request.getFixedBillingDay() : room.getBoardingHouse().getFixedBillingDay();
+        Integer fixedBillingDay = request.getFixedBillingDay() != null ? request.getFixedBillingDay()
+                : room.getBoardingHouse().getFixedBillingDay();
 
         // Create contract
         Contract contract = Contract.builder()
@@ -114,9 +116,11 @@ public class ContractServiceImpl implements ContractService {
         if (request.getExtraFees() != null) {
             for (ContractCreateRequest.ExtraFeeOverride override : request.getExtraFees()) {
                 ExtraFee extraFee = extraFeeRepository.findById(override.getExtraFeeId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ phụ phí: " + override.getExtraFeeId()));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Không tìm thấy dịch vụ phụ phí: " + override.getExtraFeeId()));
 
-                double feePrice = override.getCustomPrice() > 0 ? override.getCustomPrice() : extraFee.getDefaultPrice();
+                double feePrice = override.getCustomPrice() > 0 ? override.getCustomPrice()
+                        : extraFee.getDefaultPrice();
 
                 ContractExtraFee contractExtraFee = ContractExtraFee.builder()
                         .contract(savedContract)
@@ -148,7 +152,8 @@ public class ContractServiceImpl implements ContractService {
         // Gửi thông báo đến người thuê
         try {
             String title = "Hợp đồng thuê phòng hoạt động";
-            String content = String.format("Hợp đồng thuê phòng %s tại nhà trọ %s của bạn đã được kích hoạt thành công.",
+            String content = String.format(
+                    "Hợp đồng thuê phòng %s tại nhà trọ %s của bạn đã được kích hoạt thành công.",
                     room.getRoomNumber(),
                     room.getBoardingHouse().getName());
             notificationService.createNotification(tenant, title, content, "CONTRACT_ACTIVE", savedContract.getId());
@@ -209,7 +214,8 @@ public class ContractServiceImpl implements ContractService {
         }
 
         if (numberOfTenants > contract.getRoom().getMaxPeople()) {
-            throw new RuntimeException("Số người ở vượt quá sức chứa tối đa của phòng (" + contract.getRoom().getMaxPeople() + " người)");
+            throw new RuntimeException(
+                    "Số người ở vượt quá sức chứa tối đa của phòng (" + contract.getRoom().getMaxPeople() + " người)");
         }
 
         Contract saved = contractRepository.save(contract);
@@ -223,7 +229,8 @@ public class ContractServiceImpl implements ContractService {
         if (showAll != null && showAll) {
             page = contractRepository.findByRoomBoardingHouseLandlordId(landlord.getId(), pageable);
         } else {
-            page = contractRepository.findByRoomBoardingHouseLandlordIdAndStatus(landlord.getId(), ContractStatus.ACTIVE, pageable);
+            page = contractRepository.findByRoomBoardingHouseLandlordIdAndStatus(landlord.getId(),
+                    ContractStatus.ACTIVE, pageable);
         }
         page.forEach(c -> org.hibernate.Hibernate.initialize(c.getAddendums()));
         return page;
@@ -231,7 +238,8 @@ public class ContractServiceImpl implements ContractService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Contract> getContractsByRoomAndLandlord(UUID roomId, User landlord, Boolean showAll, Pageable pageable) {
+    public Page<Contract> getContractsByRoomAndLandlord(UUID roomId, User landlord, Boolean showAll,
+            Pageable pageable) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phòng trọ"));
         if (!room.getBoardingHouse().getLandlord().getId().equals(landlord.getId())) {
@@ -254,14 +262,18 @@ public class ContractServiceImpl implements ContractService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng"));
 
         System.out.println("=== DEBUGLOG: getContractById ===");
-        System.out.println("Logged in user ID: " + user.getId() + " (" + user.getUsername() + ", Role: " + user.getRole() + ")");
-        if (contract.getRoom() != null && contract.getRoom().getBoardingHouse() != null && contract.getRoom().getBoardingHouse().getLandlord() != null) {
-            System.out.println("Contract Landlord ID: " + contract.getRoom().getBoardingHouse().getLandlord().getId() + " (" + contract.getRoom().getBoardingHouse().getLandlord().getUsername() + ")");
+        System.out.println(
+                "Logged in user ID: " + user.getId() + " (" + user.getUsername() + ", Role: " + user.getRole() + ")");
+        if (contract.getRoom() != null && contract.getRoom().getBoardingHouse() != null
+                && contract.getRoom().getBoardingHouse().getLandlord() != null) {
+            System.out.println("Contract Landlord ID: " + contract.getRoom().getBoardingHouse().getLandlord().getId()
+                    + " (" + contract.getRoom().getBoardingHouse().getLandlord().getUsername() + ")");
         } else {
             System.out.println("Contract room/boarding house/landlord is NULL!");
         }
         if (contract.getTenant() != null) {
-            System.out.println("Contract Tenant ID: " + contract.getTenant().getId() + " (" + contract.getTenant().getUsername() + ")");
+            System.out.println("Contract Tenant ID: " + contract.getTenant().getId() + " ("
+                    + contract.getTenant().getUsername() + ")");
         } else {
             System.out.println("Contract Tenant is NULL!");
         }
@@ -297,14 +309,14 @@ public class ContractServiceImpl implements ContractService {
     public List<ContractExtraFee> getContractExtraFees(UUID contractId, User user) {
         Contract contract = contractRepository.findWithDetailsById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng"));
-        
+
         boolean isLandlord = contract.getRoom().getBoardingHouse().getLandlord().getId().equals(user.getId());
         boolean isTenant = contract.getTenant().getId().equals(user.getId());
-        
+
         if (!isLandlord && !isTenant && user.getRole() != Role.ADMIN) {
             throw new RuntimeException("Bạn không có quyền xem thông tin phụ phí của hợp đồng này");
         }
-        
+
         return contractExtraFeeRepository.findByContractId(contractId);
     }
 }

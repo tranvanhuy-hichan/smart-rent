@@ -132,6 +132,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         payloadMap.put("type", type);
         payloadMap.put("icon", "/logo.ico");
         payloadMap.put("badge", "/favicon.svg");
+        payloadMap.put("referenceId", referenceId != null ? referenceId.toString() : null);
         
         // Define redirect URL based on notification type
         String redirectUrl = "/";
