@@ -382,5 +382,12 @@ public class InvoiceServiceTest {
                 eq("PAYMENT_CONFIRMED"), 
                 eq(result.getId())
         );
+        verify(notificationService, times(1)).createNotification(
+                eq(landlord), 
+                anyString(), 
+                anyString(), 
+                eq("PAYMENT_CONFIRMED"), 
+                eq(result.getId())
+        );
     }
 }

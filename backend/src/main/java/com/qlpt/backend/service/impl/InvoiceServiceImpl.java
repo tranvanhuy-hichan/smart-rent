@@ -318,6 +318,28 @@ public class InvoiceServiceImpl implements InvoiceService {
             }
         }
 
+        // Gửi thông báo cho chủ trọ về giao dịch thanh toán trực tuyến
+        if (result.getContract() != null && 
+            result.getContract().getRoom() != null && 
+            result.getContract().getRoom().getBoardingHouse() != null && 
+            result.getContract().getRoom().getBoardingHouse().getLandlord() != null) {
+            try {
+                User landlord = result.getContract().getRoom().getBoardingHouse().getLandlord();
+                String landlordTitle = "Khách thuê thanh toán trực tuyến";
+                String landlordContent = String.format(
+                        "Khách thuê %s (phòng %s) đã thanh toán thành công %,.0f VNĐ qua cổng PayOS cho hóa đơn kỳ từ %s đến %s.",
+                        result.getContract().getTenant() != null ? result.getContract().getTenant().getFullName() : "N/A",
+                        result.getContract().getRoom().getRoomNumber(),
+                        paidAmount,
+                        result.getBillingPeriodStart(),
+                        result.getBillingPeriodEnd());
+                notificationService.createNotification(landlord, landlordTitle, landlordContent,
+                        "PAYMENT_CONFIRMED", result.getId());
+            } catch (Exception e) {
+                System.err.println("Lỗi khi gửi thông báo thanh toán cho chủ trọ: " + e.getMessage());
+            }
+        }
+
         return result;
     }
 
