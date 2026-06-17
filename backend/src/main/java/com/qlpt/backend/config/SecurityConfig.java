@@ -52,6 +52,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
                 "https://tvhquanlyphongtro.vercel.app",
+                "https://qlpt-vue-g54zgh7uc-tran-van-huy-s-projects.vercel.app",
                 "https://nhatro.tranvanhuy.io.vn",
                 "https://smartrent.tranvanhuy.io.vn",
                 "http://localhost",
@@ -59,7 +60,8 @@ public class SecurityConfig {
                 "capacitor://localhost")); // Cho phép Vue local, production, và Capacitor Android/iOS
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration
-                .setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control", "X-Requested-With", "X-Skip-Loading"));
+                .setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control", "X-Requested-With",
+                        "X-Skip-Loading"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -76,7 +78,9 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/support/**", "/error", "/ws/**", "/api/payment/payos-webhook").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/support/**", "/error", "/ws/**",
+                                "/api/payment/payos-webhook")
+                        .permitAll()
                         .requestMatchers("/api/subscriptions/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
