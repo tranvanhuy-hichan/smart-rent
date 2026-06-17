@@ -55,6 +55,10 @@ app:
     client-id: ${ADMIN_PAYOS_CLIENT_ID:}
     api-key: ${ADMIN_PAYOS_API_KEY:}
     checksum-key: ${ADMIN_PAYOS_CHECKSUM_KEY:}
+  webpush:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:admin@tranvanhuy.io.vn}
 
 
 
