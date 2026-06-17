@@ -83,7 +83,17 @@ export default {
 
     const handleFocus = () => {
       isKeyboardOpen.value = true;
-      // Reset viewport scroll to prevent the header from sliding up off-screen
+      // Khóa scroll body triệt để bằng fixed để tránh bị đẩy layout lên trên iOS
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      document.documentElement.style.position = 'fixed';
+      document.documentElement.style.width = '100%';
+      document.documentElement.style.height = '100%';
+      document.documentElement.style.overflow = 'hidden';
+
       setTimeout(() => {
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
@@ -99,6 +109,18 @@ export default {
 
     const handleBlur = () => {
       isKeyboardOpen.value = false;
+      
+      // Trở lại trạng thái bình thường
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
+      
+      document.documentElement.style.position = '';
+      document.documentElement.style.width = '';
+      document.documentElement.style.height = '';
+      document.documentElement.style.overflow = '';
+
       setTimeout(() => {
         window.scrollTo(0, 0);
         document.body.scrollTop = 0;
@@ -173,6 +195,17 @@ export default {
       // Clear currentRoomId when leaving Chat page
       chatStore.currentRoomId = null;
       
+      // Đảm bảo mở khóa scroll trang chính khi chuyển màn hình
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
+      
+      document.documentElement.style.position = '';
+      document.documentElement.style.width = '';
+      document.documentElement.style.height = '';
+      document.documentElement.style.overflow = '';
+
       if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', updateViewportHeight);
         window.visualViewport.removeEventListener('scroll', updateViewportHeight);
