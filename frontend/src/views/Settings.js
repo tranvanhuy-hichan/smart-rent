@@ -8,6 +8,8 @@ import FormInput from '../components/ui/FormInput.vue';
 import FormButton from '../components/ui/FormButton.vue';
 import ConfirmModal from '../components/ui/ConfirmModal.vue';
 import { useConfirmModal } from '../composables/useConfirmModal.js';
+import { useNotificationStore } from '../stores/notification.js';
+import pushSubscriptionService from '../services/pushSubscriptionService.js';
 
 export default {
   name: 'Settings',
@@ -267,8 +269,74 @@ export default {
       }
     };
 
+    // Push notification handling
+    const notificationStore = useNotificationStore();
+    const pushPermission = ref(typeof Notification !== 'undefined' ? Notification.permission : 'default');
+
+    const updatePermissionState = () => {
+      if (typeof Notification !== 'undefined') {
+        pushPermission.value = Notification.permission;
+      }
+    };
+
+    const pushPermissionLabel = computed(() => {
+      if (typeof Notification === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        return 'Không hỗ trợ trên trình duyệt này';
+      }
+      if (pushPermission.value === 'granted') return 'Đã bật';
+      if (pushPermission.value === 'denied') return 'Đã bị chặn (Vui lòng đặt lại quyền trên trình duyệt)';
+      return 'Chưa bật';
+    });
+
+    const pushPermissionClass = computed(() => {
+      if (pushPermission.value === 'granted') return 'text-emerald-600 dark:text-emerald-400';
+      if (pushPermission.value === 'denied') return 'text-danger';
+      return 'text-text-sub';
+    });
+
+    const showEnablePushButton = computed(() => {
+      return typeof Notification !== 'undefined' && pushPermission.value !== 'granted' && pushPermission.value !== 'denied';
+    });
+
+    const showDisablePushButton = computed(() => {
+      return typeof Notification !== 'undefined' && pushPermission.value === 'granted';
+    });
+
+    const enablePushNotifications = async () => {
+      if (typeof Notification === 'undefined') return;
+      try {
+        await notificationStore.initPushNotifications();
+        updatePermissionState();
+        if (Notification.permission === 'granted') {
+          showAlert('Thành công', 'Đã bật nhận thông báo đẩy thành công!', 'success');
+        } else if (Notification.permission === 'denied') {
+          showAlert('Cảnh báo', 'Bạn đã chặn quyền thông báo. Vui lòng đặt lại quyền trong cài đặt trình duyệt để tiếp tục.', 'warning');
+        }
+      } catch (err) {
+        showAlert('Lỗi', 'Không thể bật thông báo: ' + err.message, 'danger');
+      }
+    };
+
+    const disablePushNotifications = async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          const subscription = await registration.pushManager.getSubscription();
+          if (subscription) {
+            await pushSubscriptionService.unsubscribe(subscription.endpoint);
+            await subscription.unsubscribe();
+          }
+        }
+        showAlert('Thành công', 'Đã tắt nhận thông báo đẩy.', 'success');
+        updatePermissionState();
+      } catch (err) {
+        showAlert('Lỗi', 'Không thể tắt thông báo: ' + err.message, 'danger');
+      }
+    };
+
     onMounted(() => {
       fetchUserProfile();
+      updatePermissionState();
     });
 
     return {
@@ -300,6 +368,13 @@ export default {
       confirmRevoke,
       formatDateTime,
       formatUA,
+      // Push notifications
+      pushPermissionLabel,
+      pushPermissionClass,
+      showEnablePushButton,
+      showDisablePushButton,
+      enablePushNotifications,
+      disablePushNotifications,
     };
   },
 };

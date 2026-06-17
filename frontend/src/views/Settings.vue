@@ -371,6 +371,39 @@
                 </div>
               </div>
             </div>
+
+            <!-- Push Notifications Option -->
+            <div class="flex flex-col gap-2 border-t border-border-main/50 pt-5 mt-5 animate-in fade-in duration-200">
+              <span class="text-xs font-semibold text-text-main">Thông báo đẩy (Push Notifications)</span>
+              <p class="text-[10px] text-text-sub leading-normal m-0">
+                Nhận thông báo thời gian thực về hợp đồng, hóa đơn, thanh toán và tin nhắn ngay cả khi bạn không mở ứng dụng.
+              </p>
+
+              <div class="mt-3 flex items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-border-main/40">
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-[10px] text-text-sub font-semibold">Trạng thái quyền trình duyệt</span>
+                  <span class="text-xs font-bold" :class="pushPermissionClass">
+                    {{ pushPermissionLabel }}
+                  </span>
+                </div>
+                <FormButton 
+                  v-if="showEnablePushButton" 
+                  @click="enablePushNotifications" 
+                  variant="primary" 
+                  class="!py-1.5 !px-4 !text-[11px] font-bold shrink-0"
+                >
+                  Bật thông báo
+                </FormButton>
+                <FormButton 
+                  v-else-if="showDisablePushButton" 
+                  @click="disablePushNotifications" 
+                  variant="danger" 
+                  class="!py-1.5 !px-4 !text-[11px] font-bold shrink-0"
+                >
+                  Tắt thông báo
+                </FormButton>
+              </div>
+            </div>
           </div>
         </div>
 
