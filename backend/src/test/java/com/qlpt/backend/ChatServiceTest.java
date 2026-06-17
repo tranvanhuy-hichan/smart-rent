@@ -9,6 +9,7 @@ import com.qlpt.backend.enums.ContractStatus;
 import com.qlpt.backend.enums.Role;
 import com.qlpt.backend.repository.*;
 import com.qlpt.backend.service.NotificationService;
+import com.qlpt.backend.service.PushNotificationService;
 import com.qlpt.backend.service.impl.ChatServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ public class ChatServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private PushNotificationService pushNotificationService;
 
     @InjectMocks
     private ChatServiceImpl chatService;
@@ -190,7 +194,7 @@ public class ChatServiceTest {
         assertEquals("TEXT", response.type());
         verify(messageRepository, times(1)).save(any(Message.class));
         verify(chatWebSocketHandler, times(2)).sendMessageToUser(any(String.class), any(MessageResponse.class));
-        verify(notificationService, times(1)).createNotification(
+        verify(pushNotificationService, times(1)).sendPushNotification(
                 eq(landlord),
                 eq("Tin nhắn mới từ Người thuê"),
                 eq("Hello"),

@@ -85,6 +85,12 @@ public class AuthServiceImpl implements AuthService {
                     .active(true)
                     .build();
             userSessionRepository.save(session);
+
+            // Chỉ giữ lại 10 lần đăng nhập gần nhất của user
+            List<com.qlpt.backend.entity.UserSession> sessions = userSessionRepository.findByUserOrderByLoginTimeDesc(user);
+            if (sessions.size() > 10) {
+                userSessionRepository.deleteAll(sessions.subList(10, sessions.size()));
+            }
         } catch (Exception e) {
             System.err.println("Lỗi khi lưu phiên đăng nhập: " + e.getMessage());
         }

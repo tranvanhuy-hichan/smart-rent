@@ -20,6 +20,12 @@ public interface UserSessionRepository extends JpaRepository<UserSession, UUID> 
     boolean existsByTokenAndActiveTrue(String token);
     List<UserSession> findByUserOrderByLoginTimeDesc(User user);
 
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM UserSession s WHERE s.loginTime < :dateTime")
+    void deleteSessionsOlderThan(@org.springframework.data.repository.query.Param("dateTime") java.time.LocalDateTime dateTime);
+
+
     @Query("SELECT s FROM UserSession s JOIN s.user u WHERE " +
            "(:query IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%'))) " +
            "AND (:role IS NULL OR u.role = :role) " +

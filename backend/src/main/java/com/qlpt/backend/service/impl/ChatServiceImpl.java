@@ -13,6 +13,7 @@ import com.qlpt.backend.exception.ResourceNotFoundException;
 import com.qlpt.backend.repository.*;
 import com.qlpt.backend.service.ChatService;
 import com.qlpt.backend.service.NotificationService;
+import com.qlpt.backend.service.PushNotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ public class ChatServiceImpl implements ChatService {
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final PushNotificationService pushNotificationService;
 
     public ChatServiceImpl(ChatRoomRepository chatRoomRepository,
                            ChatRoomMemberRepository chatRoomMemberRepository,
@@ -41,7 +43,8 @@ public class ChatServiceImpl implements ChatService {
                            ChatWebSocketHandler chatWebSocketHandler,
                            ContractRepository contractRepository,
                            UserRepository userRepository,
-                           NotificationService notificationService) {
+                           NotificationService notificationService,
+                           PushNotificationService pushNotificationService) {
         this.chatRoomRepository = chatRoomRepository;
         this.chatRoomMemberRepository = chatRoomMemberRepository;
         this.messageRepository = messageRepository;
@@ -49,6 +52,7 @@ public class ChatServiceImpl implements ChatService {
         this.contractRepository = contractRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.pushNotificationService = pushNotificationService;
     }
 
     @Override
@@ -191,7 +195,7 @@ public class ChatServiceImpl implements ChatService {
             // Push message via WebSocket
             chatWebSocketHandler.sendMessageToUser(member.getUser().getUsername(), response);
 
-            // Gửi thông báo đẩy và lưu thông báo nếu không phải là người gửi tin nhắn
+            // Gửi thông báo đẩy nếu không phải là người gửi tin nhắn
             if (!member.getUser().getId().equals(user.getId())) {
                 try {
                     String title = "Tin nhắn mới từ " + user.getFullName();
@@ -201,7 +205,7 @@ public class ChatServiceImpl implements ChatService {
                     } else if ("FILE".equals(request.type())) {
                         contentText = "[Tệp tin]";
                     }
-                    notificationService.createNotification(member.getUser(), title, contentText, "CHAT_MESSAGE", chatRoom.getId());
+                    pushNotificationService.sendPushNotification(member.getUser(), title, contentText, "CHAT_MESSAGE", chatRoom.getId());
                 } catch (Exception e) {
                     System.err.println("Lỗi khi gửi thông báo tin nhắn: " + e.getMessage());
                 }

@@ -4,11 +4,13 @@ import com.qlpt.backend.entity.Contract;
 import com.qlpt.backend.enums.ContractStatus;
 import com.qlpt.backend.entity.User;
 import com.qlpt.backend.repository.ContractRepository;
+import com.qlpt.backend.repository.UserSessionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,11 +19,14 @@ public class PaymentReminderScheduler {
 
     private final ContractRepository contractRepository;
     private final NotificationService notificationService;
+    private final UserSessionRepository userSessionRepository;
 
     public PaymentReminderScheduler(ContractRepository contractRepository,
-                                    NotificationService notificationService) {
+                                    NotificationService notificationService,
+                                    UserSessionRepository userSessionRepository) {
         this.contractRepository = contractRepository;
         this.notificationService = notificationService;
+        this.userSessionRepository = userSessionRepository;
     }
 
     // Chạy vào lúc 8:00 sáng hàng ngày
@@ -87,6 +92,19 @@ public class PaymentReminderScheduler {
             log.info("Đã dọn dẹp {} thông báo cũ hơn 30 ngày.", deletedCount);
         } catch (Exception e) {
             log.error("Lỗi khi dọn dẹp thông báo cũ hơn 30 ngày", e);
+        }
+    }
+
+    // Dọn dẹp phiên đăng nhập cũ hơn 10 ngày, chạy vào lúc 2:00 sáng hàng ngày
+    @Scheduled(cron = "0 0 2 * * *")
+    public void cleanOldSessions() {
+        log.info("Bắt đầu dọn dẹp phiên đăng nhập cũ hơn 10 ngày...");
+        try {
+            LocalDateTime threshold = LocalDateTime.now().minusDays(10);
+            userSessionRepository.deleteSessionsOlderThan(threshold);
+            log.info("Đã dọn dẹp phiên đăng nhập cũ hơn 10 ngày thành công.");
+        } catch (Exception e) {
+            log.error("Lỗi khi dọn dẹp phiên đăng nhập cũ hơn 10 ngày", e);
         }
     }
 }
