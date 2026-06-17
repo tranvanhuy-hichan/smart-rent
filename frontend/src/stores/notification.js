@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import notificationService from '../services/notificationService';
+import pushSubscriptionService from '../services/pushSubscriptionService';
 import { useAuthStore } from './auth';
 
 export const useNotificationStore = defineStore('notification', {
@@ -87,6 +88,9 @@ export const useNotificationStore = defineStore('notification', {
       // Tải dữ liệu ban đầu
       this.fetchUnreadCount();
       this.fetchNotifications(0, 10);
+
+      // Khởi tạo thông báo đẩy chạy ngầm (Web Push)
+      this.initPushNotifications();
 
       // Xác định URL WebSocket
       let apiUrl = import.meta.env.VITE_API_URL;
@@ -179,9 +183,77 @@ export const useNotificationStore = defineStore('notification', {
       } catch (e) {
         // Bỏ qua lỗi nạp âm thanh
       }
+    },
+    async initPushNotifications() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        logWebSocket('Web Push Notifications không được hỗ trợ trên trình duyệt này.');
+        return;
+      }
+
+      try {
+        // Đăng ký Service Worker sw.js
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        logWebSocket('Service Worker đăng ký thành công:', registration);
+
+        // Lấy VAPID public key từ Backend
+        const keyResponse = await pushSubscriptionService.getPublicKey();
+        const vapidPublicKey = keyResponse.data.publicKey;
+        if (!vapidPublicKey) {
+          logWebSocket('Không lấy được VAPID public key từ Backend.');
+          return;
+        }
+
+        // Yêu cầu quyền thông báo
+        let permission = Notification.permission;
+        if (permission === 'default') {
+          permission = await Notification.requestPermission();
+        }
+
+        if (permission !== 'granted') {
+          logWebSocket('Người dùng từ chối quyền thông báo.');
+          return;
+        }
+
+        // Đăng ký/Lấy Subscription từ PushManager
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey
+        });
+
+        // Gửi subscription lên Backend
+        const subJson = subscription.toJSON();
+        const p256dh = subJson.keys ? subJson.keys.p256dh : '';
+        const auth = subJson.keys ? subJson.keys.auth : '';
+
+        await pushSubscriptionService.subscribe({
+          endpoint: subscription.endpoint,
+          p256dh: p256dh,
+          auth: auth
+        });
+        
+        logWebSocket('Thiết lập Web Push Notification thành công.');
+      } catch (error) {
+        logWebSocket('Lỗi thiết lập Web Push Notification:', error);
+      }
     }
   }
 });
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
 
 function logWebSocket(...args) {
   if (import.meta.env.DEV) {

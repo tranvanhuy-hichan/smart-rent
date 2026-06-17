@@ -281,7 +281,7 @@ export default {
           }
         );
       } else {
-        if (retryCount.value >= 15) {
+        if (retryCount.value >= 100) {
           // GSI không tải được sau nhiều lần thử → hiển thị nút thay thế
           console.warn('Không tải được SDK Google. Đang hiển thị nút thay thế.');
           renderCustomGoogleButton();
