@@ -12,6 +12,18 @@ export default {
     const messageContainerRef = ref(null);
     const isSending = ref(false);
     const isKeyboardOpen = ref(false);
+    const viewportHeight = ref('100%');
+
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        viewportHeight.value = `${window.visualViewport.height}px`;
+        if (window.visualViewport.height < window.innerHeight) {
+          nextTick(() => {
+            scrollToBottom();
+          });
+        }
+      }
+    };
 
     // For tenant, there's only one chat room (with their landlord)
     const currentRoom = computed(() => chatStore.rooms[0] || null);
@@ -141,10 +153,21 @@ export default {
           scrollToBottom();
         }
       }
+      
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateViewportHeight);
+        window.visualViewport.addEventListener('scroll', updateViewportHeight);
+      }
+      updateViewportHeight();
     });
 
     onUnmounted(() => {
       chatStore.currentRoomId = null;
+      
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewportHeight);
+        window.visualViewport.removeEventListener('scroll', updateViewportHeight);
+      }
     });
 
     return {
@@ -159,6 +182,7 @@ export default {
       currentUser,
       landlordInfo,
       isKeyboardOpen,
+      viewportHeight,
       loadMoreMessages,
       handleSendMessage,
       handleFocus,

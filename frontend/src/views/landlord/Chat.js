@@ -15,6 +15,18 @@ export default {
     const isSending = ref(false);
     const mobileShowChat = ref(false);
     const isKeyboardOpen = ref(false);
+    const viewportHeight = ref('100%');
+
+    const updateViewportHeight = () => {
+      if (window.visualViewport) {
+        viewportHeight.value = `${window.visualViewport.height}px`;
+        if (window.visualViewport.height < window.innerHeight) {
+          nextTick(() => {
+            scrollToBottom();
+          });
+        }
+      }
+    };
 
     const rooms = computed(() => chatStore.rooms);
     const currentRoomMessages = computed(() => chatStore.currentRoomMessages);
@@ -149,11 +161,22 @@ export default {
       if (authStore.isAuthenticated) {
         chatStore.connectWebSocket();
       }
+      
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', updateViewportHeight);
+        window.visualViewport.addEventListener('scroll', updateViewportHeight);
+      }
+      updateViewportHeight();
     });
 
     onUnmounted(() => {
       // Clear currentRoomId when leaving Chat page
       chatStore.currentRoomId = null;
+      
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateViewportHeight);
+        window.visualViewport.removeEventListener('scroll', updateViewportHeight);
+      }
     });
 
     return {
@@ -170,6 +193,7 @@ export default {
       mobileShowChat,
       selectRoom,
       isKeyboardOpen,
+      viewportHeight,
       loadMoreMessages,
       handleSendMessage,
       handleFocus,

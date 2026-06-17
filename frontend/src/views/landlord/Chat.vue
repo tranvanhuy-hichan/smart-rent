@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full flex flex-col bg-card overflow-hidden chat-container-safe" :class="{ 'keyboard-open': isKeyboardOpen }">
+  <div class="h-full flex flex-col bg-card overflow-hidden chat-container-safe" :style="{ height: viewportHeight }" :class="{ 'keyboard-open': isKeyboardOpen }">
     <!-- Main Chat Workspace Card -->
     <div class="flex-grow bg-card overflow-hidden flex flex-col lg:grid lg:grid-cols-12 min-h-0 w-full">
       
