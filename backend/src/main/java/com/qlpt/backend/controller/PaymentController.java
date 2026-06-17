@@ -284,7 +284,8 @@ public class PaymentController {
             String host = uri.getHost();
             if (host == null || host.equals("localhost") || host.equals("127.0.0.1") || 
                 host.startsWith("192.168.") || host.startsWith("10.") || host.startsWith("172.") ||
-                host.endsWith("vercel.app") || host.contains("quanlyphongtro")) {
+                host.endsWith("vercel.app") || host.contains("quanlyphongtro") ||
+                host.contains("tranvanhuy") || host.contains("smart-rent") || host.contains("smartrent")) {
                 return trimmed;
             }
         } catch (Exception e) {
