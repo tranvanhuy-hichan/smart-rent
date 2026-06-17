@@ -199,6 +199,9 @@ export const useNotificationStore = defineStore('notification', {
         // Đăng ký Service Worker sw.js
         const registration = await navigator.serviceWorker.register('/sw.js');
         logWebSocket('Service Worker đăng ký thành công:', registration);
+        
+        // Chờ Service Worker sẵn sàng và kích hoạt hoàn toàn
+        await navigator.serviceWorker.ready;
 
         // Lấy VAPID public key từ Backend
         const keyResponse = await pushSubscriptionService.getPublicKey();
@@ -219,12 +222,35 @@ export const useNotificationStore = defineStore('notification', {
           return;
         }
 
-        // Đăng ký/Lấy Subscription từ PushManager
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: applicationServerKey
-        });
+        
+        // Lấy subscription hiện tại (nếu có)
+        let subscription = await registration.pushManager.getSubscription();
+        
+        // Kiểm tra xem subscription cũ có khác VAPID public key mới của Backend không
+        if (subscription) {
+          const oldKey = subscription.options.applicationServerKey;
+          if (oldKey) {
+            const oldKeyUint8 = new Uint8Array(oldKey);
+            const isDifferentKey = oldKeyUint8.length !== applicationServerKey.length ||
+              oldKeyUint8.some((val, index) => val !== applicationServerKey[index]);
+            
+            if (isDifferentKey) {
+              logWebSocket('VAPID key đã thay đổi. Hủy đăng ký subscription cũ...');
+              await subscription.unsubscribe();
+              subscription = null;
+            }
+          }
+        }
+
+        // Nếu chưa có subscription hoặc vừa hủy đăng ký do khác key, đăng ký mới
+        if (!subscription) {
+          logWebSocket('Tạo đăng ký Web Push mới...');
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey
+          });
+        }
 
         // Gửi subscription lên Backend
         const subJson = subscription.toJSON();
@@ -237,7 +263,7 @@ export const useNotificationStore = defineStore('notification', {
           auth: auth
         });
         
-        logWebSocket('Thiết lập Web Push Notification thành công.');
+        logWebSocket('Thiết lập Web Push Notification thành công và lưu DB.');
       } catch (error) {
         logWebSocket('Lỗi thiết lập Web Push Notification:', error);
       }
