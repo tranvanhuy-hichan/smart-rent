@@ -132,6 +132,40 @@
       </button>
     </div>
   </transition>
+
+  <!-- Modal yêu cầu quyền thông báo cho thiết bị mới -->
+  <div v-if="showPushPrompt" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[2px] z-[999999] flex items-center justify-center p-4">
+    <div class="bg-card border border-border-main p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-5 animate-fade-in">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-text-main">Nhận thông báo đẩy</h3>
+          <p class="text-xs text-text-sub mt-0.5">Không bỏ lỡ tin nhắn & hóa đơn</p>
+        </div>
+      </div>
+      <p class="text-xs text-text-sub leading-relaxed">
+        Thiết bị này chưa được kích hoạt nhận thông báo. Bạn có muốn bật thông báo để nhận thông báo tức thời về tin nhắn mới, hóa đơn và hợp đồng trên thiết bị này không?
+      </p>
+      <div class="flex space-x-3">
+        <button 
+          @click="declinePushPrompt" 
+          class="flex-1 px-4 py-2.5 rounded-xl border border-border-main text-text-main text-xs font-semibold cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+        >
+          Để sau
+        </button>
+        <button 
+          @click="acceptPushPrompt" 
+          class="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold cursor-pointer hover:bg-primary-dark transition shadow-md"
+        >
+          Bật thông báo
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -160,6 +194,39 @@ export default {
     const authStore = useAuthStore();
     const notificationStore = useNotificationStore();
     const chatStore = useChatStore();
+
+    const showPushPrompt = ref(false);
+    const hasDeclinedPush = ref(sessionStorage.getItem('declined_push_notifications') === 'true');
+
+    const checkPushPermission = () => {
+      if (
+        authStore.isAuthenticated &&
+        typeof Notification !== 'undefined' &&
+        'serviceWorker' in navigator &&
+        'PushManager' in window &&
+        Notification.permission === 'default' &&
+        !hasDeclinedPush.value
+      ) {
+        showPushPrompt.value = true;
+      } else {
+        showPushPrompt.value = false;
+      }
+    };
+
+    const acceptPushPrompt = async () => {
+      showPushPrompt.value = false;
+      try {
+        await notificationStore.initPushNotifications();
+      } catch (err) {
+        console.error('Lỗi khi kích hoạt thông báo:', err);
+      }
+    };
+
+    const declinePushPrompt = () => {
+      showPushPrompt.value = false;
+      hasDeclinedPush.value = true;
+      sessionStorage.setItem('declined_push_notifications', 'true');
+    };
 
     const applyFontSize = (size) => {
       let fontSizePx = '16px';
@@ -287,9 +354,11 @@ export default {
       if (isAuthenticated) {
         notificationStore.connectWebSocket();
         chatStore.connectWebSocket();
+        setTimeout(checkPushPermission, 1500); // Kiểm tra và hỏi quyền thông báo đẩy
       } else {
         notificationStore.disconnectWebSocket();
         chatStore.disconnectWebSocket();
+        showPushPrompt.value = false;
       }
     });
 
@@ -341,6 +410,9 @@ export default {
       
       // Kiểm tra định kỳ mỗi 10 giây xem phiên đăng nhập đã hết hạn chưa
       checkInterval = setInterval(checkSession, 10000);
+
+      // Kiểm tra quyền thông báo trên thiết bị hiện tại
+      setTimeout(checkPushPermission, 1500);
     });
 
     const activeToast = computed(() => notificationStore.activeToast);
@@ -432,6 +504,10 @@ export default {
       activeToast,
       dismissToast,
       clickToast,
+      // Push notifications prompt
+      showPushPrompt,
+      declinePushPrompt,
+      acceptPushPrompt,
     };
   },
 };
