@@ -63,13 +63,13 @@ public class PaymentReminderScheduler {
                     
                     // Gửi thông báo cho Tenant
                     String tenantTitle = "Nhắc nhở đóng tiền phòng";
-                    String tenantContent = String.format("Sắp đến ngày đóng tiền phòng %s (Hạn đóng: ngày %s/%s). Vui lòng chuẩn bị thanh toán cho chủ nhà.",
+                    String tenantContent = String.format("Bạn sẽ có hóa đơn đóng tiền phòng %s vào ngày mai (hạn đóng ngày %s/%s). Vui lòng chuẩn bị số tiền thanh toán nhé!",
                             roomNumber, tomorrowDay, tomorrow.getMonthValue());
                     notificationService.createNotification(tenant, tenantTitle, tenantContent, "PAYMENT_REMINDER");
                     
                     // Gửi thông báo cho Landlord
-                    String landlordTitle = "Hạn thu tiền phòng sắp tới";
-                    String landlordContent = String.format("Phòng %s của người thuê %s sắp đến kỳ thanh toán vào ngày mai (%s/%s). Hãy chú ý kiểm tra và lập hóa đơn.",
+                    String landlordTitle = "Kỳ thanh toán phòng sắp tới";
+                    String landlordContent = String.format("Hợp đồng phòng %s của khách thuê %s sắp đến kỳ thanh toán mới vào ngày mai (%s/%s). Bạn hãy chú ý kiểm tra và tạo hóa đơn nhé!",
                             roomNumber, tenant.getFullName(), tomorrowDay, tomorrow.getMonthValue());
                     notificationService.createNotification(landlord, landlordTitle, landlordContent, "PAYMENT_REMINDER");
                     

@@ -211,13 +211,13 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         // Gửi thông báo đến người thuê
         try {
-            String title = "Hóa đơn mới được tạo";
+            String title = "Hóa đơn thanh toán mới";
             String content = String.format(
-                    "Hóa đơn phòng %s kỳ từ %s đến %s với số tiền %s đã được tạo. Vui lòng thanh toán sớm.",
+                    "Bạn có hóa đơn %s phòng %s (kỳ từ %s đến %s) cần thanh toán. Vui lòng kiểm tra và thanh toán sớm nhé!",
+                    String.format("%,.0f VNĐ", resultInvoice.getTotalAmount()),
                     room.getRoomNumber(),
                     start,
-                    end,
-                    String.format("%,.0f VNĐ", resultInvoice.getTotalAmount()));
+                    end);
             notificationService.createNotification(contract.getTenant(), title, content, "INVOICE_NEW",
                     resultInvoice.getId());
         } catch (Exception e) {
@@ -260,9 +260,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         if (isFullyPaid) {
             try {
-                String title = "Xác nhận thanh toán hóa đơn";
+                String title = "Nhận thanh toán hóa đơn thành công";
                 String content = String.format(
-                        "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
+                        "Hóa đơn phòng %s của bạn (kỳ %s đến %s) đã được xác nhận thanh toán thành công bằng Tiền mặt/Chuyển khoản trực tiếp. Cảm ơn bạn nhiều nhé!",
                         result.getContract().getRoom().getRoomNumber(),
                         result.getBillingPeriodStart(),
                         result.getBillingPeriodEnd());
@@ -305,9 +305,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         if (isFullyPaid) {
             try {
-                String title = "Xác nhận thanh toán hóa đơn";
+                String title = "Thanh toán hóa đơn thành công";
                 String content = String.format(
-                        "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công.",
+                        "Hóa đơn phòng %s của bạn (kỳ %s đến %s) đã được thanh toán thành công bằng cổng trực tuyến PayOS. Cảm ơn bạn!",
                         result.getContract().getRoom().getRoomNumber(),
                         result.getBillingPeriodStart(),
                         result.getBillingPeriodEnd());
@@ -325,14 +325,11 @@ public class InvoiceServiceImpl implements InvoiceService {
             result.getContract().getRoom().getBoardingHouse().getLandlord() != null) {
             try {
                 User landlord = result.getContract().getRoom().getBoardingHouse().getLandlord();
-                String landlordTitle = "Khách thuê thanh toán trực tuyến";
+                String landlordTitle = "Hóa đơn đã được thanh toán";
                 String landlordContent = String.format(
-                        "Khách thuê %s (phòng %s) đã thanh toán thành công %,.0f VNĐ qua cổng PayOS cho hóa đơn kỳ từ %s đến %s.",
-                        result.getContract().getTenant() != null ? result.getContract().getTenant().getFullName() : "N/A",
+                        "Hóa đơn phòng %s đã được thanh toán thành công số tiền %,.0f VNĐ bằng PayOS. Bạn vui lòng kiểm tra lại tài khoản nhé!",
                         result.getContract().getRoom().getRoomNumber(),
-                        paidAmount,
-                        result.getBillingPeriodStart(),
-                        result.getBillingPeriodEnd());
+                        paidAmount);
                 notificationService.createNotification(landlord, landlordTitle, landlordContent,
                         "PAYMENT_CONFIRMED", result.getId());
             } catch (Exception e) {
@@ -420,9 +417,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
                     // Gửi thông báo đến người thuê
                     try {
-                        String title = "Xác nhận thanh toán hóa đơn";
+                        String title = "Thanh toán hóa đơn thành công";
                         String content = String.format(
-                                "Hóa đơn phòng %s kỳ từ %s đến %s đã được xác nhận thanh toán thành công qua PayOS.",
+                                "Hóa đơn phòng %s của bạn (kỳ %s đến %s) đã được thanh toán thành công bằng cổng trực tuyến PayOS. Cảm ơn bạn!",
                                 saved.getContract().getRoom().getRoomNumber(),
                                 saved.getBillingPeriodStart(),
                                 saved.getBillingPeriodEnd());
@@ -430,6 +427,25 @@ public class InvoiceServiceImpl implements InvoiceService {
                                 "PAYMENT_CONFIRMED", saved.getId());
                     } catch (Exception ne) {
                         System.err.println("Lỗi khi gửi thông báo đồng bộ PayOS: " + ne.getMessage());
+                    }
+
+                    // Gửi thông báo cho chủ trọ
+                    if (saved.getContract() != null && 
+                        saved.getContract().getRoom() != null && 
+                        saved.getContract().getRoom().getBoardingHouse() != null && 
+                        saved.getContract().getRoom().getBoardingHouse().getLandlord() != null) {
+                        try {
+                            User landlord = saved.getContract().getRoom().getBoardingHouse().getLandlord();
+                            String landlordTitle = "Hóa đơn đã được thanh toán";
+                            String landlordContent = String.format(
+                                    "Hóa đơn phòng %s đã được thanh toán thành công số tiền %,.0f VNĐ bằng PayOS. Bạn vui lòng kiểm tra lại tài khoản nhé!",
+                                    saved.getContract().getRoom().getRoomNumber(),
+                                    saved.getTotalAmount());
+                            notificationService.createNotification(landlord, landlordTitle, landlordContent,
+                                    "PAYMENT_CONFIRMED", saved.getId());
+                        } catch (Exception ne) {
+                            System.err.println("Lỗi khi gửi thông báo đồng bộ PayOS cho chủ trọ: " + ne.getMessage());
+                        }
                     }
 
                     return invoiceRepository.findWithDetailsById(saved.getId()).orElse(saved);
@@ -592,14 +608,13 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         String title = "Khách báo đã chuyển khoản";
         String content = String.format(
-                "Phòng %s (dãy %s) báo đã thanh toán hóa đơn kỳ %s. Số tiền cần đóng: %,.0f VNĐ. Vui lòng kiểm tra tài khoản.",
+                "Khách thuê phòng %s (%s) vừa báo đã chuyển khoản thanh toán hóa đơn kỳ %s với số tiền %,.0f VNĐ. Bạn vui lòng kiểm tra tài khoản ngân hàng và xác nhận nhé!",
                 roomNumber, bhName, billingPeriod, remainingAmount);
 
         invoice.setPaymentClaimed(true);
         invoiceRepository.save(invoice);
 
-        // Tạo thông báo cho chủ trọ (createNotification tự động kích hoạt WebSocket đẩy
-        // đến chủ trọ)
+        // Tạo thông báo cho chủ trọ
         notificationService.createNotification(landlord, title, content, "PAYMENT_REPORTED", invoiceId);
     }
 }
