@@ -206,6 +206,10 @@
                 @keyup.enter.exact.prevent="handleSendMessage"
                 @focus="handleFocus"
                 @blur="handleBlur"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                inputmode="text"
               />
               <button 
                 type="submit" 
