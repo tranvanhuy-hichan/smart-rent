@@ -163,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
                 isExpired = !trialActive && !subscriptionActive;
             }
 
-            return new JwtResponse(jwt, user.getId(), user.getUsername(), user.getRole().name(), isExpired);
+            return new JwtResponse(jwt, user.getId(), user.getUsername(), user.getRole().name(), isExpired, user.getMustChangePassword());
         } catch (org.springframework.security.authentication.DisabledException
                  | org.springframework.security.authentication.LockedException ex) {
             throw new RuntimeException("Tài khoản của bạn chưa được kích hoạt hoặc đã bị khóa. Vui lòng liên hệ Admin!");
@@ -177,24 +177,39 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public User createTenantAccount(TenantCreateRequest request, User landlord) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Tên đăng nhập cho người thuê đã tồn tại!");
+        String cccd = request.getIdentityCard();
+        if (cccd == null || cccd.trim().isEmpty()) {
+            throw new RuntimeException("Số CMND/CCCD không được trống để cấp tài khoản!");
+        }
+        cccd = cccd.trim();
+
+        String username = (request.getUsername() != null && !request.getUsername().trim().isEmpty())
+                ? request.getUsername().trim()
+                : cccd;
+
+        String rawPassword = (request.getPassword() != null && !request.getPassword().trim().isEmpty())
+                ? request.getPassword().trim()
+                : cccd;
+
+        if (userRepository.existsByUsername(username)) {
+            throw new RuntimeException("Tên đăng nhập (hoặc số CCCD) đã tồn tại!");
         }
 
         User tenant = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .username(username)
+                .password(passwordEncoder.encode(rawPassword))
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .fullName(request.getFullName())
                 .role(Role.TENANT)
                 .status("ACTIVE")
                 .landlord(landlord)
-                .identityCard(request.getIdentityCard())
+                .identityCard(cccd)
                 .idCardIssueDate(request.getIdCardIssueDate())
                 .idCardIssuePlace(request.getIdCardIssuePlace())
                 .permanentAddress(request.getPermanentAddress())
                 .createdAt(java.time.LocalDateTime.now())
+                .mustChangePassword(true)
                 .build();
 
         User savedTenant = userRepository.save(tenant);
@@ -318,7 +333,7 @@ public class AuthServiceImpl implements AuthService {
                 isExpired = !trialActive && !subscriptionActive;
             }
 
-            return new JwtResponse(jwt, user.getId(), user.getUsername(), user.getRole().name(), isExpired);
+            return new JwtResponse(jwt, user.getId(), user.getUsername(), user.getRole().name(), isExpired, user.getMustChangePassword());
 
         } catch (Exception e) {
             throw new RuntimeException("Đăng nhập bằng Google thất bại: " + e.getMessage());

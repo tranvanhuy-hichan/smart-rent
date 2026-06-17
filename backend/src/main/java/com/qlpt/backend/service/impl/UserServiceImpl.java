@@ -157,6 +157,7 @@ public class UserServiceImpl implements UserService {
         }
         
         user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setMustChangePassword(false);
         userRepository.save(user);
     }
 
@@ -184,12 +185,22 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Bạn không có quyền thực hiện chức năng này");
         }
         
-        // Reset password to their phone number, fallback to '123456' if phone is empty
-        String rawPassword = (targetUser.getPhone() != null && !targetUser.getPhone().trim().isEmpty()) 
-                ? targetUser.getPhone().trim() 
-                : "123456";
+        // Reset password to their identity card (CCCD) if tenant, otherwise phone, fallback to '123456'
+        String rawPassword;
+        if (targetUser.getRole() == Role.TENANT) {
+            rawPassword = (targetUser.getIdentityCard() != null && !targetUser.getIdentityCard().trim().isEmpty())
+                    ? targetUser.getIdentityCard().trim()
+                    : ((targetUser.getPhone() != null && !targetUser.getPhone().trim().isEmpty())
+                        ? targetUser.getPhone().trim()
+                        : "123456");
+        } else {
+            rawPassword = (targetUser.getPhone() != null && !targetUser.getPhone().trim().isEmpty()) 
+                    ? targetUser.getPhone().trim() 
+                    : "123456";
+        }
                 
         targetUser.setPassword(passwordEncoder.encode(rawPassword));
+        targetUser.setMustChangePassword(true);
         return userRepository.save(targetUser);
     }
 

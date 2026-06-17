@@ -50,6 +50,9 @@ public class User {
     @Column(name = "identity_card")
     private String identityCard;
 
+    @Column(name = "must_change_password", nullable = false, columnDefinition = "boolean default false")
+    private Boolean mustChangePassword = false;
+
     @Column(name = "id_card_issue_date")
     private java.time.LocalDate idCardIssueDate;
 
