@@ -81,6 +81,7 @@ public class Invoice {
     @Column(name = "payment_date")
     private LocalDate paymentDate;
 
+    @Builder.Default
     @Column(name = "payment_claimed", nullable = false, columnDefinition = "boolean default false")
     private boolean paymentClaimed = false;
 

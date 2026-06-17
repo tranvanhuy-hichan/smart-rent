@@ -171,7 +171,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                     byte[] publicKeyBytes = Base64.getUrlDecoder().decode(sub.getP256dh());
                     byte[] authBytes = Base64.getUrlDecoder().decode(sub.getAuth());
 
-                    ECPublicKey userPublicKey = Utils.loadPublicKey(publicKeyBytes);
+                    ECPublicKey userPublicKey = (ECPublicKey) Utils.loadPublicKey(publicKeyBytes);
 
                     Notification notification = new Notification(
                             sub.getEndpoint(),

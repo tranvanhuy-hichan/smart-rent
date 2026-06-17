@@ -4,14 +4,16 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nl.martijndwars.webpush.Utils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import jakarta.annotation.PostConstruct;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.Security;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
 
 @Configuration
@@ -39,12 +41,14 @@ public class VapidKeysConfig {
             log.warn("Web Push VAPID keys are not configured in application properties/environment.");
             log.info("Generating a temporary VAPID Key Pair for this session...");
             try {
-                KeyPair keyPair = Utils.generateKeyPair();
+                KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
+                keyPairGenerator.initialize(new ECGenParameterSpec("prime256v1"));
+                KeyPair keyPair = keyPairGenerator.generateKeyPair();
                 ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
                 ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
 
-                byte[] publicKeyBytes = Utils.savePublicKey(ecPublicKey);
-                byte[] privateKeyBytes = Utils.savePrivateKey(ecPrivateKey);
+                byte[] publicKeyBytes = Utils.encode(ecPublicKey);
+                byte[] privateKeyBytes = Utils.encode(ecPrivateKey);
 
                 this.publicKey = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKeyBytes);
                 this.privateKey = Base64.getUrlEncoder().withoutPadding().encodeToString(privateKeyBytes);
