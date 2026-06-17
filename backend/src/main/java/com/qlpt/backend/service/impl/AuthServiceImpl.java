@@ -29,6 +29,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -203,14 +206,44 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public JwtResponse authenticateGoogleUser(GoogleLoginRequest request) {
+        if (googleClientId == null || googleClientId.trim().isEmpty()) {
+            throw new RuntimeException("Google Client ID chưa được cấu hình ở Backend (thiếu GOOGLE_CLIENT_ID trong .env)!");
+        }
+
         try {
+            List<String> audiences;
+            if (googleClientId.contains(",")) {
+                audiences = Arrays.stream(googleClientId.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+            } else {
+                audiences = Collections.singletonList(googleClientId.trim());
+            }
+
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
-                    .setAudience(Collections.singletonList(googleClientId))
+                    .setAudience(audiences)
                     .build();
 
             GoogleIdToken idToken = verifier.verify(request.credential());
             if (idToken == null) {
-                throw new RuntimeException("Token xác thực Google không hợp lệ!");
+                // Thử giải mã (không xác thực chữ ký) để in log chẩn đoán lỗi chi tiết
+                try {
+                    GoogleIdToken parsedToken = GoogleIdToken.parse(new GsonFactory(), request.credential());
+                    if (parsedToken != null) {
+                        GoogleIdToken.Payload parsedPayload = parsedToken.getPayload();
+                        System.err.println("--- LỖI XÁC THỰC GOOGLE TOKEN ---");
+                        System.err.println("Issuer trong token: " + parsedPayload.getIssuer());
+                        System.err.println("Audience trong token: " + parsedPayload.getAudience());
+                        System.err.println("Authorized Party (azp): " + parsedPayload.getAuthorizedParty());
+                        System.err.println("Thời gian hết hạn token: " + parsedPayload.getExpirationTimeSeconds() + " (Thời gian server hiện tại: " + (System.currentTimeMillis() / 1000) + ")");
+                        System.err.println("Danh sách Client ID được cấu hình ở backend: " + audiences);
+                        System.err.println("---------------------------------");
+                    }
+                } catch (Exception parseEx) {
+                    System.err.println("Không thể parse/đọc thông tin token lỗi: " + parseEx.getMessage());
+                }
+                throw new RuntimeException("Token xác thực Google không hợp lệ hoặc đã hết hạn! Vui lòng kiểm tra log hệ thống.");
             }
 
             GoogleIdToken.Payload payload = idToken.getPayload();

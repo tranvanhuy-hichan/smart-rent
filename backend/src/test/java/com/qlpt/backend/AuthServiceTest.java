@@ -155,4 +155,54 @@ public class AuthServiceTest {
             verify(userRepository, never()).save(any(User.class));
         }
     }
+
+    @Test
+    public void testAuthenticateGoogleUser_ConfigMissing_Failure() {
+        GoogleLoginRequest request = new GoogleLoginRequest("mock-token");
+        org.springframework.test.util.ReflectionTestUtils.setField(authService, "googleClientId", "");
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            authService.authenticateGoogleUser(request);
+        });
+
+        assertTrue(exception.getMessage().contains("Google Client ID chưa được cấu hình"));
+    }
+
+    @Test
+    public void testAuthenticateGoogleUser_MultipleAudiences_Success() {
+        GoogleLoginRequest request = new GoogleLoginRequest("mock-token");
+        org.springframework.test.util.ReflectionTestUtils.setField(authService, "googleClientId", "client-id-1, client-id-2");
+
+        User existingTenant = User.builder()
+                .id(UUID.randomUUID())
+                .username("existingtenant")
+                .email("tenant@gmail.com")
+                .role(Role.TENANT)
+                .googleId("google-sub-123")
+                .status("ACTIVE")
+                .build();
+
+        GoogleIdToken idToken = mock(GoogleIdToken.class);
+        GoogleIdToken.Payload payload = mock(GoogleIdToken.Payload.class);
+        when(idToken.getPayload()).thenReturn(payload);
+        when(payload.getSubject()).thenReturn("google-sub-123");
+        when(payload.getEmail()).thenReturn("tenant@gmail.com");
+
+        when(userRepository.findByGoogleId("google-sub-123")).thenReturn(Optional.of(existingTenant));
+        when(tokenProvider.generateToken(any())).thenReturn("mock-jwt-token");
+
+        try (MockedConstruction<GoogleIdTokenVerifier> mocked = mockConstruction(GoogleIdTokenVerifier.class,
+                (mock, context) -> {
+                    when(mock.verify("mock-token")).thenReturn(idToken);
+                })) {
+
+            JwtResponse response = authService.authenticateGoogleUser(request);
+
+            assertNotNull(response);
+            assertEquals("mock-jwt-token", response.getToken());
+            assertEquals("existingtenant", response.getUsername());
+            assertEquals("TENANT", response.getRole());
+            verify(userRepository, never()).save(any(User.class));
+        }
+    }
 }
