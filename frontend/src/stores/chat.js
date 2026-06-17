@@ -178,19 +178,30 @@ export const useChatStore = defineStore('chat', {
             // Show real-time toast notification if not in the active room
             if (!isCurrentRoom) {
               const notificationStore = useNotificationStore();
-              notificationStore.activeToast = {
-                id: message.id,
-                type: 'CHAT_MESSAGE',
-                title: `Tin nhắn mới từ ${message.senderFullName || 'Người dùng'}`,
-                content: message.content,
-                referenceId: message.chatRoomId
-              };
-              if (notificationStore.toastTimeout) {
-                clearTimeout(notificationStore.toastTimeout);
+              
+              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                notificationStore.showNativeNotification({
+                  id: message.id,
+                  type: 'CHAT_MESSAGE',
+                  title: `Tin nhắn mới từ ${message.senderFullName || 'Người dùng'}`,
+                  content: message.content,
+                  referenceId: message.chatRoomId
+                });
+              } else {
+                notificationStore.activeToast = {
+                  id: message.id,
+                  type: 'CHAT_MESSAGE',
+                  title: `Tin nhắn mới từ ${message.senderFullName || 'Người dùng'}`,
+                  content: message.content,
+                  referenceId: message.chatRoomId
+                };
+                if (notificationStore.toastTimeout) {
+                  clearTimeout(notificationStore.toastTimeout);
+                }
+                notificationStore.toastTimeout = setTimeout(() => {
+                  notificationStore.activeToast = null;
+                }, 6000);
               }
-              notificationStore.toastTimeout = setTimeout(() => {
-                notificationStore.activeToast = null;
-              }, 6000);
             }
           }
         } catch (e) {

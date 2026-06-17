@@ -408,6 +408,17 @@ export default {
         chatStore.connectWebSocket();
       }
       
+      // Lắng nghe sự kiện từ Service Worker để trả về phòng chat đang xem
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'GET_ACTIVE_ROOM') {
+            if (event.ports && event.ports[0]) {
+              event.ports[0].postMessage({ activeRoomId: chatStore.currentRoomId });
+            }
+          }
+        });
+      }
+      
       // Kiểm tra định kỳ mỗi 10 giây xem phiên đăng nhập đã hết hạn chưa
       checkInterval = setInterval(checkSession, 10000);
 

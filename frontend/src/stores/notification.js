@@ -123,14 +123,19 @@ export const useNotificationStore = defineStore('notification', {
             this.notifications.unshift(notification);
             this.unreadCount++;
             
-            // Hiển thị Toast Popup trên màn hình
-            this.activeToast = notification;
-            if (this.toastTimeout) {
-              clearTimeout(this.toastTimeout);
+            // Kiểm tra quyền thông báo để quyết định hiển thị Native hoặc Toast Popup
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+              this.showNativeNotification(notification);
+            } else {
+              // Hiển thị Toast Popup trên màn hình (dự phòng)
+              this.activeToast = notification;
+              if (this.toastTimeout) {
+                clearTimeout(this.toastTimeout);
+              }
+              this.toastTimeout = setTimeout(() => {
+                this.activeToast = null;
+              }, 6000); // Tự động ẩn sau 6 giây
             }
-            this.toastTimeout = setTimeout(() => {
-              this.activeToast = null;
-            }, 6000); // Tự động ẩn sau 6 giây
             
             // Phát âm báo hiệu
             this.playNotificationSound();
@@ -235,6 +240,57 @@ export const useNotificationStore = defineStore('notification', {
         logWebSocket('Thiết lập Web Push Notification thành công.');
       } catch (error) {
         logWebSocket('Lỗi thiết lập Web Push Notification:', error);
+      }
+    },
+    async showNativeNotification(notification) {
+      if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+
+      try {
+        const registration = await navigator.serviceWorker.ready.catch(() => null);
+        const subscription = registration ? await registration.pushManager.getSubscription().catch(() => null) : null;
+        const isPushActive = !!subscription;
+
+        // Nếu Web Push đang hoạt động, Service Worker đã nhận và tự hiển thị push notification.
+        // Ta chỉ hiển thị từ client khi Web Push không hoạt động (lỗi hoặc chưa đăng ký).
+        if (!isPushActive) {
+          let url = '/';
+          if (notification.type) {
+            switch (notification.type) {
+              case "CHAT_MESSAGE":
+                url = useAuthStore().role === "LANDLORD" ? "/landlord/chat" : "/tenant/chat";
+                break;
+              case "INVOICE_NEW":
+              case "PAYMENT_CONFIRMED":
+              case "PAYMENT_REMINDER":
+              case "PAYMENT_REPORTED":
+                url = useAuthStore().role === "LANDLORD" 
+                  ? (notification.referenceId ? `/landlord/invoices/detail/${notification.referenceId}` : "/landlord/invoices")
+                  : (notification.referenceId ? `/tenant/invoices/detail/${notification.referenceId}` : "/tenant/invoices");
+                break;
+              case "CONTRACT_ACTIVE":
+                url = useAuthStore().role === "LANDLORD"
+                  ? (notification.referenceId ? `/landlord/contracts/detail/${notification.referenceId}` : "/landlord/contracts")
+                  : (notification.referenceId ? `/tenant/contracts/detail/${notification.referenceId}` : "/tenant/contracts");
+                break;
+              case "SUBSCRIPTION_REQUEST":
+                if (useAuthStore().role === "ADMIN") {
+                  url = "/admin/landlords";
+                }
+                break;
+            }
+          }
+
+          if (registration && 'showNotification' in registration) {
+            registration.showNotification(notification.title || 'Thông báo mới', {
+              body: notification.content || notification.body || '',
+              icon: '/logo.ico',
+              badge: '/favicon.svg',
+              data: { url: url }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Lỗi hiển thị Native Notification:', e);
       }
     }
   }

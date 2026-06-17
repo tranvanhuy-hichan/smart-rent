@@ -32,9 +32,39 @@ self.addEventListener('push', function(event) {
     ]
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  // Kiểm tra xem có cần chặn thông báo đẩy không (nếu người dùng đang mở đúng phòng chat)
+  const showNotificationPromise = clients.matchAll({ type: 'window', includeUncontrolled: true })
+    .then(function(clientList) {
+      const activeClient = clientList.find(c => c.focused);
+      if (activeClient && data.type === 'CHAT_MESSAGE' && data.referenceId) {
+        return new Promise((resolve) => {
+          const messageChannel = new MessageChannel();
+          messageChannel.port1.onmessage = function(msgEvent) {
+            if (msgEvent.data && msgEvent.data.activeRoomId === data.referenceId) {
+              resolve(true); // Trùng phòng chat đang mở -> chặn thông báo
+            } else {
+              resolve(false); // Khác phòng chat -> hiển thị thông báo
+            }
+          };
+          
+          // Gửi tin nhắn yêu cầu lấy ID phòng chat đang mở tới client
+          activeClient.postMessage({ type: 'GET_ACTIVE_ROOM' }, [messageChannel.port2]);
+          
+          // Sau 200ms không phản hồi thì mặc định không chặn
+          setTimeout(() => resolve(false), 200);
+        });
+      }
+      return false;
+    })
+    .then(function(shouldSuppress) {
+      if (shouldSuppress) {
+        console.log('[Service Worker] Đã chặn thông báo vì đang mở phòng chat này:', data.referenceId);
+        return;
+      }
+      return self.registration.showNotification(title, options);
+    });
+
+  event.waitUntil(showNotificationPromise);
 });
 
 self.addEventListener('notificationclick', function(event) {
