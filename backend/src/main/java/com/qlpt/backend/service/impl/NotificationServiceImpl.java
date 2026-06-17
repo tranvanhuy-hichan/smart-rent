@@ -22,13 +22,16 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final com.qlpt.backend.config.NotificationWebSocketHandler notificationWebSocketHandler;
+    private final com.qlpt.backend.service.PushNotificationService pushNotificationService;
 
     public NotificationServiceImpl(NotificationRepository notificationRepository,
                                    UserRepository userRepository,
-                                   com.qlpt.backend.config.NotificationWebSocketHandler notificationWebSocketHandler) {
+                                   com.qlpt.backend.config.NotificationWebSocketHandler notificationWebSocketHandler,
+                                   com.qlpt.backend.service.PushNotificationService pushNotificationService) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.notificationWebSocketHandler = notificationWebSocketHandler;
+        this.pushNotificationService = pushNotificationService;
     }
 
     @Transactional
@@ -63,6 +66,12 @@ public class NotificationServiceImpl implements NotificationService {
         } catch (Exception e) {
             // Ghi nhận lỗi nhưng không chặn luồng nghiệp vụ chính
             System.err.println("Lỗi khi gửi thông báo WebSocket: " + e.getMessage());
+        }
+
+        try {
+            pushNotificationService.sendPushNotification(user, title, content, type, referenceId);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi gửi thông báo Web Push: " + e.getMessage());
         }
 
         return response;
