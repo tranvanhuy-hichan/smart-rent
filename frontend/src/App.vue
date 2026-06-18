@@ -16,7 +16,7 @@
         class="flex-1 p-0 flex flex-col justify-between relative lg:rounded-2xl"
         :class="[
           isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto',
-          (!isHeaderHidden && !hideHeaderOnMobile) ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0'
+          isHeaderInitiallyVisible ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0'
         ]"
         @touchstart.passive="onTouchStart"
         @touchmove.passive="onTouchMove"
@@ -253,6 +253,12 @@ export default {
 
     const isHeaderHidden = computed(() => {
       return authStore.isHeaderHidden || !!(route.meta && route.meta.hideHeader);
+    });
+
+    const isHeaderInitiallyVisible = computed(() => {
+      if (isHeaderHidden.value || hideHeaderOnMobile.value) return false;
+      const path = route.path.toLowerCase();
+      return !path.includes('/chat');
     });
 
     const isMainScrollDisabled = computed(() => {
@@ -523,6 +529,7 @@ export default {
       isApiSaving,
       isBottomBarHidden,
       isHeaderHidden,
+      isHeaderInitiallyVisible,
       isMainScrollDisabled,
       savingMessage,
       // Pull to refresh

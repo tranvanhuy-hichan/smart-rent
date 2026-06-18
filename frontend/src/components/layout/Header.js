@@ -1,4 +1,4 @@
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth.js';
 import { useNotificationStore } from '../../stores/notification.js';
@@ -19,6 +19,40 @@ export default {
     const router = useRouter();
     const authStore = useAuthStore();
     const chatStore = useChatStore();
+
+    const isHeaderVisible = ref(true);
+    const isChatPage = computed(() => route.path.toLowerCase().includes('/chat'));
+    const isHomePage = computed(() => {
+      const path = route.path.toLowerCase();
+      return path === '/landlord' || path === '/tenant' || path === '/admin' || 
+             route.name === 'LandlordDashboard' || route.name === 'TenantDashboard' || route.name === 'AdminStats';
+    });
+
+    let lastScrollTop = 0;
+    const handleScroll = (e) => {
+      if (isChatPage.value) {
+        isHeaderVisible.value = false;
+        return;
+      }
+      const target = e.target;
+      if (!target || typeof target.scrollTop === 'undefined') return;
+      const scrollTop = target.scrollTop;
+      
+      if (Math.abs(scrollTop - lastScrollTop) < 8) return;
+      
+      if (scrollTop <= 10) {
+        isHeaderVisible.value = true;
+      } else {
+        if (scrollTop > lastScrollTop) {
+          // Scroll down => hide topbar
+          isHeaderVisible.value = false;
+        } else {
+          // Scroll up => show topbar
+          isHeaderVisible.value = true;
+        }
+      }
+      lastScrollTop = scrollTop;
+    };
 
     const profileUser = ref(null);
     const chatUnreadCount = computed(() => chatStore.totalUnreadCount);
@@ -260,14 +294,28 @@ export default {
         notificationStore.fetchNotifications(0, 10);
       }
       document.addEventListener('click', handleDocumentClick);
+
+      // Set initial header visibility based on current page
+      isHeaderVisible.value = !isChatPage.value;
+
+      window.addEventListener('scroll', handleScroll, true);
     });
 
     onUnmounted(() => {
       // Không gọi stopPolling() ở đây vì App.vue quản lý vòng đời polling
       document.removeEventListener('click', handleDocumentClick);
+      window.removeEventListener('scroll', handleScroll, true);
+    });
+
+    watch(() => route.path, () => {
+      isHeaderVisible.value = !isChatPage.value;
+      lastScrollTop = 0;
     });
 
     return {
+      isHeaderVisible,
+      isChatPage,
+      isHomePage,
       hideOnMobile,
       username,
       userInitial,

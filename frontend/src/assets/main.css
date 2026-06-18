@@ -552,4 +552,58 @@ main .bg-bg-main > form > .grid {
   color: var(--text-secondary) !important;
 }
 
+/* iOS 26 Liquid Glass Design System Utilities */
+@utility liquid-glass {
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
+}
+
+:where([data-theme=dark]) .liquid-glass {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35) !important;
+}
+
+@media (max-width: 768px) {
+  /* Liquid Glass mobile overrides for standard UI card elements */
+  .card, 
+  .bg-card, 
+  .modal-content, 
+  .dropdown-menu,
+  .confirm-modal-content {
+    backdrop-filter: blur(32px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+    border-radius: 24px !important;
+  }
+  
+  :where([data-theme=dark]) .card,
+  :where([data-theme=dark]) .bg-card,
+  :where([data-theme=dark]) .modal-content,
+  :where([data-theme=dark]) .dropdown-menu,
+  :where([data-theme=dark]) .confirm-modal-content {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .form-input, .form-select {
+    border-radius: 12px !important;
+  }
+  
+  .animate-spring {
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.15) !important;
+  }
+  
+  .animate-fade-scale {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+}
+
+
 

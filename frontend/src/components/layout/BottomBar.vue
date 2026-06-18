@@ -1,8 +1,8 @@
 <template>
   <div 
     v-if="role && isAuthenticated && !hidden" 
-    class="lg:hidden fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/30 dark:border-zinc-850/40 shadow-2xl rounded-[24px] px-2 py-1.5 flex items-center justify-around max-w-md mx-auto transition-all duration-300 ease-out origin-bottom"
-    :class="{ 'scale-90 translate-y-4 pointer-events-none': isShrunk }"
+    class="lg:hidden fixed bottom-[max(8px,_env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 liquid-glass shadow-2xl flex items-center justify-around transition-all duration-300 ease-out origin-bottom select-none"
+    :class="bottomBarClasses"
   >
     <router-link
       v-for="tab in currentTabs"
@@ -18,13 +18,13 @@
           {{ totalUnreadCount }}
         </span>
       </div>
-      <span class="text-[9px] tracking-tight w-full text-center leading-none mt-0.5">{{ tab.label }}</span>
+      <span v-if="!isShrunk" class="text-[9px] tracking-tight w-full text-center leading-none mt-0.5">{{ tab.label }}</span>
     </router-link>
   </div>
 </template>
 
 <script>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { useAuthStore } from '../../stores/auth.js';
 import { useRoute } from 'vue-router';
 import { useChatStore } from '../../stores/chat.js';
@@ -113,7 +113,6 @@ export default {
         label: 'Chủ trọ',
         icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`
       },
-
       {
         to: '/admin/settings',
         label: 'Cài đặt',
@@ -160,12 +159,26 @@ export default {
       lastScrollTop = scrollTop;
     };
 
+    // Watch route changes to reset bar to normal size
+    watch(() => route.path, () => {
+      isShrunk.value = false;
+      lastScrollTop = 0;
+    });
+
     onMounted(() => {
       window.addEventListener('scroll', handleScroll, true);
     });
 
     onUnmounted(() => {
       window.removeEventListener('scroll', handleScroll, true);
+    });
+
+    const bottomBarClasses = computed(() => {
+      if (isShrunk.value) {
+        return 'w-[280px] rounded-full px-2 py-1 h-11 scale-95';
+      } else {
+        return 'w-[calc(100%-2rem)] max-w-md rounded-[24px] px-2 py-1.5 h-14';
+      }
     });
 
     return {
@@ -175,6 +188,7 @@ export default {
       isTabActive,
       totalUnreadCount,
       isShrunk,
+      bottomBarClasses
     };
   }
 };
