@@ -1,7 +1,7 @@
 <template>
   <div 
     v-if="role && isAuthenticated && !hidden" 
-    class="lg:hidden fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/30 dark:border-zinc-850/40 shadow-2xl rounded-[24px] px-2 py-1.5 flex items-center justify-around max-w-md mx-auto transition-all duration-300 ease-out origin-bottom"
+    class="lg:hidden fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/30 dark:border-zinc-850/40 shadow-2xl rounded-[24px] px-2 py-1.5 flex items-center justify-around max-w-md mx-auto transition-all duration-300 ease-out origin-bottom"
     :class="{ 'scale-90 translate-y-4 pointer-events-none': isShrunk }"
   >
     <router-link
