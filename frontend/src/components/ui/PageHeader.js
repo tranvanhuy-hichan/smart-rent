@@ -1,55 +1,50 @@
 export default {
-  name: 'PageHeader',
+  name: "PageHeader",
   props: {
     title: {
       type: String,
-      default: ''
+      default: "",
     },
     subtitle: {
       type: String,
-      default: ''
+      default: "",
     },
     icon: {
       type: String,
-      default: ''
+      default: "",
     },
     showAdd: {
       type: Boolean,
-      default: false
+      default: false,
     },
     addText: {
       type: String,
-      default: 'Thêm mới'
+      default: "Thêm mới",
     },
     disableAdd: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showExport: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showImport: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showSearch: {
       type: Boolean,
-      default: true
+      default: true,
     },
     searchPlaceholder: {
       type: String,
-      default: 'Tìm kiếm...'
+      default: "Tìm kiếm...",
     },
     modelValue: {
       type: String,
-      default: ''
-    }
+      default: "",
+    },
   },
-  emits: [
-    'update:modelValue',
-    'add-click',
-    'export-click',
-    'import-click'
-  ]
+  emits: ["update:modelValue", "add-click", "export-click", "import-click"],
 };

@@ -12,7 +12,8 @@
 
     <!-- Card Grid Skeleton Loader -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse select-none">
-      <div v-for="i in 3" :key="'house-loader-' + i" class="bg-card border border-border-main rounded-2xl shadow-xs flex flex-col overflow-hidden">
+      <div v-for="i in 3" :key="'house-loader-' + i"
+        class="bg-card border border-border-main rounded-2xl shadow-xs flex flex-col overflow-hidden">
         <!-- Header -->
         <div class="px-5 pt-5 pb-4 border-b border-border-main/40 flex items-start gap-3">
           <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 shrink-0"></div>

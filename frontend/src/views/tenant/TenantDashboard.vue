@@ -1,8 +1,6 @@
 <template>
   <div class="p-6 bg-bg-main min-h-full">
-
-
-    <ReportSkeleton v-slot:loading v-if="loading" chartHeight="h-44" :filterCount="1" :rowCount="3" />
+    <ReportSkeleton v-if="loading" chartHeight="h-44" :filterCount="1" :rowCount="3" />
 
     <div v-else>
       <!-- Welcome Banner -->

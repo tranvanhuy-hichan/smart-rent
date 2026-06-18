@@ -7,21 +7,11 @@
 
     <!-- Tenants List -->
     <div class="bg-card border border-border-main rounded-2xl p-4 shadow-xs">
-      <DataTable
-        :headers="tableHeaders"
-        :items="filteredTenants"
-        :loading="loading"
+      <DataTable :headers="tableHeaders" :items="filteredTenants" :loading="loading"
         loadingText="Đang tải danh sách tài khoản người thuê..."
-        emptyText="Không tìm thấy tài khoản người thuê trọ nào."
-        showPagination
-        :page="page"
-        :totalPages="totalPages"
-        :totalElements="totalElements"
-        unit="tài khoản"
-        :clickable="true"
-        @change-page="changePage"
-        @row-click="onRowClick"
-      />
+        emptyText="Không tìm thấy tài khoản người thuê trọ nào." showPagination :page="page" :totalPages="totalPages"
+        :totalElements="totalElements" unit="tài khoản" :clickable="true" @change-page="changePage"
+        @row-click="onRowClick" />
     </div>
 
     <!-- Add Tenant Modal -->
@@ -40,8 +30,7 @@
         </div>
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <FormInput type="text" label="Số điện thoại" v-model="form.phone"
-              placeholder="Số điện thoại liên hệ" />
+            <FormInput type="text" label="Số điện thoại" v-model="form.phone" placeholder="Số điện thoại liên hệ" />
           </div>
           <div>
             <FormInput type="email" label="Email" v-model="form.email" placeholder="Địa chỉ email" />
@@ -68,17 +57,9 @@
     </Modal>
 
     <!-- Custom Confirm Modal -->
-    <ConfirmModal
-      :show="confirmModal.show"
-      :title="confirmModal.title"
-      :message="confirmModal.message"
-      :type="confirmModal.type"
-      :confirmText="confirmModal.confirmText"
-      :cancelText="confirmModal.cancelText"
-      :showCancel="confirmModal.showCancel"
-      @confirm="onConfirmModal"
-      @cancel="closeConfirmModal"
-    />
+    <ConfirmModal :show="confirmModal.show" :title="confirmModal.title" :message="confirmModal.message"
+      :type="confirmModal.type" :confirmText="confirmModal.confirmText" :cancelText="confirmModal.cancelText"
+      :showCancel="confirmModal.showCancel" @confirm="onConfirmModal" @cancel="closeConfirmModal" />
   </div>
 </template>
 

@@ -17,7 +17,7 @@ export default {
     FormSelect,
     FormButton,
     AppIcon,
-    MoneyDisplay
+    MoneyDisplay,
   },
   setup() {
     const router = useRouter();
@@ -27,8 +27,8 @@ export default {
 
     const toLocalYYYYMMDD = (date) => {
       const y = date.getFullYear();
-      const m = (date.getMonth() + 1).toString().padStart(2, '0');
-      const d = date.getDate().toString().padStart(2, '0');
+      const m = (date.getMonth() + 1).toString().padStart(2, "0");
+      const d = date.getDate().toString().padStart(2, "0");
       return `${y}-${m}-${d}`;
     };
 
@@ -41,11 +41,13 @@ export default {
     const boardingHouses = ref([]);
     const selectedBulkBoardingHouseId = ref("");
     const bulkInvoiceDate = ref(toLocalYYYYMMDD(new Date()));
-    
+
     const now = new Date();
-    const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+    const currentYearMonth = `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}`;
     const bulkBillingMonth = ref(currentYearMonth);
-    
+
     const bulkRooms = ref([]);
     const isFetchingBulkStatus = ref(false);
     const isSavingBulk = ref(false);
@@ -54,8 +56,7 @@ export default {
       try {
         await boardingHouseStore.fetchBoardingHouses();
         boardingHouses.value = boardingHouseStore.boardingHouses;
-      } catch (err) {
-      }
+      } catch (err) {}
     };
 
     const onBulkBoardingHouseChange = async () => {
@@ -65,10 +66,12 @@ export default {
       }
       isFetchingBulkStatus.value = true;
       try {
-        const response = await invoiceService.getBillingStatus(selectedBulkBoardingHouseId.value);
+        const response = await invoiceService.getBillingStatus(
+          selectedBulkBoardingHouseId.value,
+        );
         bulkRooms.value = (response.data || [])
-          .filter(room => room.hasActiveContract)
-          .map(room => ({
+          .filter((room) => room.hasActiveContract)
+          .map((room) => ({
             ...room,
             newElectricityIndex: room.currentElectricityIndex,
             newWaterIndex: room.currentWaterIndex,
@@ -77,7 +80,12 @@ export default {
             discount: 0,
           }));
       } catch (err) {
-        showAlert('Lỗi', err.response?.data?.error || "Không thể tải trạng thái phòng của dãy trọ", 'danger');
+        showAlert(
+          "Lỗi",
+          err.response?.data?.error ||
+            "Không thể tải trạng thái phòng của dãy trọ",
+          "danger",
+        );
       } finally {
         isFetchingBulkStatus.value = false;
       }
@@ -85,7 +93,7 @@ export default {
 
     const adjustBulkDates = () => {
       if (bulkRooms.value.length === 0) return;
-      bulkRooms.value.forEach(room => {
+      bulkRooms.value.forEach((room) => {
         room.billingPeriodEnd = bulkInvoiceDate.value;
       });
     };
@@ -97,23 +105,31 @@ export default {
       const [year, month, day] = bulkInvoiceDate.value.split("-").map(Number);
       const lastDay = new Date(year, month, 0).getDate();
 
-      return bulkRooms.value.filter(room => {
+      return bulkRooms.value.filter((room) => {
         // Calculate contract's billing day
         const contractStartDateObj = parseLocalYYYYMMDD(room.contractStartDate);
         const contractStartDay = contractStartDateObj.getDate();
-        const targetBillingDay = room.fixedBillingDay != null ? room.fixedBillingDay : contractStartDay;
+        const targetBillingDay =
+          room.fixedBillingDay != null
+            ? room.fixedBillingDay
+            : contractStartDay;
         const actualBillingDay = Math.min(targetBillingDay, lastDay);
-        
+
         // Full billing date of selected month/year
-        const billingDateOfSelectedMonth = `${year}-${month.toString().padStart(2, '0')}-${actualBillingDay.toString().padStart(2, '0')}`;
-        
+        const billingDateOfSelectedMonth = `${year}-${month
+          .toString()
+          .padStart(2, "0")}-${actualBillingDay.toString().padStart(2, "0")}`;
+
         // 1. Only show if selected date is on or after the billing date (tới ngày thanh toán cố định hoặc quá hạn thanh toán)
         if (bulkInvoiceDate.value < billingDateOfSelectedMonth) {
           return false;
         }
 
         // 2. Exclude new contracts that start today or in the future
-        if (room.contractStartDate && room.contractStartDate >= bulkInvoiceDate.value) {
+        if (
+          room.contractStartDate &&
+          room.contractStartDate >= bulkInvoiceDate.value
+        ) {
           return false;
         }
 
@@ -123,62 +139,77 @@ export default {
         }
 
         // 4. Ensure they haven't already been billed in the selected month
-        if (room.contractStartDate && room.billingPeriodStart === room.contractStartDate) {
+        if (
+          room.contractStartDate &&
+          room.billingPeriodStart === room.contractStartDate
+        ) {
           return true;
         }
 
         const start = parseLocalYYYYMMDD(room.billingPeriodStart);
         const lastEnd = new Date(start);
         lastEnd.setDate(lastEnd.getDate() - 1);
-        
+
         const lastEndYear = lastEnd.getFullYear();
-        const lastEndMonth = (lastEnd.getMonth() + 1).toString().padStart(2, '0');
+        const lastEndMonth = (lastEnd.getMonth() + 1)
+          .toString()
+          .padStart(2, "0");
         const lastEndYearMonth = `${lastEndYear}-${lastEndMonth}`;
-        
-        const hasBilledInSelectedMonth = lastEndYearMonth === bulkBillingMonth.value;
+
+        const hasBilledInSelectedMonth =
+          lastEndYearMonth === bulkBillingMonth.value;
         return !hasBilledInSelectedMonth;
       });
     });
 
     const saveBulkInvoices = async () => {
       if (isSavingBulk.value) return;
-      
+
       const roomsToSave = visibleRooms.value;
       if (roomsToSave.length === 0) {
-        showAlert('Thông báo', "Không có phòng nào cần lập hóa đơn.", 'warning');
+        showAlert(
+          "Thông báo",
+          "Không có phòng nào cần lập hóa đơn.",
+          "warning",
+        );
         return;
       }
-      
+
       for (const room of roomsToSave) {
         if (room.newElectricityIndex < room.currentElectricityIndex) {
           showAlert(
-            'Lỗi nhập liệu', 
-            `Chỉ số điện mới của phòng ${room.roomNumber} (${room.newElectricityIndex}) không được nhỏ hơn chỉ số cũ (${room.currentElectricityIndex})`, 
-            'warning'
+            "Lỗi nhập liệu",
+            `Chỉ số điện mới của phòng ${room.roomNumber} (${room.newElectricityIndex}) không được nhỏ hơn chỉ số cũ (${room.currentElectricityIndex})`,
+            "warning",
           );
           return;
         }
-        if (room.waterBillingType === 'BY_INDEX' && room.newWaterIndex < room.currentWaterIndex) {
+        if (
+          room.waterBillingType === "BY_INDEX" &&
+          room.newWaterIndex < room.currentWaterIndex
+        ) {
           showAlert(
-            'Lỗi nhập liệu', 
-            `Chỉ số nước mới của phòng ${room.roomNumber} (${room.newWaterIndex}) không được nhỏ hơn chỉ số cũ (${room.currentWaterIndex})`, 
-            'warning'
+            "Lỗi nhập liệu",
+            `Chỉ số nước mới của phòng ${room.roomNumber} (${room.newWaterIndex}) không được nhỏ hơn chỉ số cũ (${room.currentWaterIndex})`,
+            "warning",
           );
           return;
         }
         if (!room.billingPeriodStart || !room.billingPeriodEnd) {
           showAlert(
-            'Lỗi nhập liệu',
+            "Lỗi nhập liệu",
             `Phòng ${room.roomNumber} thiếu thông tin kỳ thanh toán`,
-            'warning'
+            "warning",
           );
           return;
         }
-        if (new Date(room.billingPeriodStart) >= new Date(room.billingPeriodEnd)) {
+        if (
+          new Date(room.billingPeriodStart) >= new Date(room.billingPeriodEnd)
+        ) {
           showAlert(
-            'Lỗi nhập liệu',
+            "Lỗi nhập liệu",
             `Kỳ thanh toán phòng ${room.roomNumber} không hợp lệ (Ngày bắt đầu phải trước ngày kết thúc)`,
-            'warning'
+            "warning",
           );
           return;
         }
@@ -188,7 +219,7 @@ export default {
       try {
         const payload = {
           invoiceDate: bulkInvoiceDate.value,
-          readings: roomsToSave.map(room => ({
+          readings: roomsToSave.map((room) => ({
             roomId: room.roomId,
             contractId: room.contractId,
             billingPeriodStart: room.billingPeriodStart,
@@ -196,13 +227,17 @@ export default {
             newElectricityIndex: Number(room.newElectricityIndex),
             newWaterIndex: Number(room.newWaterIndex),
             discount: Number(room.discount) || 0,
-          }))
+          })),
         };
         await invoiceService.createBulk(payload);
-        showAlert('Thành công', "Lập hóa đơn hàng loạt thành công!", 'success');
+        showAlert("Thành công", "Lập hóa đơn hàng loạt thành công!", "success");
         router.push({ name: "Invoices" });
       } catch (err) {
-        showAlert('Lỗi', err.response?.data?.error || "Lập hóa đơn hàng loạt thất bại", 'danger');
+        showAlert(
+          "Lỗi",
+          err.response?.data?.error || "Lập hóa đơn hàng loạt thất bại",
+          "danger",
+        );
       } finally {
         isSavingBulk.value = false;
       }
@@ -222,7 +257,7 @@ export default {
       bulkBillingMonth.value = `${year}-${month}`;
 
       if (bulkRooms.value.length > 0) {
-        bulkRooms.value.forEach(room => {
+        bulkRooms.value.forEach((room) => {
           room.billingPeriodEnd = newVal;
         });
       }
@@ -235,7 +270,9 @@ export default {
       const currentDay = currentDateObj.getDate();
       const lastDay = new Date(year, month, 0).getDate();
       const targetDay = Math.min(currentDay, lastDay);
-      bulkInvoiceDate.value = `${year}-${month.padStart(2, '0')}-${targetDay.toString().padStart(2, '0')}`;
+      bulkInvoiceDate.value = `${year}-${month.padStart(2, "0")}-${targetDay
+        .toString()
+        .padStart(2, "0")}`;
     });
 
     onMounted(async () => {
