@@ -17,7 +17,7 @@
         :class="[
           isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto',
           isHeaderInitiallyVisible ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0',
-          !isBottomBarHidden ? 'pb-28 lg:pb-0' : 'pb-4 lg:pb-0'
+          !isBottomBarHidden ? 'pb-24 lg:pb-0' : 'pb-2 lg:pb-0'
         ]"
         @touchstart.passive="onTouchStart"
         @touchmove.passive="onTouchMove"
@@ -50,12 +50,6 @@
         <div class="flex-grow" :class="{ 'h-full min-h-0 flex flex-col': isMainScrollDisabled }">
           <router-view :key="routerViewKey" />
         </div>
-        <footer 
-          v-if="!isMainScrollDisabled"
-          class="py-3 text-center text-[10px] text-text-sub/70 border-t border-border-main/30 bg-card/30 backdrop-blur-xs shrink-0"
-        >
-          © 2026 Nhà Trọ Thông Minh. Hệ thống đang trong quá trình phát triển &amp; thử nghiệm.
-        </footer>
       </main>
     </div>
   </div>
