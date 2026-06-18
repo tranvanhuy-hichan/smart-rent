@@ -29,6 +29,9 @@ export default {
              path.includes('/add') || 
              path.includes('/create') || 
              path.includes('/new') || 
+             path.includes('/settings') || 
+             path.includes('/upgrade') || 
+             path.includes('/contact') || 
              !!route.params.id;
     });
     const isHomePage = computed(() => {

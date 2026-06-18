@@ -455,3 +455,12 @@
 </template>
 
 <script src="./Header.js"></script>
+
+<style scoped>
+.profile-dropdown-container .bg-card,
+.notifications-dropdown-container .bg-card {
+  background-color: var(--card-bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+</style>
