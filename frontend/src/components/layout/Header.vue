@@ -1,6 +1,6 @@
 <template>
   <header
-    class="sticky top-0 bg-card border-b border-border-main flex items-center justify-between px-4 sm:px-6 md:px-8 z-30 shadow-xs shrink-0 h-14 lg:h-16"
+    class="fixed top-[calc(env(safe-area-inset-top,20px)+8px)] left-4 right-4 z-40 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/30 dark:border-zinc-850/40 shadow-lg rounded-full px-4 py-2 h-14 max-w-lg mx-auto flex items-center justify-between lg:sticky lg:top-0 lg:left-0 lg:right-0 lg:w-full lg:rounded-none lg:border-0 lg:border-b lg:bg-card lg:shadow-xs lg:max-w-none lg:h-16 lg:px-6 lg:border-border-main"
     :class="{ 'hidden lg:flex': hideOnMobile }">
     <div class="flex items-center">
       <!-- Breadcrumbs (Hidden on mobile/tablet, shown on desktop) -->
@@ -57,8 +57,7 @@
             class="absolute top-[1px] right-[1px] min-w-[14px] h-[14px] px-1 rounded-full bg-danger text-white text-[9px] font-bold flex items-center justify-center border border-white dark:border-slate-900 leading-none shadow-xs">
             {{ unreadCount }}
           </div>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            class="w-6 h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-6 h-6">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
@@ -66,7 +65,7 @@
 
         <!-- Dropdown Popover -->
         <div v-if="showNotificationsDropdown"
-          class="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto top-16 sm:top-12 w-auto sm:w-96 bg-card border border-border-main rounded-2xl shadow-xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150">
+          class="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto top-24 sm:top-12 w-auto sm:w-96 bg-card border border-border-main rounded-2xl shadow-xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150">
           <!-- Header -->
           <div class="px-4 pb-2 border-b border-border-main flex items-center justify-between">
             <span class="font-bold text-[0.85rem] text-text-main">Thông báo</span>

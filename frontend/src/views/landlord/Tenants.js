@@ -116,7 +116,7 @@ export default {
 
       try {
         await tenantStore.createTenantAccount(form.value);
-        showAlert('Thành công', 'Tạo tài khoản người ở thành công!', 'success');
+        showAlert('Thành công', 'Tạo tài khoản người ở thành công! Mật khẩu mặc định là số CMND/CCCD.', 'success');
         closeModal();
         fetchTenants();
       } catch (err) {

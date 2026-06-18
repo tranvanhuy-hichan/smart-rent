@@ -1,26 +1,30 @@
 <template>
-  <div v-if="role && isAuthenticated && !hidden" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-md border-t border-border-main/50 shadow-lg px-1 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] flex items-center justify-around">
+  <div 
+    v-if="role && isAuthenticated && !hidden" 
+    class="lg:hidden fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-40 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/30 dark:border-zinc-850/40 shadow-2xl rounded-[24px] px-2 py-1.5 flex items-center justify-around max-w-md mx-auto transition-all duration-300 ease-out origin-bottom"
+    :class="{ 'scale-90 translate-y-4 pointer-events-none': isShrunk }"
+  >
     <router-link
       v-for="tab in currentTabs"
       :key="tab.label"
       :to="tab.to"
-      class="flex flex-col items-center justify-center flex-1 py-1.5 px-1 mx-0.5 text-text-sub hover:text-primary transition-all duration-300 relative group min-w-0 rounded-xl"
-      :class="{ 'is-active text-primary font-bold bg-primary/10 dark:bg-primary/20': isTabActive(tab) }"
+      class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-text-sub hover:text-text-main transition-all duration-300 hover:scale-110 active:scale-90 relative"
+      :class="{ 'text-primary font-semibold bg-primary/10 dark:bg-primary/20 scale-105 shadow-inner border border-primary/5': isTabActive(tab) }"
     >
-      <div class="relative mb-0.5">
-        <span class="w-5 h-5 block transition-transform duration-200 group-active:scale-90" v-html="tab.icon"></span>
+      <div class="relative w-5 h-5 flex items-center justify-center mb-0.5">
+        <span class="w-5 h-5 block" v-html="tab.icon"></span>
         <span v-if="(tab.to === '/landlord/chat' || tab.to === '/tenant/chat') && totalUnreadCount > 0" 
               class="absolute -top-1 -right-1 min-w-[12px] h-3 rounded-full bg-danger text-white text-[8px] font-black flex items-center justify-center px-0.5 shadow-sm leading-none border border-card">
           {{ totalUnreadCount }}
         </span>
       </div>
-      <span class="text-[9px] sm:text-[11px] tracking-tighter w-full text-center px-0.5 leading-none mt-0.5">{{ tab.label }}</span>
+      <span class="text-[9px] tracking-tight w-full text-center leading-none mt-0.5">{{ tab.label }}</span>
     </router-link>
   </div>
 </template>
 
 <script>
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../../stores/auth.js';
 import { useRoute } from 'vue-router';
 import { useChatStore } from '../../stores/chat.js';
@@ -137,12 +141,40 @@ export default {
       return currentPath.startsWith(tab.to);
     };
 
+    const isShrunk = ref(false);
+    let lastScrollTop = 0;
+
+    const handleScroll = (e) => {
+      const target = e.target;
+      if (!target || typeof target.scrollTop === 'undefined') return;
+      const scrollTop = target.scrollTop;
+
+      // Small threshold to prevent flickers on tiny movements
+      if (Math.abs(scrollTop - lastScrollTop) < 8) return;
+
+      if (scrollTop > lastScrollTop && scrollTop > 60) {
+        isShrunk.value = true;
+      } else {
+        isShrunk.value = false;
+      }
+      lastScrollTop = scrollTop;
+    };
+
+    onMounted(() => {
+      window.addEventListener('scroll', handleScroll, true);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener('scroll', handleScroll, true);
+    });
+
     return {
       role,
       isAuthenticated,
       currentTabs,
       isTabActive,
-      totalUnreadCount
+      totalUnreadCount,
+      isShrunk,
     };
   }
 };

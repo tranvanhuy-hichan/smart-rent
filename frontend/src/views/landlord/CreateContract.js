@@ -190,7 +190,7 @@ export default {
         // Reset and hide inline form
         inlineTenantForm.value = { fullName: "", username: "", password: "", phone: "", email: "", identityCard: "", idCardIssueDate: "", idCardIssuePlace: "", permanentAddress: "" };
         showInlineTenantForm.value = false;
-        showAlert("Thành công", `Đã tạo tài khoản khách thuê "${newTenant.fullName}" thành công.`, "success");
+        showAlert("Thành công", `Đã tạo tài khoản khách thuê "${newTenant.fullName}" thành công. Mật khẩu mặc định là số CMND/CCCD.`, "success");
       } catch (err) {
         showAlert("Lỗi", err.response?.data?.error || "Tạo tài khoản khách thuê thất bại.", "danger");
       } finally {

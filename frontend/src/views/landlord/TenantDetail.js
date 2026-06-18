@@ -60,12 +60,12 @@ export default {
       if (!tenant.value) return;
       showConfirm(
         'Đặt lại mật khẩu',
-        `Bạn có chắc chắn muốn đặt lại mật khẩu cho người thuê "${tenant.value.fullName}"? Mật khẩu mới sẽ là số điện thoại của họ (hoặc "123456" nếu không có số điện thoại).`,
+        `Bạn có chắc chắn muốn đặt lại mật khẩu cho người thuê "${tenant.value.fullName}"? Mật khẩu mặc định mới sẽ là số CMND/CCCD của họ.`,
         'warning',
         async () => {
           try {
             await userService.resetPassword(tenant.value.id);
-            showAlert('Thành công', 'Đặt lại mật khẩu thành công!', 'success');
+            showAlert('Thành công', 'Đặt lại mật khẩu thành công! Mật khẩu mặc định mới là số CMND/CCCD.', 'success');
           } catch (err) {
             showAlert('Lỗi', err.response?.data?.error || 'Không thể đặt lại mật khẩu cho người thuê', 'danger');
           }

@@ -7,15 +7,17 @@
     <div class="flex flex-col flex-1 min-w-0">
       <!-- Status Bar Spacer on Mobile -->
       <div 
-        class="lg:hidden w-full shrink-0 transition-colors duration-150" 
-        :class="(hideHeaderOnMobile || isHeaderHidden) ? 'bg-bg-main' : 'bg-card border-b border-border-main/20'"
-        :style="{ height: (hideHeaderOnMobile || isHeaderHidden) ? 'calc(env(safe-area-inset-top, 20px) + 12px)' : 'env(safe-area-inset-top, 20px)' }"
+        class="lg:hidden w-full shrink-0 bg-bg-main" 
+        :style="{ height: 'env(safe-area-inset-top, 20px)' }"
       ></div>
       <Header v-if="!isHeaderHidden" />
       <main
         ref="mainRef"
         class="flex-1 p-0 flex flex-col justify-between relative lg:rounded-2xl"
-        :class="isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto'"
+        :class="[
+          isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto',
+          (!isHeaderHidden && !hideHeaderOnMobile) ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0'
+        ]"
         @touchstart.passive="onTouchStart"
         @touchmove.passive="onTouchMove"
         @touchend="onTouchEnd"
@@ -65,73 +67,77 @@
 
   <BottomBar :hidden="isBottomBarHidden" />
 
-  <!-- Global Glassmorphic Loading Overlay for Saving/Submitting (POST/PUT/DELETE) -->
-  <div v-if="isApiSaving" class="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-[2px] z-[9999] flex flex-col items-center justify-center transition-all duration-300">
-    <div class="bg-card border border-border-main p-6 rounded-2xl shadow-xl flex flex-col items-center space-y-4 max-w-[280px]">
-      <div class="relative w-12 h-12">
-        <div class="absolute inset-0 border-4 border-slate-100 dark:border-slate-800 rounded-full"></div>
-        <div class="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  <!-- Click Blocker during API Saving -->
+  <div v-if="isApiSaving" class="fixed inset-0 z-[9998] pointer-events-auto bg-black/5 dark:bg-black/15 backdrop-blur-[0.5px]"></div>
+
+  <!-- Global Real-Time Dynamic Island Notification / Saving Pill -->
+  <div class="fixed top-[calc(env(safe-area-inset-top,20px)+6px)] left-0 right-0 z-[99999] pointer-events-none flex justify-center">
+    <div 
+      class="dynamic-island pointer-events-auto flex items-center shadow-2xl border border-white/10"
+      :class="dynamicIslandClasses"
+      @click="clickIsland"
+    >
+      <!-- Saving State Content -->
+      <div v-if="isApiSaving" class="flex items-center gap-3 w-full px-4 py-1.5 whitespace-nowrap overflow-hidden">
+        <div class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin shrink-0"></div>
+        <span class="text-xs font-semibold text-white/90 truncate">{{ savingMessage }}</span>
       </div>
-      <p class="text-sm font-semibold text-text-main text-center animate-pulse">{{ savingMessage }}</p>
+
+      <!-- Toast State Content -->
+      <div v-else-if="activeToast" class="flex gap-3 w-full p-3.5 relative overflow-hidden items-start">
+        <!-- Icon based on type -->
+        <div 
+          class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-inner"
+          :class="{
+            'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30': activeToast.type === 'PAYMENT_REPORTED' || activeToast.type === 'PAYMENT_CONFIRMED',
+            'bg-blue-500/20 text-blue-400 border border-blue-500/30': activeToast.type === 'INVOICE_NEW',
+            'bg-amber-500/20 text-amber-400 border border-amber-500/30': activeToast.type === 'SUBSCRIPTION_REQUEST' || activeToast.type === 'PAYMENT_REMINDER',
+            'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30': activeToast.type === 'CONTRACT_ACTIVE' || activeToast.type === 'CHAT_MESSAGE',
+            'bg-slate-500/20 text-slate-400 border border-slate-500/30': !['PAYMENT_REPORTED', 'PAYMENT_CONFIRMED', 'INVOICE_NEW', 'SUBSCRIPTION_REQUEST', 'PAYMENT_REMINDER', 'CONTRACT_ACTIVE', 'CHAT_MESSAGE'].includes(activeToast.type)
+          }"
+        >
+          <!-- SVG Icons -->
+          <svg v-if="activeToast.type === 'CHAT_MESSAGE'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.497c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+          </svg>
+          <svg v-else-if="activeToast.type === 'PAYMENT_REPORTED' || activeToast.type === 'PAYMENT_CONFIRMED'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <svg v-else-if="activeToast.type === 'INVOICE_NEW'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+          <svg v-else-if="activeToast.type === 'SUBSCRIPTION_REQUEST' || activeToast.type === 'PAYMENT_REMINDER'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <svg v-else-if="activeToast.type === 'CONTRACT_ACTIVE'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+          </svg>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0 pr-4 text-left">
+          <h4 class="text-xs font-bold text-white mb-0.5 truncate">{{ activeToast.title }}</h4>
+          <p class="text-[11px] leading-snug text-white/80 line-clamp-2">{{ activeToast.content }}</p>
+        </div>
+
+        <!-- Close Button -->
+        <button 
+          class="absolute top-3 right-3 text-white/50 hover:text-white transition cursor-pointer p-0.5"
+          @click.stop="dismissToast"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Idle Notch Placeholder -->
+      <div v-else class="w-24 h-5"></div>
     </div>
   </div>
-
-  <!-- Global Real-Time Notification Toast Popup -->
-  <transition name="toast-slide">
-    <div 
-      v-if="activeToast" 
-      class="fixed top-6 md:top-20 right-4 left-4 md:left-auto md:w-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl rounded-2xl border border-slate-200/50 dark:border-slate-800/50 p-4 z-[99999] flex gap-3.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/80 transition duration-200"
-      @click="clickToast"
-    >
-      <!-- Icon based on type -->
-      <div 
-        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-        :class="{
-          'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400': activeToast.type === 'PAYMENT_REPORTED' || activeToast.type === 'PAYMENT_CONFIRMED',
-          'bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400': activeToast.type === 'INVOICE_NEW',
-          'bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400': activeToast.type === 'SUBSCRIPTION_REQUEST' || activeToast.type === 'PAYMENT_REMINDER',
-          'bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400': activeToast.type === 'CONTRACT_ACTIVE' || activeToast.type === 'CHAT_MESSAGE',
-          'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400': !['PAYMENT_REPORTED', 'PAYMENT_CONFIRMED', 'INVOICE_NEW', 'SUBSCRIPTION_REQUEST', 'PAYMENT_REMINDER', 'CONTRACT_ACTIVE', 'CHAT_MESSAGE'].includes(activeToast.type)
-        }"
-      >
-        <!-- SVG Icons -->
-        <svg v-if="activeToast.type === 'CHAT_MESSAGE'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.497c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-        </svg>
-        <svg v-else-if="activeToast.type === 'PAYMENT_REPORTED' || activeToast.type === 'PAYMENT_CONFIRMED'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <svg v-else-if="activeToast.type === 'INVOICE_NEW'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-        </svg>
-        <svg v-else-if="activeToast.type === 'SUBSCRIPTION_REQUEST' || activeToast.type === 'PAYMENT_REMINDER'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-        </svg>
-        <svg v-else-if="activeToast.type === 'CONTRACT_ACTIVE'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5.5 h-5.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-        </svg>
-      </div>
-
-      <!-- Content -->
-      <div class="flex-1 min-w-0 pr-4">
-        <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-0.5 truncate">{{ activeToast.title }}</h4>
-        <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2">{{ activeToast.content }}</p>
-      </div>
-
-      <!-- Close Button -->
-      <button 
-        class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer p-0.5"
-        @click.stop="dismissToast"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-  </transition>
 
   <!-- Modal yêu cầu quyền thông báo cho thiết bị mới -->
   <div v-if="showPushPrompt" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-[2px] z-[999999] flex items-center justify-center p-4">
@@ -484,6 +490,22 @@ export default {
       }
     };
 
+    const dynamicIslandClasses = computed(() => {
+      if (isApiSaving.value) {
+        return 'w-[260px] h-[40px] rounded-full bg-slate-900/90 dark:bg-black/90 text-white backdrop-blur-xl scale-100 opacity-100 cursor-default';
+      } else if (activeToast.value) {
+        return 'w-[calc(100vw-2rem)] sm:w-[380px] h-auto min-h-[72px] rounded-[24px] bg-slate-900/90 dark:bg-black/90 text-white backdrop-blur-xl scale-100 opacity-100 cursor-pointer hover:bg-slate-950 dark:hover:bg-black';
+      } else {
+        return 'w-[100px] h-[30px] rounded-full bg-black/90 scale-90 opacity-0 pointer-events-none overflow-hidden';
+      }
+    });
+
+    const clickIsland = () => {
+      if (activeToast.value) {
+        clickToast();
+      }
+    };
+
     onUnmounted(() => {
       if (checkInterval) {
         clearInterval(checkInterval);
@@ -519,25 +541,17 @@ export default {
       showPushPrompt,
       declinePushPrompt,
       acceptPushPrompt,
+      // Dynamic Island
+      dynamicIslandClasses,
+      clickIsland,
     };
   },
 };
 </script>
 
 <style scoped>
-/* Toast slide animation */
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.toast-slide-enter-from {
-  opacity: 0;
-  transform: translateY(-2rem) scale(0.95);
-}
-
-.toast-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-1rem) scale(0.95);
+.dynamic-island {
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+  will-change: width, height, transform, opacity, border-radius;
 }
 </style>
