@@ -16,7 +16,8 @@
         class="flex-1 p-0 flex flex-col justify-between relative lg:rounded-2xl"
         :class="[
           isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto',
-          isHeaderInitiallyVisible ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0'
+          isHeaderInitiallyVisible ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0',
+          !isBottomBarHidden ? 'pb-28 lg:pb-0' : 'pb-4 lg:pb-0'
         ]"
         @touchstart.passive="onTouchStart"
         @touchmove.passive="onTouchMove"
@@ -51,16 +52,10 @@
         </div>
         <footer 
           v-if="!isMainScrollDisabled"
-          class="hidden lg:block py-3 text-center text-xs text-text-sub border-t border-border-main/50 bg-card/60 backdrop-blur-xs shrink-0"
+          class="py-3 text-center text-[10px] text-text-sub/70 border-t border-border-main/30 bg-card/30 backdrop-blur-xs shrink-0"
         >
           © 2026 Nhà Trọ Thông Minh. Hệ thống đang trong quá trình phát triển &amp; thử nghiệm.
         </footer>
-        <!-- Bottom Safe Area Spacer to prevent content from being covered by BottomBar or device safe areas on mobile -->
-        <div 
-          v-if="!isMainScrollDisabled"
-          class="w-full shrink-0 lg:hidden" 
-          :style="{ height: isBottomBarHidden ? 'calc(0.5rem + env(safe-area-inset-bottom, 8px))' : 'calc(6.5rem + env(safe-area-inset-bottom, 16px))' }"
-        ></div>
       </main>
     </div>
   </div>
