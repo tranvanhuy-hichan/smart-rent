@@ -44,11 +44,11 @@ export default {
         isHeaderVisible.value = true;
       } else {
         if (scrollTop > lastScrollTop) {
-          // Scroll down => show topbar
-          isHeaderVisible.value = true;
-        } else {
-          // Scroll up => hide topbar
+          // Scroll down => hide topbar
           isHeaderVisible.value = false;
+        } else {
+          // Scroll up => show topbar
+          isHeaderVisible.value = true;
         }
       }
       lastScrollTop = scrollTop;
