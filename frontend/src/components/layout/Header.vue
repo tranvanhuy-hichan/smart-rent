@@ -224,11 +224,10 @@
     </div>
   </header>
 
-  <!-- MOBILE SPLIT FLOATING TOPBAR -->
+  <!-- MOBILE RECTANGULAR TOPBAR (Full width, square edge) -->
   <div class="lg:hidden" v-if="!shouldHideMobileHeader">
     <div 
-      class="fixed top-[calc(8px+env(safe-area-inset-top,20px))] left-2 right-2 z-40 liquid-glass rounded-full px-4 h-14 flex items-center justify-between shadow-lg transition-all duration-300 ease-out animate-spring mobile-top-capsule"
-      :class="isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'"
+      class="fixed top-0 left-0 right-0 w-full z-40 bg-card border-b border-border-main/50 px-4 h-[calc(3.5rem+env(safe-area-inset-top,20px))] pt-[env(safe-area-inset-top,20px)] flex items-center justify-between shadow-xs mobile-top-capsule"
     >
       <!-- Left part: Logo & Brand + Greeting -->
       <div @click="goToOverview" class="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform shrink-0">
@@ -273,7 +272,7 @@
 
           <!-- Dropdown Popover on Mobile -->
           <div v-if="showNotificationsDropdown"
-            class="fixed right-4 left-4 top-[88px] bg-card border border-border-main rounded-[24px] shadow-2xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
+            class="fixed right-4 left-4 top-[calc(3.75rem+env(safe-area-inset-top,20px))] bg-card border border-border-main rounded-2xl shadow-2xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
           >
             <div class="px-4 pb-2 border-b border-border-main flex items-center justify-between">
               <span class="font-bold text-[0.85rem] text-text-main">Thông báo</span>

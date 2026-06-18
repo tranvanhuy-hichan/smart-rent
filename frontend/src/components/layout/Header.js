@@ -309,14 +309,11 @@ export default {
 
       // Set initial header visibility based on current page
       isHeaderVisible.value = !shouldHideMobileHeader.value;
-
-      window.addEventListener('scroll', handleScroll, true);
     });
 
     onUnmounted(() => {
       // Không gọi stopPolling() ở đây vì App.vue quản lý vòng đời polling
       document.removeEventListener('click', handleDocumentClick);
-      window.removeEventListener('scroll', handleScroll, true);
     });
 
     watch(() => route.path, () => {
