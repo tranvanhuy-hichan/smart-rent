@@ -22,6 +22,15 @@ export default {
 
     const isHeaderVisible = ref(true);
     const isChatPage = computed(() => route.path.toLowerCase().includes('/chat'));
+    const shouldHideMobileHeader = computed(() => {
+      const path = route.path.toLowerCase();
+      return path.includes('/chat') || 
+             path.includes('/detail') || 
+             path.includes('/add') || 
+             path.includes('/create') || 
+             path.includes('/new') || 
+             !!route.params.id;
+    });
     const isHomePage = computed(() => {
       const path = route.path.toLowerCase();
       return path === '/landlord' || path === '/tenant' || path === '/admin' || 
@@ -296,7 +305,7 @@ export default {
       document.addEventListener('click', handleDocumentClick);
 
       // Set initial header visibility based on current page
-      isHeaderVisible.value = !isChatPage.value;
+      isHeaderVisible.value = !shouldHideMobileHeader.value;
 
       window.addEventListener('scroll', handleScroll, true);
     });
@@ -308,13 +317,14 @@ export default {
     });
 
     watch(() => route.path, () => {
-      isHeaderVisible.value = !isChatPage.value;
+      isHeaderVisible.value = !shouldHideMobileHeader.value;
       lastScrollTop = 0;
     });
 
     return {
       isHeaderVisible,
       isChatPage,
+      shouldHideMobileHeader,
       isHomePage,
       hideOnMobile,
       username,

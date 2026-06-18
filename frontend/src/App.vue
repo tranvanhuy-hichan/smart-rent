@@ -258,7 +258,15 @@ export default {
     const isHeaderInitiallyVisible = computed(() => {
       if (isHeaderHidden.value || hideHeaderOnMobile.value) return false;
       const path = route.path.toLowerCase();
-      return !path.includes('/chat');
+      if (path.includes('/chat') || 
+          path.includes('/detail') || 
+          path.includes('/add') || 
+          path.includes('/create') || 
+          path.includes('/new') || 
+          route.params.id) {
+        return false;
+      }
+      return true;
     });
 
     const isMainScrollDisabled = computed(() => {
@@ -377,6 +385,9 @@ export default {
     // ==================== Session Check ====================
     let checkInterval = null;
     let themeObserver = null;
+    let appViewportResizeHandler = null;
+    let appFocusInHandler = null;
+    let appFocusOutHandler = null;
 
     const checkSession = () => {
       if (authStore.token && isTokenExpired(authStore.token)) {
@@ -436,6 +447,63 @@ export default {
 
       // Kiểm tra quyền thông báo trên thiết bị hiện tại
       setTimeout(checkPushPermission, 1500);
+
+      // Keyboard Detection using Visual Viewport API
+      if (window.visualViewport) {
+        const handleViewportResize = () => {
+          const currentHeight = window.visualViewport.height;
+          const windowHeight = window.innerHeight;
+          const activeEl = document.activeElement;
+          const isInputFocused = activeEl && (
+            activeEl.tagName === 'INPUT' || 
+            activeEl.tagName === 'TEXTAREA' || 
+            activeEl.isContentEditable || 
+            activeEl.tagName === 'SELECT'
+          );
+
+          // Visual viewport height shrinks by > 140px on keyboard open
+          if (isInputFocused && (windowHeight - currentHeight > 140)) {
+            document.documentElement.classList.add('keyboard-open');
+            // If the element is on mobile and not a chat input, scroll into view smoothly
+            if (activeEl && typeof activeEl.scrollIntoView === 'function' && !window.location.pathname.includes('/chat')) {
+              setTimeout(() => {
+                activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 150);
+            }
+          } else {
+            document.documentElement.classList.remove('keyboard-open');
+          }
+        };
+
+        window.visualViewport.addEventListener('resize', handleViewportResize);
+        window.visualViewport.addEventListener('scroll', handleViewportResize);
+
+        const handleFocusIn = () => {
+          setTimeout(handleViewportResize, 100);
+        };
+        
+        const handleFocusOut = () => {
+          setTimeout(() => {
+            const activeEl = document.activeElement;
+            const isInputFocused = activeEl && (
+              activeEl.tagName === 'INPUT' || 
+              activeEl.tagName === 'TEXTAREA' || 
+              activeEl.isContentEditable || 
+              activeEl.tagName === 'SELECT'
+            );
+            if (!isInputFocused) {
+              document.documentElement.classList.remove('keyboard-open');
+            }
+          }, 150);
+        };
+
+        window.addEventListener('focusin', handleFocusIn);
+        window.addEventListener('focusout', handleFocusOut);
+
+        appViewportResizeHandler = handleViewportResize;
+        appFocusInHandler = handleFocusIn;
+        appFocusOutHandler = handleFocusOut;
+      }
     });
 
     const activeToast = computed(() => notificationStore.activeToast);
@@ -521,6 +589,17 @@ export default {
       }
       notificationStore.stopPolling();
       chatStore.disconnectWebSocket();
+
+      if (window.visualViewport && appViewportResizeHandler) {
+        window.visualViewport.removeEventListener('resize', appViewportResizeHandler);
+        window.visualViewport.removeEventListener('scroll', appViewportResizeHandler);
+      }
+      if (appFocusInHandler) {
+        window.removeEventListener('focusin', appFocusInHandler);
+      }
+      if (appFocusOutHandler) {
+        window.removeEventListener('focusout', appFocusOutHandler);
+      }
     });
 
     return {

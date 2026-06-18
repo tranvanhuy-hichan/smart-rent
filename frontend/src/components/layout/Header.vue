@@ -225,9 +225,9 @@
   </header>
 
   <!-- MOBILE SPLIT FLOATING TOPBAR -->
-  <div class="lg:hidden" v-if="!isChatPage">
+  <div class="lg:hidden" v-if="!shouldHideMobileHeader">
     <div 
-      class="fixed top-[calc(8px+env(safe-area-inset-top,20px))] left-2 right-2 z-40 liquid-glass rounded-full px-4 h-14 flex items-center justify-between shadow-lg transition-all duration-300 ease-out animate-spring"
+      class="fixed top-[calc(8px+env(safe-area-inset-top,20px))] left-2 right-2 z-40 liquid-glass rounded-full px-4 h-14 flex items-center justify-between shadow-lg transition-all duration-300 ease-out animate-spring mobile-top-capsule"
       :class="isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'"
     >
       <!-- Left part: Logo & Brand + Greeting -->

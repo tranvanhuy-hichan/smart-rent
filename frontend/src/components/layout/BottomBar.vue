@@ -1,13 +1,13 @@
 <template>
   <div 
     v-if="role && isAuthenticated && !hidden" 
-    class="lg:hidden fixed left-1/2 -translate-x-1/2 z-40 liquid-glass shadow-2xl flex items-center justify-around select-none w-[calc(100%-2rem)] max-w-md rounded-[24px] px-2 py-1.5 h-14 bottom-bar-ios-adjust"
+    class="lg:hidden fixed left-1/2 -translate-x-1/2 z-40 liquid-glass shadow-2xl flex items-center justify-around select-none w-[calc(100%-2rem)] max-w-md rounded-[24px] px-2 py-1.5 h-14 bottom-bar-ios-adjust mobile-bottom-capsule"
   >
     <router-link
       v-for="tab in currentTabs"
       :key="tab.label"
       :to="tab.to"
-      class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-text-sub hover:text-text-main transition-all duration-300 hover:scale-110 active:scale-90 relative"
+      class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-[18px] text-text-sub hover:text-text-main transition-all duration-300 hover:scale-110 active:scale-90 relative"
       :class="{ 'text-primary font-semibold bg-primary/10 dark:bg-primary/20 scale-105 shadow-inner border border-primary/5': isTabActive(tab) }"
     >
       <div class="relative w-5 h-5 flex items-center justify-center mb-0.5">

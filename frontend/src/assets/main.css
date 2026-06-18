@@ -595,6 +595,15 @@ main .bg-bg-main > form > .grid {
   .form-input, .form-select {
     border-radius: 12px !important;
   }
+
+  /* Prevent iOS Safari from auto-zooming when focusing inputs */
+  input,
+  textarea,
+  select,
+  .form-input,
+  .form-select {
+    font-size: 16px !important;
+  }
   
   .animate-spring {
     transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.15) !important;
@@ -602,6 +611,39 @@ main .bg-bg-main > form > .grid {
   
   .animate-fade-scale {
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  /* Keyboard Aware UI */
+  .mobile-top-capsule,
+  .mobile-bottom-capsule {
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Hide Topbar and Bottom Bar when keyboard is open on Mobile viewport */
+  html.keyboard-open .mobile-top-capsule {
+    transform: translateY(-160%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  html.keyboard-open .mobile-bottom-capsule {
+    transform: translate(-50%, 160%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Disable background rubber banding during active keyboard typing */
+  html.keyboard-open {
+    overscroll-behavior: none;
+  }
+
+  /* Turn off non-essential transitions when keyboard is active to maximize input performance */
+  html.keyboard-open * {
+    transition-duration: 0s !important;
+  }
+  html.keyboard-open .mobile-top-capsule,
+  html.keyboard-open .mobile-bottom-capsule {
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 }
 
