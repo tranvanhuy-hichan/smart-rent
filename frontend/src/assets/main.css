@@ -646,6 +646,190 @@ main .bg-bg-main > form > .grid {
     transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 }
+/* ============================================================
+   MOBILE PASTEL DESIGN SYSTEM  v2
+   Màu đậm hơn, phủ rộng hơn — không dùng viền card.
+   Chỉ áp dụng trên màn hình nhỏ (max-width: 767px).
+   ============================================================ */
+@media (max-width: 767px) {
 
+  /* ── NỀN CHÍNH: gradient pastel đậm hơn, cố định ── */
+  body {
+    background:
+      linear-gradient(155deg,
+        #c7e3fa 0%,    /* xanh sky đậm */
+        #ddd6fe 38%,   /* tím lavender đậm */
+        #fbcfe8 72%,   /* hồng pastel đậm */
+        #bfdbfe 100%   /* xanh nhạt */
+      ) !important;
+    background-attachment: fixed !important;
+  }
 
+  /* Page container — trong suốt để lộ nền body */
+  .bg-bg-main,
+  [class*="bg-bg-main"] {
+    background: transparent !important;
+  }
 
+  /* ── CARD CHÍNH: nền trắng mờ nhẹ, không viền accent ── */
+  .bg-card {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.60) !important;
+    box-shadow: 0 4px 20px rgba(100, 80, 200, 0.10), 0 1px 4px rgba(0,0,0,0.06) !important;
+  }
+
+  /* ── STAT CARDS trên Dashboard: nền pastel đậm theo màu thương hiệu ── */
+  .stat-card:nth-child(1) {
+    background: linear-gradient(135deg, #bfdbfe 0%, #dbeafe 100%) !important;
+    border-color: rgba(96, 165, 250, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.18) !important;
+  }
+  .stat-card:nth-child(2) {
+    background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 100%) !important;
+    border-color: rgba(129, 140, 248, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18) !important;
+  }
+  .stat-card:nth-child(3) {
+    background: linear-gradient(135deg, #a7f3d0 0%, #d1fae5 100%) !important;
+    border-color: rgba(52, 211, 153, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.18) !important;
+  }
+  .stat-card:nth-child(4) {
+    background: linear-gradient(135deg, #fecaca 0%, #fee2e2 100%) !important;
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.18) !important;
+  }
+
+  /* ── WELCOME BANNER: đậm màu hơn trên mobile ── */
+  .bg-gradient-to-br.from-indigo-600 {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%) !important;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35) !important;
+  }
+
+  /* ── TABLE HEADER: nền tím pastel nhẹ ── */
+  .bg-slate-50,
+  [class*="bg-slate-50"] {
+    background: linear-gradient(135deg, rgba(238, 235, 255, 0.85) 0%, rgba(245, 243, 255, 0.85) 100%) !important;
+  }
+
+  /* ── FORM INPUT & SELECT: viền tím nhạt khi không focus ── */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    background: rgba(255, 255, 255, 0.88) !important;
+    border-color: rgba(167, 139, 250, 0.4) !important;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  select:focus,
+  textarea:focus {
+    border-color: rgba(139, 92, 246, 0.7) !important;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
+
+  /* ── BOTTOM NAV BAR: gradient pastel đậm ── */
+  .mobile-bottom-capsule.liquid-glass {
+    background: linear-gradient(135deg,
+      rgba(199, 227, 250, 0.93) 0%,
+      rgba(221, 214, 254, 0.93) 50%,
+      rgba(251, 207, 232, 0.93) 100%) !important;
+    border: 1px solid rgba(167, 139, 250, 0.50) !important;
+    box-shadow:
+      0 -2px 20px rgba(139, 92, 246, 0.12),
+      0 8px 32px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  /* ── ROUTER LINK ACTIVE trong bottom bar: nền tím đậm ── */
+  .mobile-bottom-capsule .text-primary,
+  .mobile-bottom-capsule [class*="bg-primary"] {
+    background: rgba(139, 92, 246, 0.18) !important;
+    border-color: rgba(139, 92, 246, 0.25) !important;
+  }
+
+  /* ── MODAL OVERLAY: background blur với tông tím nhẹ ── */
+  .fixed.inset-0.bg-black\/50 {
+    background: rgba(79, 46, 150, 0.35) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* ── MODAL CONTENT: trắng tinh trong suốt ── */
+  .modal-content,
+  .confirm-modal-content,
+  .fixed.inset-0.bg-black\/50 > div {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    box-shadow:
+      0 24px 48px rgba(79, 46, 150, 0.18),
+      0 8px 24px rgba(0, 0, 0, 0.10) !important;
+  }
+
+  /* ── BOARDING HOUSES: card nền xanh sky nhạt ── */
+  .boarding-houses-page .bg-card,
+  .rooms-page .bg-card {
+    background: rgba(239, 246, 255, 0.82) !important;
+    border-color: rgba(147, 197, 253, 0.50) !important;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.10) !important;
+  }
+
+  /* ── CONTRACTS: card nền emerald nhạt ── */
+  .contracts-page .bg-card {
+    background: rgba(240, 253, 249, 0.82) !important;
+    border-color: rgba(110, 231, 183, 0.50) !important;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.10) !important;
+  }
+
+  /* ── INVOICES: card nền amber nhạt ── */
+  .invoices-page .bg-card {
+    background: rgba(255, 251, 235, 0.82) !important;
+    border-color: rgba(252, 211, 77, 0.50) !important;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.10) !important;
+  }
+
+  /* ── TENANTS: card nền violet nhạt ── */
+  .tenants-page .bg-card {
+    background: rgba(250, 245, 255, 0.82) !important;
+    border-color: rgba(196, 132, 252, 0.50) !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.10) !important;
+  }
+
+  /* ── DARK MODE: reset về màu tối thuần ── */
+  :where([data-theme=dark]) body {
+    background: linear-gradient(155deg, #0a0a12 0%, #10091a 50%, #12090d 100%) !important;
+  }
+  :where([data-theme=dark]) .bg-card,
+  :where([data-theme=dark]) .boarding-houses-page .bg-card,
+  :where([data-theme=dark]) .rooms-page .bg-card,
+  :where([data-theme=dark]) .contracts-page .bg-card,
+  :where([data-theme=dark]) .invoices-page .bg-card,
+  :where([data-theme=dark]) .tenants-page .bg-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.09) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.40) !important;
+  }
+  :where([data-theme=dark]) .stat-card:nth-child(1),
+  :where([data-theme=dark]) .stat-card:nth-child(2),
+  :where([data-theme=dark]) .stat-card:nth-child(3),
+  :where([data-theme=dark]) .stat-card:nth-child(4) {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+  }
+  :where([data-theme=dark]) .mobile-bottom-capsule.liquid-glass {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 255, 255, 0.10) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40) !important;
+  }
+  :where([data-theme=dark]) input:not([type="checkbox"]):not([type="radio"]),
+  :where([data-theme=dark]) select,
+  :where([data-theme=dark]) textarea {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+  :where([data-theme=dark]) .bg-slate-50,
+  :where([data-theme=dark]) [class*="bg-slate-50"] {
+    background: rgba(255, 255, 255, 0.04) !important;
+  }
+}
