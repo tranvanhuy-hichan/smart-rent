@@ -17,7 +17,7 @@
         :class="[
           isMainScrollDisabled ? 'overflow-hidden animate-fade-in' : 'overflow-y-auto',
           isHeaderInitiallyVisible ? 'pt-[4.5rem] lg:pt-0' : 'pt-2 lg:pt-0',
-          !isBottomBarHidden ? 'pb-24 lg:pb-0' : 'pb-2 lg:pb-0'
+          !isBottomBarHidden ? 'pb-32 lg:pb-0' : 'pb-4 lg:pb-0'
         ]"
         @touchstart.passive="onTouchStart"
         @touchmove.passive="onTouchMove"
