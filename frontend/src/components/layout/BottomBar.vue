@@ -1,8 +1,7 @@
 <template>
   <div 
     v-if="role && isAuthenticated && !hidden" 
-    class="lg:hidden fixed bottom-[max(8px,_env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 liquid-glass shadow-2xl flex items-center justify-around transition-all duration-300 ease-out origin-bottom select-none"
-    :class="bottomBarClasses"
+    class="lg:hidden fixed left-1/2 -translate-x-1/2 z-40 liquid-glass shadow-2xl flex items-center justify-around select-none w-[calc(100%-2rem)] max-w-md rounded-[24px] px-2 py-1.5 h-14 bottom-bar-ios-adjust"
   >
     <router-link
       v-for="tab in currentTabs"
@@ -18,13 +17,13 @@
           {{ totalUnreadCount }}
         </span>
       </div>
-      <span v-if="!isShrunk" class="text-[9px] tracking-tight w-full text-center leading-none mt-0.5">{{ tab.label }}</span>
+      <span class="text-[9px] tracking-tight w-full text-center leading-none mt-0.5">{{ tab.label }}</span>
     </router-link>
   </div>
 </template>
 
 <script>
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { computed } from 'vue';
 import { useAuthStore } from '../../stores/auth.js';
 import { useRoute } from 'vue-router';
 import { useChatStore } from '../../stores/chat.js';
@@ -140,55 +139,12 @@ export default {
       return currentPath.startsWith(tab.to);
     };
 
-    const isShrunk = ref(false);
-    let lastScrollTop = 0;
-
-    const handleScroll = (e) => {
-      const target = e.target;
-      if (!target || typeof target.scrollTop === 'undefined') return;
-      const scrollTop = target.scrollTop;
-
-      // Small threshold to prevent flickers on tiny movements
-      if (Math.abs(scrollTop - lastScrollTop) < 8) return;
-
-      if (scrollTop > lastScrollTop && scrollTop > 60) {
-        isShrunk.value = true;
-      } else {
-        isShrunk.value = false;
-      }
-      lastScrollTop = scrollTop;
-    };
-
-    // Watch route changes to reset bar to normal size
-    watch(() => route.path, () => {
-      isShrunk.value = false;
-      lastScrollTop = 0;
-    });
-
-    onMounted(() => {
-      window.addEventListener('scroll', handleScroll, true);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener('scroll', handleScroll, true);
-    });
-
-    const bottomBarClasses = computed(() => {
-      if (isShrunk.value) {
-        return 'w-[280px] rounded-full px-2 py-1 h-11 scale-95';
-      } else {
-        return 'w-[calc(100%-2rem)] max-w-md rounded-[24px] px-2 py-1.5 h-14';
-      }
-    });
-
     return {
       role,
       isAuthenticated,
       currentTabs,
       isTabActive,
-      totalUnreadCount,
-      isShrunk,
-      bottomBarClasses
+      totalUnreadCount
     };
   }
 };
@@ -202,5 +158,9 @@ export default {
 
 .is-active {
   color: var(--primary-color) !important;
+}
+
+.bottom-bar-ios-adjust {
+  bottom: max(8px, calc(env(safe-area-inset-bottom, 0px) - 16px));
 }
 </style>

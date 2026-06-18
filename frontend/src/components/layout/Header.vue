@@ -227,13 +227,16 @@
   <!-- MOBILE SPLIT FLOATING TOPBAR -->
   <div class="lg:hidden" v-if="!isChatPage">
     <div 
-      class="fixed top-[calc(8px+env(safe-area-inset-top,20px))] left-4 right-4 z-40 liquid-glass rounded-full px-4 h-12 flex items-center justify-between shadow-lg transition-all duration-300 ease-out animate-spring"
+      class="fixed top-[calc(8px+env(safe-area-inset-top,20px))] left-2 right-2 z-40 liquid-glass rounded-full px-4 h-14 flex items-center justify-between shadow-lg transition-all duration-300 ease-out animate-spring"
       :class="isHeaderVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'"
     >
-      <!-- Left part: Logo & Brand -->
+      <!-- Left part: Logo & Brand + Greeting -->
       <div @click="goToOverview" class="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform shrink-0">
-        <img src="/logo.ico" alt="Logo" class="w-6 h-6 rounded object-contain shrink-0" />
-        <span class="text-[13px] font-extrabold text-primary tracking-wide">SMART RENT</span>
+        <img src="/logo.ico" alt="Logo" class="w-7 h-7 rounded object-contain shrink-0" />
+        <div class="flex flex-col text-left">
+          <span class="text-[12px] font-extrabold text-primary tracking-wide leading-tight">SMART RENT</span>
+          <span class="text-[9px] text-text-sub font-semibold leading-none mt-0.5">Xin chào, {{ username }}</span>
+        </div>
       </div>
 
       <!-- Right part: Actions & Profile -->
@@ -270,7 +273,7 @@
 
           <!-- Dropdown Popover on Mobile -->
           <div v-if="showNotificationsDropdown"
-            class="fixed right-4 left-4 top-20 bg-card border border-border-main rounded-[24px] shadow-2xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
+            class="fixed right-4 left-4 top-[88px] bg-card border border-border-main rounded-[24px] shadow-2xl py-3 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
           >
             <div class="px-4 pb-2 border-b border-border-main flex items-center justify-between">
               <span class="font-bold text-[0.85rem] text-text-main">Thông báo</span>
@@ -365,7 +368,7 @@
 
           <!-- Profile Dropdown on Mobile -->
           <div v-if="showDropdown"
-            class="absolute right-0 top-9 w-48 bg-card border border-border-main rounded-2xl shadow-xl py-1.5 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
+            class="absolute right-0 top-11 w-48 bg-card border border-border-main rounded-2xl shadow-xl py-1.5 z-50 text-xs mt-1 animate-in fade-in slide-in-from-top-2 duration-150"
           >
             <button @click="navigateToSettings"
               class="w-full text-left px-4 py-2.5 text-text-main hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer flex items-center gap-2 border-0 bg-transparent">
