@@ -2,10 +2,7 @@
   <div class="p-6 bg-bg-main min-h-full">
 
 
-    <div v-if="loading" class="flex flex-col items-center justify-center py-20 gap-4 text-text-sub">
-      <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <span>Đang tải thông tin phòng trọ...</span>
-    </div>
+    <ReportSkeleton v-slot:loading v-if="loading" chartHeight="h-44" :filterCount="1" :rowCount="3" />
 
     <div v-else>
       <!-- Welcome Banner -->

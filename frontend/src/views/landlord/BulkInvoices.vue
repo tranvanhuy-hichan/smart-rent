@@ -46,10 +46,26 @@
       </div>
     </div>
 
-    <!-- Loading / Empty States -->
-    <div v-if="isFetchingBulkStatus" class="bg-card border border-border-main rounded-2xl p-12 flex flex-col items-center justify-center gap-3">
-      <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <div class="text-text-sub text-xs">Đang tải danh sách phòng...</div>
+    <!-- Loading State -->
+    <div v-if="isFetchingBulkStatus" class="bg-card border border-border-main rounded-2xl p-6 shadow-xs space-y-4 animate-pulse select-none">
+      <!-- Simulated Header -->
+      <div class="flex items-center gap-4 pb-2 border-b border-border-main/40">
+        <div class="w-16 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="flex-1 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+      </div>
+      <!-- Simulated Rows -->
+      <div class="space-y-4">
+        <div v-for="r in 4" :key="'bulk-loader-' + r" class="flex items-center gap-4 py-2">
+          <div class="w-16 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="flex-1 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+        </div>
+      </div>
     </div>
 
     <div v-else-if="!selectedBulkBoardingHouseId" class="bg-card border border-border-main rounded-2xl p-12 text-center text-text-sub text-xs italic">

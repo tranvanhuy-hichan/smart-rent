@@ -401,7 +401,7 @@ export default {
     onMounted(async () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
-      const savedFontSize = localStorage.getItem('fontSize') || 'medium';
+      const savedFontSize = localStorage.getItem('fontSize') || 'large';
       applyFontSize(savedFontSize);
       checkSession();
 

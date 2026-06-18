@@ -2,10 +2,7 @@
   <div class="p-4 bg-bg-main min-h-full">
 
     <!-- Loading -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-20 gap-4 text-text-sub">
-      <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <span class="text-sm font-medium">Đang tổng hợp dữ liệu doanh thu...</span>
-    </div>
+    <ReportSkeleton v-slot:loading v-if="loading" chartHeight="h-44" :filterCount="2" :rowCount="3" />
 
     <template v-else>
 

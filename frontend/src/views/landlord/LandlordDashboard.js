@@ -10,6 +10,7 @@ import FormInput from '../../components/ui/FormInput.vue';
 import FormButton from '../../components/ui/FormButton.vue';
 import FormSelect from '../../components/ui/FormSelect.vue';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
+import ReportSkeleton from '../../components/ui/ReportSkeleton.vue';
 
 export default {
   name: 'LandlordDashboard',
@@ -18,6 +19,7 @@ export default {
     FormButton,
     FormSelect,
     AppIcon,
+    ReportSkeleton,
   },
   setup() {
     const router = useRouter();

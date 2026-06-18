@@ -1,11 +1,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useContractStore } from '../../stores/contract.js';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
+import LoadingState from '../../components/ui/LoadingState.vue';
 
 export default {
   name: 'ContactLandlord',
   components: {
     AppIcon,
+    LoadingState,
   },
   setup() {
     const contractStore = useContractStore();

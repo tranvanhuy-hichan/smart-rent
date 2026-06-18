@@ -5,10 +5,11 @@ import boardingHouseService from '../../services/boardingHouseService.js';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
 import FormSelect from '../../components/ui/FormSelect.vue';
 import FormInput from '../../components/ui/FormInput.vue';
+import ReportSkeleton from '../../components/ui/ReportSkeleton.vue';
 
 export default {
   name: 'Revenue',
-  components: { AppIcon, FormSelect, FormInput },
+  components: { AppIcon, FormSelect, FormInput, ReportSkeleton },
   setup() {
     const router = useRouter();
 

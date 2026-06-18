@@ -359,7 +359,7 @@
                     fontSize === 'medium' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border-main hover:bg-slate-50 dark:hover:bg-slate-800']"
                 >
                   <span class="text-[13px] text-text-main font-normal">A</span>
-                  <span class="font-bold text-[10px] text-text-main">Vừa (Mặc định)</span>
+                  <span class="font-bold text-[10px] text-text-main">Vừa</span>
                 </div>
 
                 <!-- Large Size -->
@@ -369,7 +369,7 @@
                     fontSize === 'large' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border-main hover:bg-slate-50 dark:hover:bg-slate-800']"
                 >
                   <span class="text-[15px] text-text-main font-normal">A</span>
-                  <span class="font-bold text-[10px] text-text-main">Lớn</span>
+                  <span class="font-bold text-[10px] text-text-main">Lớn (Mặc định)</span>
                 </div>
 
                 <!-- Extra Large Size -->

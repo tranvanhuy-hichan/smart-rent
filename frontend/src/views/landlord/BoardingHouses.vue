@@ -10,10 +10,32 @@
       </svg>
     </button>
 
-    <!-- Grid of Boarding Houses -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-12 gap-4 text-text-sub">
-      <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <span>Đang tải danh sách dãy trọ...</span>
+    <!-- Card Grid Skeleton Loader -->
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse select-none">
+      <div v-for="i in 3" :key="'house-loader-' + i" class="bg-card border border-border-main rounded-2xl shadow-xs flex flex-col overflow-hidden">
+        <!-- Header -->
+        <div class="px-5 pt-5 pb-4 border-b border-border-main/40 flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 shrink-0"></div>
+          <div class="flex-1 space-y-2 min-w-0">
+            <div class="w-2/3 h-5 bg-slate-300 dark:bg-slate-700 rounded"></div>
+            <div class="w-1/2 h-3.5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          </div>
+        </div>
+        <!-- Body -->
+        <div class="px-5 py-3 flex-1 flex flex-col gap-2">
+          <div class="flex justify-between items-center py-1">
+            <div class="w-20 h-4 bg-slate-200 dark:bg-slate-800 rounded"></div>
+            <div class="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+          </div>
+          <!-- Services -->
+          <div class="pt-2 border-t border-border-main/40">
+            <div class="w-24 h-3 bg-slate-200 dark:bg-slate-800 rounded mb-2"></div>
+            <div class="flex flex-wrap gap-1">
+              <div v-for="j in 3" :key="j" class="w-12 h-5 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Hiển thị nếu có lỗi xảy ra -->

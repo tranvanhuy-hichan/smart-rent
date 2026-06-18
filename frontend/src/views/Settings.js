@@ -30,7 +30,7 @@ export default {
 
     const activeTab = ref(authStore.user?.mustChangePassword ? 'security' : 'profile'); // 'profile' | 'security' | 'preferences' | 'imou'
     const theme = ref(localStorage.getItem('theme') || 'light');
-    const fontSize = ref(localStorage.getItem('fontSize') || 'medium');
+    const fontSize = ref(localStorage.getItem('fontSize') || 'large');
     const isLandlord = computed(() => authStore.role === 'LANDLORD');
 
     const setFontSize = (size) => {

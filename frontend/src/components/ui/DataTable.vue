@@ -1,9 +1,23 @@
 <template>
   <div class="w-full">
-    <!-- Loading overlay (centered and standard) -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-12 gap-4 text-text-sub bg-card border border-border-main/50 rounded-xl w-full">
-      <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      <span>{{ loadingText }}</span>
+    <!-- Table Skeleton Loader -->
+    <div v-if="loading" class="w-full bg-card border border-border-main/50 rounded-xl p-6 shadow-xs space-y-4 animate-pulse select-none">
+      <!-- Simulated Header -->
+      <div class="flex items-center gap-4 pb-2 border-b border-border-main/40">
+        <div class="w-8 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="flex-1 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+        <div class="w-32 h-4 bg-slate-300 dark:bg-slate-700 rounded"></div>
+      </div>
+      <!-- Simulated Rows -->
+      <div class="space-y-4">
+        <div v-for="r in 5" :key="'row-loader-' + r" class="flex items-center gap-4 py-2">
+          <div class="w-8 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="flex-1 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="w-24 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          <div class="w-32 h-5 bg-slate-200 dark:bg-slate-800 rounded"></div>
+        </div>
+      </div>
     </div>
     
     <template v-else>

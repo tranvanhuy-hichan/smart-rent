@@ -7,6 +7,7 @@ import { useInvoiceStore } from '../../stores/invoice.js';
 import AppIcon from '../../components/ui/icons/AppIcon.vue';
 import MoneyDisplay from '../../components/ui/MoneyDisplay.vue';
 import DateDisplay from '../../components/ui/DateDisplay.vue';
+import ReportSkeleton from '../../components/ui/ReportSkeleton.vue';
 
 export default {
   name: 'TenantDashboard',
@@ -15,6 +16,7 @@ export default {
     AppIcon,
     MoneyDisplay,
     DateDisplay,
+    ReportSkeleton,
   },
   setup() {
     const router = useRouter();
