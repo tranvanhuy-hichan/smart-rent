@@ -1,0 +1,25 @@
+# Dependencies / build output
+node_modules/
+dist/
+target/
+build/
+*.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.properties
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Android (Capacitor)
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/android/app/build/
