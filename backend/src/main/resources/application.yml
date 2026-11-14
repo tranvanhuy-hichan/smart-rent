@@ -1,0 +1,64 @@
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 5
+    max-connections: 200
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml
+    min-response-size: 1024
+
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 20
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+
+# App Configurations
+app:
+  jwt:
+    secret: ${JWT_SECRET:}
+    expiration-ms: ${JWT_EXPIRATION_MS:} # 60 days
+  resend:
+    api-key: ${RESEND_API_KEY:}
+    from: ${RESEND_FROM:}
+    admin-email: tranvanhuy064206@gmail.com
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:}
+  imou:
+    app-id: ${IMOU_APP_ID:}
+    app-secret: ${IMOU_APP_SECRET:}
+  payos:
+    client-id: ${ADMIN_PAYOS_CLIENT_ID:}
+    api-key: ${ADMIN_PAYOS_API_KEY:}
+    checksum-key: ${ADMIN_PAYOS_CHECKSUM_KEY:}
+  webpush:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:admin@tranvanhuy.io.vn}
+
+
+
